@@ -5,6 +5,9 @@ declare global {
         showOpenDialog: (options: any) => Promise<any>;
         showSaveDialog: (options: any) => Promise<any>;
       };
+      ipcRenderer: {
+        invoke(channel: string, ...args: any[]): Promise<any>;
+      };
     };
   }
 }
@@ -14,6 +17,7 @@ export interface Budget {
   description: string;
   createdAt: string;
   updatedAt: string;
+  filePath?: string;
 }
 
 class BudgetService {
@@ -30,29 +34,62 @@ class BudgetService {
   }
 
   async createBudget(
-    budget: Omit<Budget, "createdAt" | "updatedAt">
+    budget: Omit<Budget, "createdAt" | "updatedAt" | "filePath">
   ): Promise<Budget> {
-    const newBudget: Budget = {
-      ...budget,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+    try {
+      const result = await window.electron.dialog.showSaveDialog({
+        title: "Save Budget",
+        defaultPath: `${budget.name}.bdgtmn`,
+        filters: [
+          { name: "Budget Manager Files", extensions: ["bdgtmn"] },
+          { name: "All Files", extensions: ["*"] },
+        ],
+      });
 
-    // TODO: Implement file saving logic
-    this.currentBudget = newBudget;
-    return newBudget;
+      if (result.canceled || !result.filePath) {
+        throw new Error("Save operation cancelled");
+      }
+
+      const newBudget: Budget = {
+        ...budget,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        filePath: result.filePath,
+      };
+
+      // Save the budget to file
+      await window.electron.ipcRenderer.invoke("file:save", {
+        filePath: result.filePath,
+        content: JSON.stringify(newBudget, null, 2),
+      });
+
+      this.currentBudget = newBudget;
+      return newBudget;
+    } catch (error) {
+      console.error("Error saving budget:", error);
+      throw error;
+    }
   }
 
   async openBudget(): Promise<Budget | null> {
     try {
       const result = await window.electron.dialog.showOpenDialog({
         properties: ["openFile"],
-        filters: [{ name: "Budget Files", extensions: ["json"] }],
+        filters: [
+          { name: "Budget Manager Files", extensions: ["bdgtmn"] },
+          { name: "All Files", extensions: ["*"] },
+        ],
       });
 
       if (!result.canceled && result.filePaths.length > 0) {
-        // TODO: Implement file loading logic
-        return null;
+        const filePath = result.filePaths[0];
+        const content = await window.electron.ipcRenderer.invoke(
+          "file:read",
+          filePath
+        );
+        const budget = JSON.parse(content) as Budget;
+        this.currentBudget = budget;
+        return budget;
       }
       return null;
     } catch (error) {

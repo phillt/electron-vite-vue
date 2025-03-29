@@ -3,6 +3,7 @@ import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import os from "node:os";
+import fs from "node:fs/promises";
 
 const require = createRequire(import.meta.url);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -133,4 +134,25 @@ ipcMain.handle("dialog:showSaveDialog", async (_, options) => {
     throw new Error("Main window not available");
   }
   return dialog.showSaveDialog(win, options);
+});
+
+// Handle file operations
+ipcMain.handle("file:save", async (_, { filePath, content }) => {
+  try {
+    await fs.writeFile(filePath, content, "utf-8");
+    return true;
+  } catch (error) {
+    console.error("Error saving file:", error);
+    throw error;
+  }
+});
+
+ipcMain.handle("file:read", async (_, filePath) => {
+  try {
+    const content = await fs.readFile(filePath, "utf-8");
+    return content;
+  } catch (error) {
+    console.error("Error reading file:", error);
+    throw error;
+  }
 });
