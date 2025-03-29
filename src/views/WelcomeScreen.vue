@@ -34,10 +34,15 @@ import { budgetService } from "../services/budgetService";
 const router = useRouter();
 
 const openExistingBudget = async () => {
-  const budget = await budgetService.openBudget();
-  if (budget) {
-    // TODO: Navigate to budget view
-    console.log("Budget loaded:", budget);
+  try {
+    const budget = await budgetService.openBudget();
+    if (budget) {
+      // Add a small delay to ensure the budget is properly loaded
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      router.push("/income-expenses");
+    }
+  } catch (error) {
+    console.error("Error opening budget:", error);
   }
 };
 </script>

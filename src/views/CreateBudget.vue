@@ -87,7 +87,7 @@ const handleSubmit = async () => {
 
   try {
     await budgetService.createBudget(budget.value);
-    router.push("/");
+    router.push("/income-expenses");
   } catch (e: any) {
     if (e.message === "Save operation cancelled") {
       // User cancelled the save dialog, no need to show error

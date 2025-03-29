@@ -13,6 +13,11 @@ const router = createRouter({
       name: "create-budget",
       component: () => import("../views/CreateBudget.vue"),
     },
+    {
+      path: "/income-expenses",
+      name: "income-expenses",
+      component: () => import("../views/IncomeExpenses.vue"),
+    },
   ],
 });
 

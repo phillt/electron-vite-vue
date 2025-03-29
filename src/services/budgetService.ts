@@ -12,12 +12,21 @@ declare global {
   }
 }
 
+export interface Item {
+  id: string;
+  description: string;
+  amount: number;
+  date: string;
+  type: "income" | "expense";
+}
+
 export interface Budget {
   name: string;
   description: string;
   createdAt: string;
   updatedAt: string;
   filePath?: string;
+  items: Item[];
 }
 
 class BudgetService {
@@ -34,7 +43,7 @@ class BudgetService {
   }
 
   async createBudget(
-    budget: Omit<Budget, "createdAt" | "updatedAt" | "filePath">
+    budget: Omit<Budget, "createdAt" | "updatedAt" | "filePath" | "items">
   ): Promise<Budget> {
     try {
       const result = await window.electron.dialog.showSaveDialog({
@@ -55,6 +64,7 @@ class BudgetService {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         filePath: result.filePath,
+        items: [],
       };
 
       // Save the budget to file
@@ -98,8 +108,51 @@ class BudgetService {
     }
   }
 
+  async addItem(item: Omit<Item, "id" | "date">): Promise<Item> {
+    if (!this.currentBudget) {
+      throw new Error("No budget is currently open");
+    }
+
+    const newItem: Item = {
+      ...item,
+      id: Date.now().toString(),
+      date: new Date().toISOString(),
+    };
+
+    this.currentBudget.items.push(newItem);
+    this.currentBudget.updatedAt = new Date().toISOString();
+
+    // Save the updated budget
+    if (this.currentBudget.filePath) {
+      await window.electron.ipcRenderer.invoke("file:save", {
+        filePath: this.currentBudget.filePath,
+        content: JSON.stringify(this.currentBudget, null, 2),
+      });
+    }
+
+    return newItem;
+  }
+
   getCurrentBudget(): Budget | null {
     return this.currentBudget;
+  }
+
+  getItems(type?: "income" | "expense"): Item[] {
+    if (!this.currentBudget) return [];
+    if (!type) return this.currentBudget.items;
+    return this.currentBudget.items.filter((item) => item.type === type);
+  }
+
+  getTotalIncome(): number {
+    return this.getItems("income").reduce((sum, item) => sum + item.amount, 0);
+  }
+
+  getTotalExpenses(): number {
+    return this.getItems("expense").reduce((sum, item) => sum + item.amount, 0);
+  }
+
+  getBalance(): number {
+    return this.getTotalIncome() - this.getTotalExpenses();
   }
 }
 
