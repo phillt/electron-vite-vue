@@ -5,8 +5,13 @@ const router = createRouter({
   routes: [
     {
       path: "/",
-      name: "home",
-      component: () => import("../views/Home.vue"),
+      name: "welcome",
+      component: () => import("../views/WelcomeScreen.vue"),
+    },
+    {
+      path: "/create-budget",
+      name: "create-budget",
+      component: () => import("../views/CreateBudget.vue"),
     },
   ],
 });
