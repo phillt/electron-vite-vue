@@ -18,6 +18,11 @@ const router = createRouter({
       name: "income-expenses",
       component: () => import("../views/IncomeExpenses.vue"),
     },
+    {
+      path: "/add-income",
+      name: "add-income",
+      component: () => import("../views/AddIncome.vue"),
+    },
   ],
 });
 
