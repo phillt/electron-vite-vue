@@ -22,16 +22,19 @@ contextBridge.exposeInMainWorld("electron", {
       const [channel, ...omit] = args;
       return ipcRenderer.send(channel, ...omit);
     },
-    invoke(...args: Parameters<typeof ipcRenderer.invoke>) {
-      const [channel, ...omit] = args;
-      return ipcRenderer.invoke(channel, ...omit);
+    invoke(channel: string, ...args: any[]) {
+      return ipcRenderer.invoke(channel, ...args);
     },
   },
   dialog: {
-    showOpenDialog: (options: OpenDialogOptions) =>
+    showOpenDialog: (options: any) =>
       ipcRenderer.invoke("dialog:showOpenDialog", options),
-    showSaveDialog: (options: SaveDialogOptions) =>
+    showSaveDialog: (options: any) =>
       ipcRenderer.invoke("dialog:showSaveDialog", options),
+  },
+  settings: {
+    get: () => ipcRenderer.invoke("settings:get"),
+    set: (settings: any) => ipcRenderer.invoke("settings:set", settings),
   },
 });
 

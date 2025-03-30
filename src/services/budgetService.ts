@@ -8,6 +8,10 @@ declare global {
       ipcRenderer: {
         invoke(channel: string, ...args: any[]): Promise<any>;
       };
+      settings: {
+        get: () => Promise<{ lastBudgetPath: string | null }>;
+        set: (settings: { lastBudgetPath: string | null }) => Promise<void>;
+      };
     };
   }
 }
@@ -50,6 +54,7 @@ import { ref } from "vue";
 class BudgetService {
   private static instance: BudgetService;
   private currentBudget = ref<Budget | null>(null);
+  private isInitialized = false;
 
   private constructor() {}
 
@@ -58,6 +63,61 @@ class BudgetService {
       BudgetService.instance = new BudgetService();
     }
     return BudgetService.instance;
+  }
+
+  async initialize(): Promise<void> {
+    if (this.isInitialized) return;
+
+    try {
+      console.log("Initializing budget service...");
+      await this.loadLastBudget();
+      this.isInitialized = true;
+      console.log("Budget service initialized");
+    } catch (error) {
+      console.error("Error initializing budget service:", error);
+    }
+  }
+
+  private async loadLastBudget(): Promise<void> {
+    try {
+      console.log("Loading last budget...");
+      const settings = await window.electron.settings.get();
+      console.log("Settings loaded:", settings);
+
+      if (settings.lastBudgetPath) {
+        console.log("Found last budget path:", settings.lastBudgetPath);
+        // Try to load the last budget
+        const content = await window.electron.ipcRenderer.invoke(
+          "file:read",
+          settings.lastBudgetPath
+        );
+        const budget = JSON.parse(content) as Budget;
+        // Ensure incomes and bills arrays exist for older budget files
+        if (!budget.incomes) {
+          budget.incomes = [];
+        }
+        if (!budget.bills) {
+          budget.bills = [];
+        }
+        this.currentBudget.value = budget;
+        console.log("Last budget loaded successfully");
+      } else {
+        console.log("No last budget path found in settings");
+      }
+    } catch (error) {
+      console.error("Error loading last budget:", error);
+    }
+  }
+
+  private async saveLastBudgetPath(filePath: string): Promise<void> {
+    try {
+      console.log("Saving last budget path:", filePath);
+      await window.electron.settings.set({ lastBudgetPath: filePath });
+      console.log("Last budget path saved successfully");
+    } catch (error) {
+      console.error("Error saving last budget path:", error);
+      throw error;
+    }
   }
 
   async createBudget(
@@ -97,6 +157,8 @@ class BudgetService {
       });
 
       this.currentBudget.value = newBudget;
+      // Save the path to settings
+      await this.saveLastBudgetPath(result.filePath);
       return newBudget;
     } catch (error) {
       console.error("Error saving budget:", error);
@@ -129,6 +191,8 @@ class BudgetService {
           budget.bills = [];
         }
         this.currentBudget.value = budget;
+        // Save the path to settings
+        await this.saveLastBudgetPath(filePath);
         return budget;
       }
       return null;

@@ -43,6 +43,57 @@ let win: BrowserWindow | null = null;
 const preload = path.join(__dirname, "../preload/index.mjs");
 const indexHtml = path.join(RENDERER_DIST, "index.html");
 
+// Settings file management
+const SETTINGS_FILE = path.join(os.homedir(), ".bdgtman");
+
+interface AppSettings {
+  lastBudgetPath: string | null;
+}
+
+async function loadSettings(): Promise<AppSettings> {
+  try {
+    console.log("Loading settings from:", SETTINGS_FILE);
+    const content = await fs.readFile(SETTINGS_FILE, "utf-8");
+    const settings = JSON.parse(content);
+    console.log("Settings loaded:", settings);
+    return settings;
+  } catch (error) {
+    console.log("No settings file found or invalid, creating default settings");
+    // If file doesn't exist or is invalid, create default settings
+    const defaultSettings: AppSettings = {
+      lastBudgetPath: null,
+    };
+    await saveSettings(defaultSettings);
+    return defaultSettings;
+  }
+}
+
+async function saveSettings(settings: AppSettings): Promise<void> {
+  try {
+    console.log("Saving settings to:", SETTINGS_FILE);
+    console.log("Settings to save:", settings);
+    await fs.writeFile(SETTINGS_FILE, JSON.stringify(settings, null, 2));
+    console.log("Settings saved successfully");
+  } catch (error) {
+    console.error("Error saving settings:", error);
+    throw error;
+  }
+}
+
+// Handle settings IPC calls
+ipcMain.handle("settings:get", async () => {
+  console.log("Received settings:get request");
+  const settings = await loadSettings();
+  console.log("Returning settings:", settings);
+  return settings;
+});
+
+ipcMain.handle("settings:set", async (_, settings: AppSettings) => {
+  console.log("Received settings:set request with settings:", settings);
+  await saveSettings(settings);
+  console.log("Settings saved successfully");
+});
+
 async function createWindow() {
   win = new BrowserWindow({
     title: "Main window",
