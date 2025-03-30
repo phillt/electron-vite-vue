@@ -45,9 +45,11 @@ export interface Budget {
   bills: Bill[];
 }
 
+import { ref } from "vue";
+
 class BudgetService {
   private static instance: BudgetService;
-  private currentBudget: Budget | null = null;
+  private currentBudget = ref<Budget | null>(null);
 
   private constructor() {}
 
@@ -94,7 +96,7 @@ class BudgetService {
         content: JSON.stringify(newBudget, null, 2),
       });
 
-      this.currentBudget = newBudget;
+      this.currentBudget.value = newBudget;
       return newBudget;
     } catch (error) {
       console.error("Error saving budget:", error);
@@ -119,11 +121,14 @@ class BudgetService {
           filePath
         );
         const budget = JSON.parse(content) as Budget;
-        // Ensure incomes array exists for older budget files
+        // Ensure incomes and bills arrays exist for older budget files
         if (!budget.incomes) {
           budget.incomes = [];
         }
-        this.currentBudget = budget;
+        if (!budget.bills) {
+          budget.bills = [];
+        }
+        this.currentBudget.value = budget;
         return budget;
       }
       return null;
@@ -134,7 +139,7 @@ class BudgetService {
   }
 
   async addItem(item: Omit<Item, "id" | "date">): Promise<Item> {
-    if (!this.currentBudget) {
+    if (!this.currentBudget.value) {
       throw new Error("No budget is currently open");
     }
 
@@ -144,14 +149,14 @@ class BudgetService {
       date: new Date().toISOString(),
     };
 
-    this.currentBudget.items.push(newItem);
-    this.currentBudget.updatedAt = new Date().toISOString();
+    this.currentBudget.value.items.push(newItem);
+    this.currentBudget.value.updatedAt = new Date().toISOString();
 
     // Save the updated budget
-    if (this.currentBudget.filePath) {
+    if (this.currentBudget.value.filePath) {
       await window.electron.ipcRenderer.invoke("file:save", {
-        filePath: this.currentBudget.filePath,
-        content: JSON.stringify(this.currentBudget, null, 2),
+        filePath: this.currentBudget.value.filePath,
+        content: JSON.stringify(this.currentBudget.value, null, 2),
       });
     }
 
@@ -159,134 +164,172 @@ class BudgetService {
   }
 
   async addIncome(income: Income): Promise<void> {
-    if (!this.currentBudget) {
+    if (!this.currentBudget.value) {
       throw new Error("No budget is currently open");
     }
 
     // Ensure incomes array exists
-    if (!this.currentBudget.incomes) {
-      this.currentBudget.incomes = [];
+    if (!this.currentBudget.value.incomes) {
+      this.currentBudget.value.incomes = [];
     }
 
-    this.currentBudget.incomes.push(income);
-    this.currentBudget.updatedAt = new Date().toISOString();
+    this.currentBudget.value.incomes.push(income);
+    this.currentBudget.value.updatedAt = new Date().toISOString();
 
     // Save the updated budget
-    if (this.currentBudget.filePath) {
+    if (this.currentBudget.value.filePath) {
       await window.electron.ipcRenderer.invoke("file:save", {
-        filePath: this.currentBudget.filePath,
-        content: JSON.stringify(this.currentBudget, null, 2),
+        filePath: this.currentBudget.value.filePath,
+        content: JSON.stringify(this.currentBudget.value, null, 2),
       });
     }
   }
 
   async deleteIncome(name: string): Promise<void> {
-    if (!this.currentBudget) {
+    if (!this.currentBudget.value) {
       throw new Error("No budget is currently open");
     }
 
-    const index = this.currentBudget.incomes.findIndex(
+    const index = this.currentBudget.value.incomes.findIndex(
       (inc) => inc.name === name
     );
     if (index === -1) {
       throw new Error("Income not found");
     }
 
-    this.currentBudget.incomes.splice(index, 1);
-    this.currentBudget.updatedAt = new Date().toISOString();
+    this.currentBudget.value.incomes.splice(index, 1);
+    this.currentBudget.value.updatedAt = new Date().toISOString();
 
     // Save the updated budget
-    if (this.currentBudget.filePath) {
+    if (this.currentBudget.value.filePath) {
       await window.electron.ipcRenderer.invoke("file:save", {
-        filePath: this.currentBudget.filePath,
-        content: JSON.stringify(this.currentBudget, null, 2),
+        filePath: this.currentBudget.value.filePath,
+        content: JSON.stringify(this.currentBudget.value, null, 2),
       });
     }
   }
 
   async updateIncome(name: string, updatedIncome: Income): Promise<void> {
-    if (!this.currentBudget) {
+    if (!this.currentBudget.value) {
       throw new Error("No budget is currently open");
     }
 
-    const index = this.currentBudget.incomes.findIndex(
+    const index = this.currentBudget.value.incomes.findIndex(
       (inc) => inc.name === name
     );
     if (index === -1) {
       throw new Error("Income not found");
     }
 
-    this.currentBudget.incomes[index] = updatedIncome;
-    this.currentBudget.updatedAt = new Date().toISOString();
+    this.currentBudget.value.incomes[index] = updatedIncome;
+    this.currentBudget.value.updatedAt = new Date().toISOString();
 
     // Save the updated budget
-    if (this.currentBudget.filePath) {
+    if (this.currentBudget.value.filePath) {
       await window.electron.ipcRenderer.invoke("file:save", {
-        filePath: this.currentBudget.filePath,
-        content: JSON.stringify(this.currentBudget, null, 2),
+        filePath: this.currentBudget.value.filePath,
+        content: JSON.stringify(this.currentBudget.value, null, 2),
       });
     }
   }
 
   async addBill(bill: Bill): Promise<void> {
-    if (!this.currentBudget) {
+    if (!this.currentBudget.value) {
       throw new Error("No budget is currently open");
     }
 
     // Ensure bills array exists
-    if (!this.currentBudget.bills) {
-      this.currentBudget.bills = [];
+    if (!this.currentBudget.value.bills) {
+      this.currentBudget.value.bills = [];
     }
 
-    this.currentBudget.bills.push(bill);
-    this.currentBudget.updatedAt = new Date().toISOString();
+    this.currentBudget.value.bills.push(bill);
+    this.currentBudget.value.updatedAt = new Date().toISOString();
 
     // Save the updated budget
-    if (this.currentBudget.filePath) {
+    if (this.currentBudget.value.filePath) {
       await window.electron.ipcRenderer.invoke("file:save", {
-        filePath: this.currentBudget.filePath,
-        content: JSON.stringify(this.currentBudget, null, 2),
+        filePath: this.currentBudget.value.filePath,
+        content: JSON.stringify(this.currentBudget.value, null, 2),
       });
     }
   }
 
   async deleteBill(name: string): Promise<void> {
-    if (!this.currentBudget) {
+    if (!this.currentBudget.value) {
       throw new Error("No budget is currently open");
     }
 
-    const index = this.currentBudget.bills.findIndex(
+    // Ensure bills array exists
+    if (!this.currentBudget.value.bills) {
+      this.currentBudget.value.bills = [];
+    }
+
+    const index = this.currentBudget.value.bills.findIndex(
       (bill) => bill.name === name
     );
     if (index === -1) {
       throw new Error("Bill not found");
     }
 
-    this.currentBudget.bills.splice(index, 1);
-    this.currentBudget.updatedAt = new Date().toISOString();
+    // Remove the bill
+    this.currentBudget.value.bills = this.currentBudget.value.bills.filter(
+      (bill) => bill.name !== name
+    );
+    this.currentBudget.value.updatedAt = new Date().toISOString();
 
     // Save the updated budget
-    if (this.currentBudget.filePath) {
+    if (this.currentBudget.value.filePath) {
       await window.electron.ipcRenderer.invoke("file:save", {
-        filePath: this.currentBudget.filePath,
-        content: JSON.stringify(this.currentBudget, null, 2),
+        filePath: this.currentBudget.value.filePath,
+        content: JSON.stringify(this.currentBudget.value, null, 2),
+      });
+    }
+  }
+
+  async updateBill(name: string, updatedBill: Bill): Promise<void> {
+    if (!this.currentBudget.value) {
+      throw new Error("No budget is currently open");
+    }
+
+    const index = this.currentBudget.value.bills.findIndex(
+      (bill) => bill.name === name
+    );
+    if (index === -1) {
+      throw new Error("Bill not found");
+    }
+
+    this.currentBudget.value.bills[index] = updatedBill;
+    this.currentBudget.value.updatedAt = new Date().toISOString();
+
+    // Save the updated budget
+    if (this.currentBudget.value.filePath) {
+      await window.electron.ipcRenderer.invoke("file:save", {
+        filePath: this.currentBudget.value.filePath,
+        content: JSON.stringify(this.currentBudget.value, null, 2),
       });
     }
   }
 
   getCurrentBudget(): Budget | null {
-    return this.currentBudget;
+    return this.currentBudget.value;
+  }
+
+  refreshCurrentBudget(): void {
+    if (this.currentBudget.value) {
+      this.currentBudget.value = { ...this.currentBudget.value };
+    }
   }
 
   getItems(type?: "income" | "expense"): Item[] {
-    if (!this.currentBudget) return [];
-    if (!type) return this.currentBudget.items;
-    return this.currentBudget.items.filter((item) => item.type === type);
+    if (!this.currentBudget.value) return [];
+    if (!type) return this.currentBudget.value.items;
+    return this.currentBudget.value.items.filter((item) => item.type === type);
   }
 
   getTotalIncome(): number {
-    if (!this.currentBudget) return 0;
-    return this.currentBudget.incomes.reduce(
+    if (!this.currentBudget.value) return 0;
+    return this.currentBudget.value.incomes.reduce(
       (sum, income) => sum + income.amount,
       0
     );

@@ -3,7 +3,9 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="bg-white rounded-lg shadow-lg p-6">
         <div class="flex justify-between items-center mb-6">
-          <h2 class="text-2xl font-bold text-gray-900">Add Bill</h2>
+          <h2 class="text-2xl font-bold text-gray-900">
+            {{ isEditing ? "Edit" : "Add" }} Bill
+          </h2>
           <button
             @click="$router.push('/income-expenses')"
             class="text-sm text-gray-600 hover:text-gray-900"
@@ -45,6 +47,7 @@
                 v-model="bill.name"
                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 required
+                :disabled="isEditing"
                 placeholder="e.g., Rent, Utilities, etc."
               />
               <p class="mt-1 text-sm text-gray-500">
@@ -113,7 +116,13 @@
                 :disabled="isSubmitting"
                 class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
               >
-                {{ isSubmitting ? "Adding..." : "Add Bill" }}
+                {{
+                  isSubmitting
+                    ? "Saving..."
+                    : isEditing
+                    ? "Save Changes"
+                    : "Add Bill"
+                }}
               </button>
             </div>
           </form>
@@ -124,14 +133,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
-import { useRouter } from "vue-router";
+import { ref, computed, onMounted } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import { budgetService, type Bill } from "../services/budgetService";
 
 const router = useRouter();
+const route = useRoute();
 const currentBudget = computed(() => budgetService.getCurrentBudget());
 const isSubmitting = ref(false);
 const error = ref<string | null>(null);
+const isEditing = computed(() => !!route.query.edit);
 
 const bill = ref({
   name: "",
@@ -139,16 +150,32 @@ const bill = ref({
   amount: 0,
 });
 
+onMounted(() => {
+  if (isEditing.value) {
+    const billName = route.query.edit as string;
+    const existingBill = currentBudget.value?.bills.find(
+      (b) => b.name === billName
+    );
+    if (existingBill) {
+      bill.value = { ...existingBill };
+    } else {
+      error.value = "Bill not found.";
+    }
+  }
+});
+
 const handleSubmit = async () => {
   isSubmitting.value = true;
   error.value = null;
 
   try {
-    // Check if name already exists
-    const existingBills = currentBudget.value?.bills || [];
-    if (existingBills.some((b: Bill) => b.name === bill.value.name)) {
-      error.value = "A bill with this name already exists.";
-      return;
+    // Check if name already exists (only for new bills)
+    if (!isEditing.value) {
+      const existingBills = currentBudget.value?.bills || [];
+      if (existingBills.some((b: Bill) => b.name === bill.value.name)) {
+        error.value = "A bill with this name already exists.";
+        return;
+      }
     }
 
     // Validate due day
@@ -157,12 +184,17 @@ const handleSubmit = async () => {
       return;
     }
 
-    // Add the bill to the budget
-    await budgetService.addBill({
-      name: bill.value.name,
-      dueDay: bill.value.dueDay,
-      amount: bill.value.amount,
-    });
+    if (isEditing.value) {
+      // Update the bill
+      await budgetService.updateBill(route.query.edit as string, bill.value);
+    } else {
+      // Add the bill to the budget
+      await budgetService.addBill({
+        name: bill.value.name,
+        dueDay: bill.value.dueDay,
+        amount: bill.value.amount,
+      });
+    }
 
     // Reset form
     bill.value.name = "";
@@ -172,8 +204,8 @@ const handleSubmit = async () => {
     // Navigate back to income-expenses
     router.push("/income-expenses");
   } catch (err) {
-    console.error("Error adding bill:", err);
-    error.value = "Failed to add bill. Please try again.";
+    console.error("Error saving bill:", err);
+    error.value = "Failed to save bill. Please try again.";
   } finally {
     isSubmitting.value = false;
   }
