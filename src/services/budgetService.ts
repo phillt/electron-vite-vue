@@ -757,6 +757,105 @@ class BudgetService {
       });
     }
   }
+
+  async updatePayPeriodBillAmount(
+    payPeriodIndex: number,
+    billName: string,
+    newAmount: number
+  ): Promise<void> {
+    if (!this.currentBudget.value) {
+      throw new Error("No budget is currently open");
+    }
+
+    const payPeriod = this.currentBudget.value.payPeriods[payPeriodIndex];
+    if (!payPeriod) {
+      throw new Error("Pay period not found");
+    }
+
+    const bill = payPeriod.bills.find((b) => b.name === billName);
+    if (!bill) {
+      throw new Error("Bill not found");
+    }
+
+    // Update the bill amount
+    bill.amount = newAmount;
+
+    // Recalculate totals
+    const totalAmount = payPeriod.bills.reduce((sum, b) => sum + b.amount, 0);
+    const paidBills = payPeriod.bills.reduce(
+      (sum, b) => sum + (b.isPaid ? b.amount : 0),
+      0
+    );
+    const paidExpenses = payPeriod.expenses.reduce(
+      (sum, e) => sum + (e.isPaid ? e.amount : 0),
+      0
+    );
+
+    payPeriod.totalAmount = totalAmount;
+    payPeriod.paidAmount = paidBills + paidExpenses;
+    payPeriod.unpaidAmount =
+      totalAmount + payPeriod.totalExpenses - payPeriod.paidAmount;
+
+    this.currentBudget.value.updatedAt = new Date().toISOString();
+
+    if (this.currentBudget.value.filePath) {
+      await window.electron.ipcRenderer.invoke("file:save", {
+        filePath: this.currentBudget.value.filePath,
+        content: JSON.stringify(this.currentBudget.value, null, 2),
+      });
+    }
+  }
+
+  async updatePayPeriodExpenseAmount(
+    payPeriodIndex: number,
+    expenseId: string,
+    newAmount: number
+  ): Promise<void> {
+    if (!this.currentBudget.value) {
+      throw new Error("No budget is currently open");
+    }
+
+    const payPeriod = this.currentBudget.value.payPeriods[payPeriodIndex];
+    if (!payPeriod) {
+      throw new Error("Pay period not found");
+    }
+
+    const expense = payPeriod.expenses.find((e) => e.id === expenseId);
+    if (!expense) {
+      throw new Error("Expense not found");
+    }
+
+    // Update the expense amount
+    expense.amount = newAmount;
+
+    // Recalculate totals
+    const totalExpenses = payPeriod.expenses.reduce(
+      (sum, e) => sum + e.amount,
+      0
+    );
+    const paidBills = payPeriod.bills.reduce(
+      (sum, b) => sum + (b.isPaid ? b.amount : 0),
+      0
+    );
+    const paidExpenses = payPeriod.expenses.reduce(
+      (sum, e) => sum + (e.isPaid ? e.amount : 0),
+      0
+    );
+
+    payPeriod.totalExpenses = totalExpenses;
+    payPeriod.paidAmount = paidBills + paidExpenses;
+    payPeriod.unpaidAmount =
+      payPeriod.totalAmount + totalExpenses - payPeriod.paidAmount;
+
+    this.currentBudget.value.updatedAt = new Date().toISOString();
+
+    if (this.currentBudget.value.filePath) {
+      await window.electron.ipcRenderer.invoke("file:save", {
+        filePath: this.currentBudget.value.filePath,
+        content: JSON.stringify(this.currentBudget.value, null, 2),
+      });
+    }
+  }
 }
 
 export const budgetService = BudgetService.getInstance();

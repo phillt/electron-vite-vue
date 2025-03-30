@@ -35,6 +35,20 @@ const formatCurrency = (amount: number) => {
   }).format(amount);
 };
 
+const formatCurrencyInput = (amount: number) => {
+  return new Intl.NumberFormat("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
+};
+
+const parseCurrencyInput = (value: string): number => {
+  // Remove all non-numeric characters except decimal point
+  const numericValue = value.replace(/[^0-9.]/g, "");
+  const parsed = parseFloat(numericValue);
+  return isNaN(parsed) ? 0 : parsed;
+};
+
 const handleCreatePayPeriod = async () => {
   loading.value = true;
   error.value = null;
@@ -64,6 +78,79 @@ const handleToggleExpensePaid = async (
   } catch (e: any) {
     error.value = e.message;
   }
+};
+
+const handleUpdateBillAmount = async (
+  payPeriodIndex: number,
+  billName: string,
+  newAmount: number
+) => {
+  try {
+    await budgetService.updatePayPeriodBillAmount(
+      payPeriodIndex,
+      billName,
+      newAmount
+    );
+  } catch (e: any) {
+    error.value = e.message;
+  }
+};
+
+const handleUpdateExpenseAmount = async (
+  payPeriodIndex: number,
+  expenseId: string,
+  newAmount: number
+) => {
+  try {
+    await budgetService.updatePayPeriodExpenseAmount(
+      payPeriodIndex,
+      expenseId,
+      newAmount
+    );
+  } catch (e: any) {
+    error.value = e.message;
+  }
+};
+
+const handleBillAmountChange = (
+  payPeriodIndex: number,
+  billName: string,
+  event: Event
+) => {
+  const input = event.target as HTMLInputElement;
+  const newAmount = parseCurrencyInput(input.value);
+  if (!isNaN(newAmount)) {
+    handleUpdateBillAmount(payPeriodIndex, billName, newAmount);
+    // Update the input value with proper formatting
+    input.value = formatCurrencyInput(newAmount);
+  }
+};
+
+const handleExpenseAmountChange = (
+  payPeriodIndex: number,
+  expenseId: string,
+  event: Event
+) => {
+  const input = event.target as HTMLInputElement;
+  const newAmount = parseCurrencyInput(input.value);
+  if (!isNaN(newAmount)) {
+    handleUpdateExpenseAmount(payPeriodIndex, expenseId, newAmount);
+    // Update the input value with proper formatting
+    input.value = formatCurrencyInput(newAmount);
+  }
+};
+
+const handleBillAmountFocus = (event: Event) => {
+  const input = event.target as HTMLInputElement;
+  // Remove formatting when focused
+  input.value = input.value.replace(/[^0-9.]/g, "");
+};
+
+const handleBillAmountBlur = (event: Event) => {
+  const input = event.target as HTMLInputElement;
+  const amount = parseCurrencyInput(input.value);
+  // Reapply formatting when blurred
+  input.value = formatCurrencyInput(amount);
 };
 
 const handleAddExpense = (index: number) => {
@@ -276,7 +363,24 @@ const getPayPeriodStatus = (index: number) => {
                 {{ bill.name }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {{ formatCurrency(bill.amount) }}
+                <div class="flex items-center space-x-2">
+                  <div class="relative">
+                    <span
+                      class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500"
+                      >$</span
+                    >
+                    <input
+                      type="text"
+                      :value="formatCurrencyInput(bill.amount)"
+                      @change="
+                        (e) => handleBillAmountChange(index, bill.name, e)
+                      "
+                      @focus="handleBillAmountFocus"
+                      @blur="handleBillAmountBlur"
+                      class="w-32 pl-6 pr-2 py-1 text-sm border rounded focus:outline-none focus:ring-1 focus:ring-indigo-500 text-right"
+                    />
+                  </div>
+                </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {{ formatDate(bill.dueDate) }}
@@ -333,8 +437,23 @@ const getPayPeriodStatus = (index: number) => {
               </div>
             </div>
             <div class="flex items-center space-x-4">
-              <div class="font-medium text-gray-900">
-                {{ formatCurrency(expense.amount) }}
+              <div class="flex items-center space-x-2">
+                <div class="relative">
+                  <span
+                    class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500"
+                    >$</span
+                  >
+                  <input
+                    type="text"
+                    :value="formatCurrencyInput(expense.amount)"
+                    @change="
+                      (e) => handleExpenseAmountChange(index, expense.id, e)
+                    "
+                    @focus="handleBillAmountFocus"
+                    @blur="handleBillAmountBlur"
+                    class="w-32 pl-6 pr-2 py-1 text-sm border rounded focus:outline-none focus:ring-1 focus:ring-indigo-500 text-right"
+                  />
+                </div>
               </div>
               <button
                 @click="handleToggleExpensePaid(index, expense.id)"
