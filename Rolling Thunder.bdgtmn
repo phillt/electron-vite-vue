@@ -1,0 +1,198 @@
+{
+  "name": "Rolling Thunder",
+  "description": "My first attempt at creating a real budget.",
+  "createdAt": "2025-03-30T05:35:16.804Z",
+  "updatedAt": "2025-03-30T17:39:34.267Z",
+  "filePath": "/home/philllt/Projects/apps/electron-vite-vue/Rolling Thunder.bdgtmn",
+  "items": [],
+  "incomes": [
+    {
+      "name": "PhoneBurner",
+      "amount": 3500,
+      "frequency": "bi-weekly",
+      "lastPayday": "2025-03-27",
+      "payPeriods": [
+        {
+          "start": "2025-03-28T00:00:00.000Z",
+          "end": "2025-04-11T00:00:00.000Z"
+        },
+        {
+          "start": "2025-04-11T00:00:00.000Z",
+          "end": "2025-04-25T00:00:00.000Z"
+        },
+        {
+          "start": "2025-04-25T00:00:00.000Z",
+          "end": "2025-05-09T00:00:00.000Z"
+        },
+        {
+          "start": "2025-05-09T00:00:00.000Z",
+          "end": "2025-05-23T00:00:00.000Z"
+        },
+        {
+          "start": "2025-05-23T00:00:00.000Z",
+          "end": "2025-06-06T00:00:00.000Z"
+        }
+      ]
+    }
+  ],
+  "bills": [
+    {
+      "name": "Student Loans",
+      "dueDay": 4,
+      "amount": 286.87
+    },
+    {
+      "name": "Car insurance",
+      "dueDay": 5,
+      "amount": 354.02
+    },
+    {
+      "name": "FSD",
+      "dueDay": 5,
+      "amount": 109
+    },
+    {
+      "name": "iCloud",
+      "dueDay": 7,
+      "amount": 2.99
+    },
+    {
+      "name": "Kia Payment",
+      "dueDay": 10,
+      "amount": 862.83
+    },
+    {
+      "name": "xfinity",
+      "dueDay": 11,
+      "amount": 85.32
+    },
+    {
+      "name": "Apple Music",
+      "dueDay": 12,
+      "amount": 16.99
+    },
+    {
+      "name": "Tesla Subscription",
+      "dueDay": 13,
+      "amount": 9.99
+    },
+    {
+      "name": "T-Mobile",
+      "dueDay": 25,
+      "amount": 295.89
+    },
+    {
+      "name": "StoreQuest",
+      "dueDay": 27,
+      "amount": 141
+    },
+    {
+      "name": "Federal Taxes",
+      "dueDay": 27,
+      "amount": 600
+    }
+  ],
+  "payPeriods": [
+    {
+      "startDate": "2025-03-28T00:00:00.000Z",
+      "endDate": "2025-04-10T00:00:00.000Z",
+      "bills": [
+        {
+          "name": "Student Loans",
+          "dueDay": 4,
+          "amount": 286.87,
+          "isPaid": false,
+          "dueDate": "2025-04-05T00:00:00.000Z"
+        },
+        {
+          "name": "Car insurance",
+          "dueDay": 5,
+          "amount": 354.02,
+          "isPaid": false,
+          "dueDate": "2025-04-06T00:00:00.000Z"
+        },
+        {
+          "name": "FSD",
+          "dueDay": 5,
+          "amount": 109,
+          "isPaid": false,
+          "dueDate": "2025-04-06T00:00:00.000Z"
+        },
+        {
+          "name": "iCloud",
+          "dueDay": 7,
+          "amount": 2.99,
+          "isPaid": false,
+          "dueDate": "2025-04-08T00:00:00.000Z"
+        },
+        {
+          "name": "StoreQuest",
+          "dueDay": 27,
+          "amount": 141,
+          "isPaid": false,
+          "dueDate": "2025-03-28T00:00:00.000Z"
+        },
+        {
+          "name": "Federal Taxes",
+          "dueDay": 27,
+          "amount": 600,
+          "isPaid": false,
+          "dueDate": "2025-03-28T00:00:00.000Z"
+        }
+      ],
+      "expenses": [],
+      "totalAmount": 1493.88,
+      "paidAmount": 0,
+      "unpaidAmount": 1493.88,
+      "totalExpenses": 0,
+      "paycheckAmount": 3500
+    },
+    {
+      "startDate": "2025-04-11T00:00:00.000Z",
+      "endDate": "2025-04-24T00:00:00.000Z",
+      "bills": [
+        {
+          "name": "Kia Payment",
+          "dueDay": 10,
+          "amount": 862.83,
+          "isPaid": false,
+          "dueDate": "2025-04-11T00:00:00.000Z"
+        },
+        {
+          "name": "xfinity",
+          "dueDay": 11,
+          "amount": 85.32,
+          "isPaid": false,
+          "dueDate": "2025-04-12T00:00:00.000Z"
+        },
+        {
+          "name": "Apple Music",
+          "dueDay": 12,
+          "amount": 16.99,
+          "isPaid": false,
+          "dueDate": "2025-04-13T00:00:00.000Z"
+        },
+        {
+          "name": "Tesla Subscription",
+          "dueDay": 13,
+          "amount": 9.99,
+          "isPaid": false,
+          "dueDate": "2025-04-14T00:00:00.000Z"
+        }
+      ],
+      "expenses": [],
+      "totalAmount": 975.1300000000001,
+      "paidAmount": 0,
+      "unpaidAmount": 975.1300000000001,
+      "totalExpenses": 0,
+      "paycheckAmount": 3500
+    }
+  ],
+  "expenses": [],
+  "totalAmount": 1718.02,
+  "paidAmount": 0,
+  "unpaidAmount": 1718.02,
+  "totalExpenses": 0,
+  "paycheckAmount": 3500,
+  "lastPayday": "2025-03-27T00:00:00.000Z"
+}

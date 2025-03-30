@@ -48,7 +48,7 @@
                         {{ income.name }}
                       </p>
                       <p class="text-sm text-gray-500">
-                        Next payday: {{ formatDate(income.nextPayday) }}
+                        Next payday: {{ getNextPayday(income) }}
                       </p>
                     </div>
                     <div class="ml-4 flex-shrink-0 flex items-center space-x-4">
@@ -145,6 +145,13 @@ const currentBudget = computed(() => budgetService.getCurrentBudget());
 
 const formatDate = (date: string) => {
   return new Date(date).toLocaleDateString();
+};
+
+const getNextPayday = (income: Income) => {
+  const lastPayday = new Date(income.lastPayday);
+  const nextPayday = new Date(lastPayday);
+  nextPayday.setDate(nextPayday.getDate() + 15); // Add 15 days to get to the next payday (14 days for current period + 1 day)
+  return formatDate(nextPayday.toISOString());
 };
 
 const editIncome = (income: Income) => {

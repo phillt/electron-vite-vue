@@ -60,7 +60,7 @@
                 for="amount"
                 class="block text-sm font-medium text-gray-700"
               >
-                Amount (After Taxes)
+                Amount
               </label>
               <div class="mt-1 relative rounded-md shadow-sm">
                 <div
@@ -79,28 +79,46 @@
                   placeholder="0.00"
                 />
               </div>
+            </div>
+
+            <div>
+              <label
+                for="frequency"
+                class="block text-sm font-medium text-gray-700"
+              >
+                Pay Frequency
+              </label>
+              <select
+                id="frequency"
+                v-model="income.frequency"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                required
+              >
+                <option value="bi-weekly">Bi-weekly</option>
+              </select>
               <p class="mt-1 text-sm text-gray-500">
-                Enter your biweekly take-home pay after taxes.
+                Select how often you receive this income.
               </p>
             </div>
 
             <div>
               <label
-                for="nextPayday"
+                for="lastPayday"
                 class="block text-sm font-medium text-gray-700"
               >
-                Next Payday
+                Last Payday
               </label>
               <input
                 type="date"
-                id="nextPayday"
-                v-model="income.nextPayday"
+                id="lastPayday"
+                v-model="income.lastPayday"
                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 required
-                :min="today"
+                :min="lastWeekDate"
               />
               <p class="mt-1 text-sm text-gray-500">
-                Select your next payday to help track your income schedule.
+                Select the date of your most recent payday for this income
+                source.
               </p>
             </div>
 
@@ -146,15 +164,20 @@ const error = ref<string | null>(null);
 
 // Get today's date in YYYY-MM-DD format for the date input min attribute
 const today = new Date().toISOString().split("T")[0];
+const lastWeek = new Date();
+lastWeek.setDate(lastWeek.getDate() - 7);
+const lastWeekDate = lastWeek.toISOString().split("T")[0];
 
 const isEditing = computed(() => {
   return !!route.query.edit;
 });
 
-const income = ref({
+const income = ref<Partial<Income>>({
   name: "",
   amount: 0,
-  nextPayday: today,
+  frequency: "bi-weekly" as const,
+  lastPayday: today,
+  payPeriods: [],
 });
 
 onMounted(() => {
@@ -165,11 +188,7 @@ onMounted(() => {
     );
 
     if (existingIncome) {
-      income.value = {
-        name: existingIncome.name,
-        amount: existingIncome.originalAmount,
-        nextPayday: existingIncome.nextPayday,
-      };
+      income.value = { ...existingIncome };
     } else {
       error.value = "Income not found";
     }
@@ -192,27 +211,34 @@ const handleSubmit = async () => {
       }
     }
 
+    // Generate pay periods
+    const payPeriods = generatePayPeriods(income.value.lastPayday!, 5);
+
     if (isEditing.value) {
       // Update existing income
-      await budgetService.updateIncome(route.query.edit as string, {
-        ...income.value,
-        amount: income.value.amount,
-        originalAmount: income.value.amount,
-      });
+      await budgetService.updateIncome(
+        route.query.edit as string,
+        {
+          ...income.value,
+          payPeriods,
+          frequency: "bi-weekly" as const,
+        } as Income
+      );
     } else {
       // Add new income
       await budgetService.addIncome({
-        name: income.value.name,
-        amount: income.value.amount,
-        originalAmount: income.value.amount,
-        nextPayday: income.value.nextPayday,
-      });
+        ...income.value,
+        payPeriods,
+        frequency: "bi-weekly" as const,
+      } as Income);
     }
 
     // Reset form
     income.value.name = "";
     income.value.amount = 0;
-    income.value.nextPayday = today;
+    income.value.frequency = "bi-weekly" as const;
+    income.value.lastPayday = today;
+    income.value.payPeriods = [];
 
     // Navigate back to income-expenses
     router.push("/income-expenses");
@@ -223,4 +249,27 @@ const handleSubmit = async () => {
     isSubmitting.value = false;
   }
 };
+
+// Helper function to generate pay periods
+function generatePayPeriods(lastPayday: string, count: number) {
+  const periods = [];
+  let currentDate = new Date(lastPayday);
+  currentDate.setDate(currentDate.getDate() + 1); // Start one day after the payday
+
+  for (let i = 0; i < count; i++) {
+    const start = new Date(currentDate);
+    const end = new Date(currentDate);
+    end.setDate(end.getDate() + 14); // Set to the next payday
+
+    periods.push({
+      start: start.toISOString(),
+      end: end.toISOString(),
+    });
+
+    // Move to next payday
+    currentDate.setDate(currentDate.getDate() + 14);
+  }
+
+  return periods;
+}
 </script>

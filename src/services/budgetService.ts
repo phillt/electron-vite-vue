@@ -27,8 +27,12 @@ export interface Item {
 export interface Income {
   name: string;
   amount: number;
-  originalAmount: number;
-  nextPayday: string; // ISO date string
+  frequency: "bi-weekly";
+  lastPayday: string; // ISO date string
+  payPeriods: {
+    start: string; // ISO date string
+    end: string; // ISO date string
+  }[];
 }
 
 export interface Bill {
@@ -543,6 +547,7 @@ class BudgetService {
         throw new Error("No last payday set");
       }
       startDate = new Date(budget.lastPayday);
+      startDate.setDate(startDate.getDate() + 1); // Add one day to start date
     } else {
       const lastPayPeriod = budget.payPeriods[budget.payPeriods.length - 1];
       startDate = new Date(lastPayPeriod.endDate);
@@ -551,6 +556,7 @@ class BudgetService {
 
     // Calculate the end date (always biweekly)
     const endDate = this.calculateNextPayday(startDate.toISOString());
+    endDate.setDate(endDate.getDate() - 1); // Subtract one day from end date
 
     // Get bills for this period
     const bills = this.getBillsForPayPeriod(startDate, endDate, budget.bills);

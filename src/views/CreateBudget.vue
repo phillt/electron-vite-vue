@@ -42,6 +42,28 @@
           </div>
         </div>
 
+        <div>
+          <label
+            for="lastPayday"
+            class="block text-sm font-medium text-gray-700"
+          >
+            Last Payday
+          </label>
+          <div class="mt-1">
+            <input
+              id="lastPayday"
+              v-model="budget.lastPayday"
+              type="date"
+              required
+              class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            />
+          </div>
+          <p class="mt-1 text-sm text-gray-500">
+            Select the date of your most recent payday. This will be used to
+            calculate future pay periods.
+          </p>
+        </div>
+
         <div v-if="error" class="text-red-600 text-sm">{{ error }}</div>
 
         <div class="flex items-center justify-between">
@@ -74,6 +96,7 @@ const router = useRouter();
 const budget = ref({
   name: "",
   description: "",
+  lastPayday: new Date().toISOString().split("T")[0], // Default to today
 });
 const error = ref<string | null>(null);
 const isSubmitting = ref(false);
