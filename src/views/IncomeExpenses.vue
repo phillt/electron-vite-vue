@@ -1,135 +1,97 @@
 <template>
-  <div class="min-h-screen bg-gray-100 py-6">
+  <div>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="bg-white rounded-lg shadow-lg p-6">
+      <BaseCard padding="lg">
         <div class="flex justify-between items-center mb-6">
-          <h2 class="text-2xl font-bold text-gray-900">Income & Expenses</h2>
-          <button
-            @click="$router.push('/')"
-            class="text-sm text-gray-600 hover:text-gray-900"
-          >
+          <h2 class="text-2xl font-bold text-brand-text">Income & Expenses</h2>
+          <BaseButton variant="ghost" @click="$router.push('/')">
             Back to Budget
-          </button>
+          </BaseButton>
         </div>
 
         <div v-if="!currentBudget" class="text-center py-12">
-          <p class="text-gray-500">No budget is currently open.</p>
-          <button
-            @click="$router.push('/')"
-            class="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
+          <p class="text-brand-muted">No budget is currently open.</p>
+          <BaseButton variant="primary" class="mt-4" @click="$router.push('/')">
             Open or Create Budget
-          </button>
+          </BaseButton>
         </div>
 
         <template v-else>
           <!-- Income Sources Section -->
           <div class="mb-12">
-            <div class="flex justify-between items-center mb-6">
-              <h3 class="text-lg font-medium text-gray-900">Income Sources</h3>
-              <button
-                @click="$router.push('/add-income')"
-                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-              >
-                Add New Income
-              </button>
-            </div>
+            <BaseSection
+              title="Income Sources"
+              :action="{
+                label: 'Add New Income',
+                variant: 'secondary',
+                onClick: () => $router.push('/add-income'),
+              }"
+            />
 
             <div class="bg-white shadow overflow-hidden sm:rounded-md">
-              <ul class="divide-y divide-gray-200">
-                <li
+              <ul class="divide-y divide-brand-surface">
+                <BaseList
                   v-for="income in currentBudget?.incomes || []"
                   :key="income.name"
-                  class="px-4 py-4 sm:px-6"
-                >
-                  <div class="flex items-center justify-between">
-                    <div class="flex-1 min-w-0">
-                      <p class="text-sm font-medium text-indigo-600 truncate">
-                        {{ income.name }}
-                      </p>
-                      <p class="text-sm text-gray-500">
-                        Next payday: {{ getNextPayday(income) }}
-                      </p>
-                    </div>
-                    <div class="ml-4 flex-shrink-0 flex items-center space-x-4">
-                      <span class="text-sm font-medium text-green-600">
-                        ${{ income.amount.toFixed(2) }}
-                      </span>
-                      <div class="flex space-x-2">
-                        <button
-                          @click="editIncome(income)"
-                          class="text-indigo-600 hover:text-indigo-900"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          @click="deleteIncome(income)"
-                          class="text-red-600 hover:text-red-900"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </li>
+                  :title="income.name"
+                  :subtitle="'Next payday: ' + getNextPayday(income)"
+                  :amount="income.amount"
+                  amount-color="success"
+                  :actions="[
+                    {
+                      label: 'Edit',
+                      color: 'primary',
+                      onClick: () => editIncome(income),
+                    },
+                    {
+                      label: 'Delete',
+                      color: 'danger',
+                      onClick: () => deleteIncome(income),
+                    },
+                  ]"
+                />
               </ul>
             </div>
           </div>
 
           <!-- Bills Section -->
           <div>
-            <div class="flex justify-between items-center mb-6">
-              <h3 class="text-lg font-medium text-gray-900">Bills</h3>
-              <button
-                @click="$router.push('/add-bill')"
-                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-              >
-                Add New Bill
-              </button>
-            </div>
+            <BaseSection
+              title="Bills"
+              :action="{
+                label: 'Add New Bill',
+                variant: 'secondary',
+                onClick: () => $router.push('/add-bill'),
+              }"
+            />
 
             <div class="bg-white shadow overflow-hidden sm:rounded-md">
-              <ul class="divide-y divide-gray-200">
-                <li
+              <ul class="divide-y divide-brand-surface">
+                <BaseList
                   v-for="bill in currentBudget?.bills || []"
                   :key="bill.name"
-                  class="px-4 py-4 sm:px-6"
-                >
-                  <div class="flex items-center justify-between">
-                    <div class="flex-1 min-w-0">
-                      <p class="text-sm font-medium text-indigo-600 truncate">
-                        {{ bill.name }}
-                      </p>
-                      <p class="text-sm text-gray-500">
-                        Due on the {{ bill.dueDay }}th of each month
-                      </p>
-                    </div>
-                    <div class="ml-4 flex-shrink-0 flex items-center space-x-4">
-                      <span class="text-sm font-medium text-red-600">
-                        ${{ bill.amount.toFixed(2) }}
-                      </span>
-                      <div class="flex space-x-2">
-                        <button
-                          @click="editBill(bill)"
-                          class="text-indigo-600 hover:text-indigo-900"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          @click="deleteBill(bill)"
-                          class="text-red-600 hover:text-red-900"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </li>
+                  :title="bill.name"
+                  :subtitle="'Due on the ' + bill.dueDay + 'th of each month'"
+                  :amount="bill.amount"
+                  amount-color="warning"
+                  :actions="[
+                    {
+                      label: 'Edit',
+                      color: 'primary',
+                      onClick: () => editBill(bill),
+                    },
+                    {
+                      label: 'Delete',
+                      color: 'danger',
+                      onClick: () => deleteBill(bill),
+                    },
+                  ]"
+                />
               </ul>
             </div>
           </div>
         </template>
-      </div>
+      </BaseCard>
     </div>
   </div>
 </template>
@@ -139,6 +101,10 @@ import { computed } from "vue";
 import { budgetService } from "../services/budgetService";
 import { useRouter } from "vue-router";
 import type { Income, Bill } from "../services/budgetService";
+import BaseButton from "../components/atoms/BaseButton.vue";
+import BaseCard from "../components/atoms/BaseCard.vue";
+import BaseList from "../components/atoms/BaseList.vue";
+import BaseSection from "../components/atoms/BaseSection.vue";
 
 const router = useRouter();
 const currentBudget = computed(() => budgetService.getCurrentBudget());
