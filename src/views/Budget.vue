@@ -2,7 +2,7 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { budgetService } from "../services/budgetService";
-import type { PayPeriod } from "../services/budgetService";
+import type { PayPeriod, Income } from "../services/budgetService";
 import { useRouter } from "vue-router";
 
 const currentBudget = computed(() => budgetService.getCurrentBudget());
@@ -80,6 +80,27 @@ const getPayPeriodStatus = (index: number) => {
     };
   }
 };
+
+const calculatePaycheckAmount = (payPeriod: PayPeriod) => {
+  if (!currentBudget.value) return 0;
+
+  let totalPaycheck = 0;
+  const periodStart = new Date(payPeriod.startDate);
+  const periodEnd = new Date(payPeriod.endDate);
+
+  // For each income source
+  currentBudget.value.incomes.forEach((income: Income) => {
+    // Get the next payday after the period start
+    let nextPayday = new Date(income.nextPayday);
+
+    // Check if this payday falls within our pay period
+    if (nextPayday >= periodStart && nextPayday <= periodEnd) {
+      totalPaycheck += income.amount;
+    }
+  });
+
+  return totalPaycheck;
+};
 </script>
 
 <template>
@@ -136,6 +157,46 @@ const getPayPeriodStatus = (index: number) => {
           </div>
         </div>
         <div class="mt-4 grid grid-cols-4 gap-4 text-sm">
+          <div class="col-span-4 bg-blue-50 p-3 rounded-lg">
+            <div class="font-medium text-blue-900">Expected Income</div>
+            <div class="mt-1 grid grid-cols-3 gap-4">
+              <div>
+                <span class="text-blue-700">Paycheck:</span>
+                <span class="ml-2 font-medium text-blue-900">{{
+                  formatCurrency(calculatePaycheckAmount(payPeriod))
+                }}</span>
+              </div>
+              <div>
+                <span class="text-blue-700">Total Outgoing:</span>
+                <span class="ml-2 font-medium text-blue-900">{{
+                  formatCurrency(
+                    payPeriod.totalAmount + (payPeriod.totalExpenses || 0)
+                  )
+                }}</span>
+              </div>
+              <div>
+                <span class="text-blue-700">Remaining:</span>
+                <span
+                  class="ml-2 font-medium"
+                  :class="
+                    calculatePaycheckAmount(payPeriod) -
+                      (payPeriod.totalAmount +
+                        (payPeriod.totalExpenses || 0)) >=
+                    0
+                      ? 'text-green-600'
+                      : 'text-red-600'
+                  "
+                >
+                  {{
+                    formatCurrency(
+                      calculatePaycheckAmount(payPeriod) -
+                        (payPeriod.totalAmount + (payPeriod.totalExpenses || 0))
+                    )
+                  }}
+                </span>
+              </div>
+            </div>
+          </div>
           <div>
             <span class="text-gray-500">Total Bills:</span>
             <span class="ml-2 font-medium">{{
