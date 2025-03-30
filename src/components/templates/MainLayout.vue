@@ -6,7 +6,7 @@ import Sidebar from "../organisms/Sidebar.vue";
 <template>
   <div class="flex h-screen bg-brand-background">
     <Sidebar />
-    <div class="flex-1 overflow-auto p-4">
+    <div class="flex-1 overflow-auto p-4 bg-gray-200">
       <router-view></router-view>
     </div>
   </div>

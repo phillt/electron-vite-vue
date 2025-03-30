@@ -16,7 +16,7 @@ defineProps<{
 <template>
   <li class="px-4 py-4 sm:px-6">
     <div class="flex items-center justify-between">
-      <div class="flex-1 min-w-0">
+      <div class="flex-1 min-w-0 text-left">
         <p class="text-sm font-medium text-brand-dark truncate">
           {{ title }}
         </p>

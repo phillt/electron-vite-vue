@@ -1,99 +1,88 @@
 <template>
-  <div>
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <BaseCard padding="lg">
-        <div class="flex justify-between items-center mb-6">
-          <h2 class="text-2xl font-bold text-brand-text">Income & Expenses</h2>
-          <BaseButton variant="ghost" @click="$router.push('/')">
-            Back to Budget
-          </BaseButton>
-        </div>
-
-        <div v-if="!currentBudget" class="text-center py-12">
-          <p class="text-brand-muted">No budget is currently open.</p>
-          <BaseButton variant="primary" class="mt-4" @click="$router.push('/')">
-            Open or Create Budget
-          </BaseButton>
-        </div>
-
-        <template v-else>
-          <!-- Income Sources Section -->
-          <div class="mb-12">
-            <BaseSection
-              title="Income Sources"
-              :action="{
-                label: 'Add New Income',
-                variant: 'secondary',
-                onClick: () => $router.push('/add-income'),
-              }"
-            />
-
-            <div class="bg-white shadow overflow-hidden sm:rounded-md">
-              <ul class="divide-y divide-brand-surface">
-                <BaseList
-                  v-for="income in currentBudget?.incomes || []"
-                  :key="income.name"
-                  :title="income.name"
-                  :subtitle="'Next payday: ' + getNextPayday(income)"
-                  :amount="income.amount"
-                  amount-color="success"
-                  :actions="[
-                    {
-                      label: 'Edit',
-                      color: 'primary',
-                      onClick: () => editIncome(income),
-                    },
-                    {
-                      label: 'Delete',
-                      color: 'danger',
-                      onClick: () => deleteIncome(income),
-                    },
-                  ]"
-                />
-              </ul>
-            </div>
-          </div>
-
-          <!-- Bills Section -->
-          <div>
-            <BaseSection
-              title="Bills"
-              :action="{
-                label: 'Add New Bill',
-                variant: 'secondary',
-                onClick: () => $router.push('/add-bill'),
-              }"
-            />
-
-            <div class="bg-white shadow overflow-hidden sm:rounded-md">
-              <ul class="divide-y divide-brand-surface">
-                <BaseList
-                  v-for="bill in currentBudget?.bills || []"
-                  :key="bill.name"
-                  :title="bill.name"
-                  :subtitle="'Due on the ' + bill.dueDay + 'th of each month'"
-                  :amount="bill.amount"
-                  amount-color="warning"
-                  :actions="[
-                    {
-                      label: 'Edit',
-                      color: 'primary',
-                      onClick: () => editBill(bill),
-                    },
-                    {
-                      label: 'Delete',
-                      color: 'danger',
-                      onClick: () => deleteBill(bill),
-                    },
-                  ]"
-                />
-              </ul>
-            </div>
-          </div>
-        </template>
-      </BaseCard>
+  <BasePage title="Income & Expenses">
+    <div v-if="!currentBudget" class="text-center py-12">
+      <p class="text-brand-muted">No budget is currently open.</p>
+      <BaseButton variant="primary" class="mt-4" @click="$router.push('/')">
+        Open or Create Budget
+      </BaseButton>
     </div>
-  </div>
+
+    <template v-else>
+      <!-- Income Sources Section -->
+      <div class="mb-12">
+        <BaseSection
+          title="Income Sources"
+          :action="{
+            label: 'Add New Income',
+            variant: 'secondary',
+            onClick: () => $router.push('/add-income'),
+          }"
+        />
+
+        <div class="bg-white shadow overflow-hidden sm:rounded-md">
+          <ul class="divide-y divide-brand-surface">
+            <BaseList
+              v-for="income in currentBudget?.incomes || []"
+              :key="income.name"
+              :title="income.name"
+              :subtitle="'Next payday: ' + getNextPayday(income)"
+              :amount="income.amount"
+              amount-color="success"
+              :actions="[
+                {
+                  label: 'Edit',
+                  color: 'primary',
+                  onClick: () => editIncome(income),
+                },
+                {
+                  label: 'Delete',
+                  color: 'danger',
+                  onClick: () => deleteIncome(income),
+                },
+              ]"
+            />
+          </ul>
+        </div>
+      </div>
+
+      <!-- Bills Section -->
+      <div>
+        <BaseSection
+          title="Bills"
+          :action="{
+            label: 'Add New Bill',
+            variant: 'secondary',
+            onClick: () => $router.push('/add-bill'),
+          }"
+        />
+
+        <div class="bg-white shadow overflow-hidden sm:rounded-md">
+          <ul class="divide-y divide-brand-surface">
+            <BaseList
+              v-for="bill in currentBudget?.bills || []"
+              :key="bill.name"
+              :title="bill.name"
+              :subtitle="'Due on the ' + bill.dueDay + 'th of each month'"
+              :amount="bill.amount"
+              amount-color="warning"
+              :actions="[
+                {
+                  label: 'Edit',
+                  color: 'primary',
+                  onClick: () => editBill(bill),
+                },
+                {
+                  label: 'Delete',
+                  color: 'danger',
+                  onClick: () => deleteBill(bill),
+                },
+              ]"
+            />
+          </ul>
+        </div>
+      </div>
+    </template>
+  </BasePage>
 </template>
 
 <script setup lang="ts">
@@ -105,6 +94,7 @@ import BaseButton from "../components/atoms/BaseButton.vue";
 import BaseCard from "../components/atoms/BaseCard.vue";
 import BaseList from "../components/atoms/BaseList.vue";
 import BaseSection from "../components/atoms/BaseSection.vue";
+import BasePage from "../components/atoms/BasePage.vue";
 
 const router = useRouter();
 const currentBudget = computed(() => budgetService.getCurrentBudget());
