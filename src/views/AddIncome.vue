@@ -3,7 +3,9 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="bg-white rounded-lg shadow-lg p-6">
         <div class="flex justify-between items-center mb-6">
-          <h2 class="text-2xl font-bold text-gray-900">Add Income</h2>
+          <h2 class="text-2xl font-bold text-gray-900">
+            {{ isEditing ? "Edit Income" : "Add Income" }}
+          </h2>
           <button
             @click="$router.push('/income-expenses')"
             class="text-sm text-gray-600 hover:text-gray-900"
@@ -46,6 +48,7 @@
                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 required
                 placeholder="e.g., Main Job, Side Gig, etc."
+                :disabled="isEditing"
               />
               <p class="mt-1 text-sm text-gray-500">
                 Give this income source a unique name to help you identify it.
@@ -102,6 +105,26 @@
               </select>
             </div>
 
+            <div>
+              <label
+                for="nextPayday"
+                class="block text-sm font-medium text-gray-700"
+              >
+                Next Payday
+              </label>
+              <input
+                type="date"
+                id="nextPayday"
+                v-model="income.nextPayday"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                required
+                :min="today"
+              />
+              <p class="mt-1 text-sm text-gray-500">
+                Select your next payday to help track your income schedule.
+              </p>
+            </div>
+
             <div class="flex justify-end space-x-3">
               <button
                 type="button"
@@ -115,7 +138,13 @@
                 :disabled="isSubmitting"
                 class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
               >
-                {{ isSubmitting ? "Adding..." : "Add Income" }}
+                {{
+                  isSubmitting
+                    ? "Saving..."
+                    : isEditing
+                    ? "Save Changes"
+                    : "Add Income"
+                }}
               </button>
             </div>
           </form>
@@ -126,19 +155,46 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
-import { useRouter } from "vue-router";
+import { ref, computed, onMounted } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import { budgetService, type Income } from "../services/budgetService";
 
 const router = useRouter();
+const route = useRoute();
 const currentBudget = computed(() => budgetService.getCurrentBudget());
 const isSubmitting = ref(false);
 const error = ref<string | null>(null);
+
+// Get today's date in YYYY-MM-DD format for the date input min attribute
+const today = new Date().toISOString().split("T")[0];
+
+const isEditing = computed(() => {
+  return !!route.query.edit;
+});
 
 const income = ref({
   name: "",
   amount: 0,
   frequency: "monthly" as "weekly" | "biweekly" | "monthly",
+  nextPayday: today,
+});
+
+onMounted(() => {
+  if (isEditing.value) {
+    const incomeName = route.query.edit as string;
+    const existingIncome = currentBudget.value?.incomes.find(
+      (inc) => inc.name === incomeName
+    );
+
+    if (existingIncome) {
+      income.value = {
+        ...existingIncome,
+        amount: existingIncome.originalAmount,
+      };
+    } else {
+      error.value = "Income not found";
+    }
+  }
 });
 
 const handleSubmit = async () => {
@@ -146,11 +202,15 @@ const handleSubmit = async () => {
   error.value = null;
 
   try {
-    // Check if name already exists
-    const existingIncomes = currentBudget.value?.incomes || [];
-    if (existingIncomes.some((inc: Income) => inc.name === income.value.name)) {
-      error.value = "An income source with this name already exists.";
-      return;
+    // Check if name already exists (only for new incomes)
+    if (!isEditing.value) {
+      const existingIncomes = currentBudget.value?.incomes || [];
+      if (
+        existingIncomes.some((inc: Income) => inc.name === income.value.name)
+      ) {
+        error.value = "An income source with this name already exists.";
+        return;
+      }
     }
 
     // Calculate monthly amount based on frequency
@@ -167,24 +227,34 @@ const handleSubmit = async () => {
         break;
     }
 
-    // Add the income to the budget
-    await budgetService.addIncome({
-      name: income.value.name,
-      amount: monthlyAmount,
-      frequency: income.value.frequency,
-      originalAmount: income.value.amount,
-    });
+    if (isEditing.value) {
+      // Update existing income
+      await budgetService.updateIncome(route.query.edit as string, {
+        ...income.value,
+        amount: monthlyAmount,
+      });
+    } else {
+      // Add new income
+      await budgetService.addIncome({
+        name: income.value.name,
+        amount: monthlyAmount,
+        frequency: income.value.frequency,
+        originalAmount: income.value.amount,
+        nextPayday: income.value.nextPayday,
+      });
+    }
 
     // Reset form
     income.value.name = "";
     income.value.amount = 0;
-    income.value.frequency = "";
+    income.value.frequency = "monthly";
+    income.value.nextPayday = today;
 
     // Navigate back to income-expenses
     router.push("/income-expenses");
   } catch (err) {
-    console.error("Error adding income:", err);
-    error.value = "Failed to add income. Please try again.";
+    console.error("Error saving income:", err);
+    error.value = "Failed to save income. Please try again.";
   } finally {
     isSubmitting.value = false;
   }

@@ -25,6 +25,7 @@ export interface Income {
   amount: number;
   frequency: "weekly" | "biweekly" | "monthly";
   originalAmount: number;
+  nextPayday: string; // ISO date string
 }
 
 export interface Budget {
@@ -110,6 +111,10 @@ class BudgetService {
           filePath
         );
         const budget = JSON.parse(content) as Budget;
+        // Ensure incomes array exists for older budget files
+        if (!budget.incomes) {
+          budget.incomes = [];
+        }
         this.currentBudget = budget;
         return budget;
       }
@@ -150,7 +155,60 @@ class BudgetService {
       throw new Error("No budget is currently open");
     }
 
+    // Ensure incomes array exists
+    if (!this.currentBudget.incomes) {
+      this.currentBudget.incomes = [];
+    }
+
     this.currentBudget.incomes.push(income);
+    this.currentBudget.updatedAt = new Date().toISOString();
+
+    // Save the updated budget
+    if (this.currentBudget.filePath) {
+      await window.electron.ipcRenderer.invoke("file:save", {
+        filePath: this.currentBudget.filePath,
+        content: JSON.stringify(this.currentBudget, null, 2),
+      });
+    }
+  }
+
+  async deleteIncome(name: string): Promise<void> {
+    if (!this.currentBudget) {
+      throw new Error("No budget is currently open");
+    }
+
+    const index = this.currentBudget.incomes.findIndex(
+      (inc) => inc.name === name
+    );
+    if (index === -1) {
+      throw new Error("Income not found");
+    }
+
+    this.currentBudget.incomes.splice(index, 1);
+    this.currentBudget.updatedAt = new Date().toISOString();
+
+    // Save the updated budget
+    if (this.currentBudget.filePath) {
+      await window.electron.ipcRenderer.invoke("file:save", {
+        filePath: this.currentBudget.filePath,
+        content: JSON.stringify(this.currentBudget, null, 2),
+      });
+    }
+  }
+
+  async updateIncome(name: string, updatedIncome: Income): Promise<void> {
+    if (!this.currentBudget) {
+      throw new Error("No budget is currently open");
+    }
+
+    const index = this.currentBudget.incomes.findIndex(
+      (inc) => inc.name === name
+    );
+    if (index === -1) {
+      throw new Error("Income not found");
+    }
+
+    this.currentBudget.incomes[index] = updatedIncome;
     this.currentBudget.updatedAt = new Date().toISOString();
 
     // Save the updated budget
@@ -173,7 +231,11 @@ class BudgetService {
   }
 
   getTotalIncome(): number {
-    return this.getItems("income").reduce((sum, item) => sum + item.amount, 0);
+    if (!this.currentBudget) return 0;
+    return this.currentBudget.incomes.reduce(
+      (sum, income) => sum + income.amount,
+      0
+    );
   }
 
   getTotalExpenses(): number {

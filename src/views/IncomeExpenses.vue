@@ -157,40 +157,73 @@
           <!-- List of Items -->
           <div class="mt-8">
             <h3 class="text-lg font-medium text-gray-900 mb-4">
-              {{ activeTab === "income" ? "Income" : "Expenses" }} List
+              {{ activeTab === "income" ? "Income Sources" : "Expenses" }} List
             </h3>
             <div class="bg-white shadow overflow-hidden sm:rounded-md">
               <ul class="divide-y divide-gray-200">
-                <li
-                  v-for="item in items"
-                  :key="item.id"
-                  class="px-4 py-4 sm:px-6"
-                >
-                  <div class="flex items-center justify-between">
-                    <div class="flex-1 min-w-0">
-                      <p class="text-sm font-medium text-indigo-600 truncate">
-                        {{ item.description }}
-                      </p>
-                      <p class="text-sm text-gray-500">
-                        {{ new Date(item.date).toLocaleDateString() }}
-                      </p>
-                    </div>
-                    <div class="ml-4 flex-shrink-0">
-                      <span
-                        :class="[
-                          activeTab === 'income'
-                            ? 'text-green-600'
-                            : 'text-red-600',
-                          'text-sm font-medium',
-                        ]"
+                <template v-if="activeTab === 'income'">
+                  <li
+                    v-for="income in currentBudget?.incomes || []"
+                    :key="income.name"
+                    class="px-4 py-4 sm:px-6"
+                  >
+                    <div class="flex items-center justify-between">
+                      <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-indigo-600 truncate">
+                          {{ income.name }}
+                        </p>
+                        <p class="text-sm text-gray-500">
+                          {{ income.frequency }} • Next payday:
+                          {{ formatDate(income.nextPayday) }}
+                        </p>
+                      </div>
+                      <div
+                        class="ml-4 flex-shrink-0 flex items-center space-x-4"
                       >
-                        {{ activeTab === "income" ? "+" : "-" }}${{
-                          item.amount.toFixed(2)
-                        }}
-                      </span>
+                        <span class="text-sm font-medium text-green-600">
+                          ${{ income.amount.toFixed(2) }}/month
+                        </span>
+                        <div class="flex space-x-2">
+                          <button
+                            @click="editIncome(income)"
+                            class="text-indigo-600 hover:text-indigo-900"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            @click="deleteIncome(income)"
+                            class="text-red-600 hover:text-red-900"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </li>
+                  </li>
+                </template>
+                <template v-else>
+                  <li
+                    v-for="item in items"
+                    :key="item.id"
+                    class="px-4 py-4 sm:px-6"
+                  >
+                    <div class="flex items-center justify-between">
+                      <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-indigo-600 truncate">
+                          {{ item.description }}
+                        </p>
+                        <p class="text-sm text-gray-500">
+                          {{ new Date(item.date).toLocaleDateString() }}
+                        </p>
+                      </div>
+                      <div class="ml-4 flex-shrink-0">
+                        <span class="text-sm font-medium text-red-600">
+                          -${{ item.amount.toFixed(2) }}
+                        </span>
+                      </div>
+                    </div>
+                  </li>
+                </template>
               </ul>
             </div>
           </div>
@@ -202,7 +235,14 @@
 
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import { budgetService, type Item } from "../services/budgetService";
+import { useRouter } from "vue-router";
+import {
+  budgetService,
+  type Item,
+  type Income,
+} from "../services/budgetService";
+
+const router = useRouter();
 
 const tabs = [
   { name: "income", label: "Income" },
@@ -243,6 +283,13 @@ const balance = computed(() => {
   return budgetService.getBalance();
 });
 
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  // Add one day to compensate for timezone offset
+  date.setDate(date.getDate() + 1);
+  return date.toLocaleDateString();
+};
+
 const handleSubmit = async () => {
   isSubmitting.value = true;
   try {
@@ -259,6 +306,25 @@ const handleSubmit = async () => {
     console.error("Error adding item:", error);
   } finally {
     isSubmitting.value = false;
+  }
+};
+
+const editIncome = (income: Income) => {
+  router.push({
+    path: "/add-income",
+    query: { edit: income.name },
+  });
+};
+
+const deleteIncome = async (income: Income) => {
+  if (!confirm(`Are you sure you want to delete "${income.name}"?`)) {
+    return;
+  }
+
+  try {
+    await budgetService.deleteIncome(income.name);
+  } catch (error) {
+    console.error("Error deleting income:", error);
   }
 };
 </script>
