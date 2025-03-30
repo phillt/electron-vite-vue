@@ -28,4 +28,7 @@ release
 package-lock.json
 pnpm-lock.yaml
 yarn.lock
-Rolling Thunder.bdgtmn
+
+# budget files
+
+*.bdgtmn
