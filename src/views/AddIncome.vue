@@ -80,29 +80,8 @@
                 />
               </div>
               <p class="mt-1 text-sm text-gray-500">
-                Enter your take-home pay after taxes. If hourly, use a
-                conservative estimate.
+                Enter your biweekly take-home pay after taxes.
               </p>
-            </div>
-
-            <div>
-              <label
-                for="frequency"
-                class="block text-sm font-medium text-gray-700"
-              >
-                Frequency
-              </label>
-              <select
-                id="frequency"
-                v-model="income.frequency"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                required
-              >
-                <option value="">Select frequency</option>
-                <option value="weekly">Weekly</option>
-                <option value="biweekly">Bi-Weekly</option>
-                <option value="monthly">Monthly</option>
-              </select>
             </div>
 
             <div>
@@ -175,7 +154,6 @@ const isEditing = computed(() => {
 const income = ref({
   name: "",
   amount: 0,
-  frequency: "monthly" as "weekly" | "biweekly" | "monthly",
   nextPayday: today,
 });
 
@@ -188,8 +166,9 @@ onMounted(() => {
 
     if (existingIncome) {
       income.value = {
-        ...existingIncome,
+        name: existingIncome.name,
         amount: existingIncome.originalAmount,
+        nextPayday: existingIncome.nextPayday,
       };
     } else {
       error.value = "Income not found";
@@ -213,32 +192,18 @@ const handleSubmit = async () => {
       }
     }
 
-    // Calculate monthly amount based on frequency
-    let monthlyAmount = income.value.amount;
-    switch (income.value.frequency) {
-      case "weekly":
-        monthlyAmount = income.value.amount * 4.33; // Average weeks in a month
-        break;
-      case "biweekly":
-        monthlyAmount = income.value.amount * 2.17; // Average bi-weekly periods in a month
-        break;
-      case "monthly":
-        monthlyAmount = income.value.amount;
-        break;
-    }
-
     if (isEditing.value) {
       // Update existing income
       await budgetService.updateIncome(route.query.edit as string, {
         ...income.value,
-        amount: monthlyAmount,
+        amount: income.value.amount,
+        originalAmount: income.value.amount,
       });
     } else {
       // Add new income
       await budgetService.addIncome({
         name: income.value.name,
-        amount: monthlyAmount,
-        frequency: income.value.frequency,
+        amount: income.value.amount,
         originalAmount: income.value.amount,
         nextPayday: income.value.nextPayday,
       });
@@ -247,7 +212,6 @@ const handleSubmit = async () => {
     // Reset form
     income.value.name = "";
     income.value.amount = 0;
-    income.value.frequency = "monthly";
     income.value.nextPayday = today;
 
     // Navigate back to income-expenses

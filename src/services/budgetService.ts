@@ -27,7 +27,6 @@ export interface Item {
 export interface Income {
   name: string;
   amount: number;
-  frequency: "weekly" | "biweekly" | "monthly";
   originalAmount: number;
   nextPayday: string; // ISO date string
 }
@@ -72,7 +71,6 @@ export interface Budget {
   incomes: Income[];
   bills: Bill[];
   payPeriods: PayPeriod[];
-  payFrequency: "weekly" | "biweekly";
   lastPayday?: string; // ISO date string
 }
 
@@ -129,9 +127,6 @@ class BudgetService {
         }
         if (!budget.payPeriods) {
           budget.payPeriods = [];
-        }
-        if (!budget.payFrequency) {
-          budget.payFrequency = "biweekly";
         }
         if (!budget.lastPayday) {
           budget.lastPayday = new Date().toISOString();
@@ -206,7 +201,6 @@ class BudgetService {
         incomes: [],
         bills: [],
         payPeriods: [],
-        payFrequency: budget.payFrequency || "biweekly",
         lastPayday: budget.lastPayday || new Date().toISOString(),
       };
 
@@ -253,9 +247,6 @@ class BudgetService {
         }
         if (!budget.payPeriods) {
           budget.payPeriods = [];
-        }
-        if (!budget.payFrequency) {
-          budget.payFrequency = "biweekly";
         }
         if (!budget.lastPayday) {
           budget.lastPayday = new Date().toISOString();
@@ -493,16 +484,9 @@ class BudgetService {
     return this.getTotalIncome() - this.getTotalExpenses();
   }
 
-  private calculateNextPayday(
-    lastPayday: string,
-    frequency: "weekly" | "biweekly"
-  ): Date {
+  private calculateNextPayday(lastPayday: string): Date {
     const date = new Date(lastPayday);
-    if (frequency === "weekly") {
-      date.setDate(date.getDate() + 7);
-    } else {
-      date.setDate(date.getDate() + 14);
-    }
+    date.setDate(date.getDate() + 14); // Always biweekly
     return date;
   }
 
@@ -538,14 +522,10 @@ class BudgetService {
 
   private calculatePaycheckAmount(): number {
     if (!this.currentBudget.value) return 0;
-
-    let totalPaycheck = 0;
-    this.currentBudget.value.incomes.forEach((income: Income) => {
-      if (this.currentBudget.value?.payFrequency === "biweekly") {
-        totalPaycheck += income.amount;
-      }
-    });
-    return totalPaycheck;
+    return this.currentBudget.value.incomes.reduce(
+      (total, income) => total + income.amount,
+      0
+    );
   }
 
   async createPayPeriod(): Promise<PayPeriod | null> {
@@ -568,11 +548,8 @@ class BudgetService {
       startDate.setDate(startDate.getDate() + 1);
     }
 
-    // Calculate the end date based on frequency
-    const endDate = this.calculateNextPayday(
-      startDate.toISOString(),
-      budget.payFrequency
-    );
+    // Calculate the end date (always biweekly)
+    const endDate = this.calculateNextPayday(startDate.toISOString());
 
     // Get bills for this period
     const bills = this.getBillsForPayPeriod(startDate, endDate, budget.bills);
@@ -589,7 +566,7 @@ class BudgetService {
       paidAmount: 0,
       unpaidAmount: totalAmount,
       totalExpenses: 0,
-      paycheckAmount: this.calculatePaycheckAmount(), // Store the current paycheck amount
+      paycheckAmount: this.calculatePaycheckAmount(),
     };
 
     budget.payPeriods.push(payPeriod);

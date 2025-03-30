@@ -42,12 +42,10 @@ describe("Budget.vue", () => {
     // Mock the current budget data
     const mockBudget = {
       name: "Test Budget",
-      payFrequency: "biweekly",
       incomes: [
         {
           name: "Main Job",
           amount: 3500,
-          frequency: "biweekly",
           originalAmount: 3500,
           nextPayday: "2025-03-29",
         },
@@ -110,12 +108,10 @@ describe("Budget.vue", () => {
     // Mock the current budget data with bills and expenses
     const mockBudget = {
       name: "Test Budget",
-      payFrequency: "biweekly",
       incomes: [
         {
           name: "Main Job",
           amount: 3500,
-          frequency: "biweekly",
           originalAmount: 3500,
           nextPayday: "2025-03-29",
         },
