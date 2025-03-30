@@ -1,22 +1,36 @@
 <!-- BaseButton.vue -->
 <script setup lang="ts">
 defineProps<{
-  variant?: "primary" | "secondary" | "outline" | "ghost";
+  variant?:
+    | "primary"
+    | "secondary"
+    | "outline"
+    | "ghost"
+    | "danger"
+    | "success"
+    | "warning";
   size?: "sm" | "md" | "lg";
   disabled?: boolean;
   type?: "button" | "submit" | "reset";
 }>();
 
 const baseClasses =
-  "inline-flex items-center justify-center font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors";
+  "inline-flex items-center justify-center font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
+
 const variantClasses = {
   primary:
-    "bg-brand-dark text-white hover:bg-brand-dark/90 focus:ring-brand-dark",
+    "bg-brand-dark text-white hover:bg-brand-dark50 focus:ring-brand-dark50 shadow-sm",
   secondary:
-    "bg-brand-accent text-white hover:bg-brand-accent/90 focus:ring-brand-accent",
+    "bg-brand-accent text-white hover:bg-brand-accent/90 focus:ring-brand-accent20 shadow-sm",
   outline:
-    "border-2 border-brand-dark text-brand-dark hover:bg-brand-dark/10 focus:ring-brand-dark",
-  ghost: "text-brand-dark hover:bg-brand-dark/10 focus:ring-brand-dark",
+    "border-2 border-brand-dark text-brand-dark hover:bg-brand-dark50/10 focus:ring-brand-dark50",
+  ghost: "text-brand-muted hover:text-brand-text focus:ring-brand-dark50",
+  danger:
+    "border-2 border-red-500 text-red-500 hover:bg-red-50 focus:ring-red-500/20",
+  success:
+    "bg-brand-success text-white hover:bg-brand-success/90 focus:ring-brand-success30 shadow-sm",
+  warning:
+    "bg-brand-warning text-white hover:bg-brand-warning/90 focus:ring-brand-warning20 shadow-sm",
 };
 
 const sizeClasses = {
@@ -32,7 +46,6 @@ const sizeClasses = {
       baseClasses,
       variantClasses[variant || 'primary'],
       sizeClasses[size || 'md'],
-      disabled ? 'opacity-50 cursor-not-allowed' : '',
     ]"
     :disabled="disabled"
     :type="type || 'button'"

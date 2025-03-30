@@ -4,6 +4,10 @@ import { ref, computed } from "vue";
 import { budgetService } from "../services/budgetService";
 import type { PayPeriod, Income } from "../services/budgetService";
 import { useRouter } from "vue-router";
+import BaseButton from "../components/atoms/BaseButton.vue";
+import BaseCard from "../components/atoms/BaseCard.vue";
+import BaseSection from "../components/atoms/BaseSection.vue";
+import BaseTable from "../components/atoms/BaseTable.vue";
 
 const currentBudget = computed(() => budgetService.getCurrentBudget());
 const loading = ref(false);
@@ -193,57 +197,69 @@ const getPayPeriodStatus = (index: number) => {
   if (index === currentPayPeriodIndex.value) {
     return {
       label: "Current Period",
-      class: "bg-green-50 border-green-200",
-      badge: "bg-green-100 text-green-800",
+      class: "bg-brand-success/10 border-brand-success/20",
+      badge: "bg-brand-success/20 text-brand-success",
     };
   } else if (index < currentPayPeriodIndex.value) {
     return {
       label: "Past Period",
-      class: "bg-gray-50 border-gray-200",
-      badge: "bg-gray-100 text-gray-600",
+      class: "bg-brand-surface border-brand-surface/20",
+      badge: "bg-brand-surface/20 text-brand-muted",
     };
   } else {
     return {
       label: "Future Period",
-      class: "bg-blue-50 border-blue-200",
-      badge: "bg-blue-100 text-blue-800",
+      class: "bg-brand-primary/10 border-brand-primary/20",
+      badge: "bg-brand-primary/20 text-brand-primary",
     };
   }
+};
+
+const tableHeaders = [
+  { label: "Bill Name", key: "name" },
+  { label: "Amount", key: "amount" },
+  { label: "Due Date", key: "dueDate" },
+  { label: "Days Until Due", key: "daysUntilDue" },
+  { label: "Status", key: "status" },
+];
+
+const handleAddBill = (index: number) => {
+  router.push(`/add-bill?payPeriodIndex=${index}`);
 };
 </script>
 
 <template>
   <div v-if="currentBudget" class="space-y-6">
     <div class="flex justify-between items-center">
-      <h1 class="text-2xl font-bold text-gray-900">Budget Overview</h1>
+      <h1 class="text-2xl font-bold text-brand-text">Budget Overview</h1>
       <div class="flex space-x-4">
-        <button
+        <BaseButton
+          variant="danger"
           v-if="
             currentBudget.payPeriods.length > 0 &&
             currentPayPeriodIndex !== currentBudget.payPeriods.length - 1
           "
           @click="handleDeleteLastPayPeriod"
-          class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
         >
           Delete Last Period
-        </button>
-        <button
-          @click="handleCreatePayPeriod"
+        </BaseButton>
+        <BaseButton
+          variant="primary"
           :disabled="loading"
-          class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+          @click="handleCreatePayPeriod"
         >
           {{ loading ? "Creating..." : "Create Next Pay Period" }}
-        </button>
+        </BaseButton>
       </div>
     </div>
 
-    <div v-if="error" class="rounded-md bg-red-50 p-4">
-      <div class="text-sm text-red-700">{{ error }}</div>
+    <div v-if="error" class="rounded-md bg-brand-danger/10 p-4">
+      <div class="text-sm text-brand-danger">{{ error }}</div>
     </div>
 
     <div v-if="currentBudget.payPeriods.length === 0" class="text-center py-12">
-      <h3 class="text-lg font-medium text-gray-900">No Pay Periods Yet</h3>
-      <p class="mt-2 text-sm text-gray-500">
+      <h3 class="text-lg font-medium text-brand-text">No Pay Periods Yet</h3>
+      <p class="mt-2 text-sm text-brand-muted">
         Click the button above to create your first pay period.
       </p>
     </div>
@@ -258,7 +274,7 @@ const getPayPeriodStatus = (index: number) => {
       <div class="px-4 py-5 sm:px-6">
         <div class="flex items-center justify-between">
           <div>
-            <h3 class="text-lg font-medium text-gray-900">
+            <h3 class="text-lg font-medium text-brand-text">
               Pay Period: {{ formatDate(payPeriod.startDate) }} -
               {{ formatDate(payPeriod.endDate) }}
             </h3>
@@ -270,22 +286,22 @@ const getPayPeriodStatus = (index: number) => {
             </span>
           </div>
           <div class="text-right">
-            <div class="text-sm text-gray-500">Progress</div>
-            <div class="mt-1 text-lg font-semibold">
+            <div class="text-sm text-brand-muted">Progress</div>
+            <div class="mt-1 text-lg font-semibold text-brand-text">
               {{ formatCurrency(payPeriod.paidAmount) }} /
               {{ formatCurrency(payPeriod.totalAmount) }}
             </div>
           </div>
         </div>
         <div class="mt-4 grid grid-cols-4 gap-4 text-sm">
-          <div class="col-span-4 bg-blue-50 p-3 rounded-lg">
-            <div class="font-medium text-blue-900">Expected Income</div>
+          <div class="col-span-4 bg-brand-primary/10 p-3 rounded-lg">
+            <div class="font-medium text-brand-primary">Expected Income</div>
             <div class="mt-1 grid grid-cols-3 gap-4">
               <div>
-                <span class="text-blue-700">Paycheck:</span>
+                <span class="text-brand-primary">Paycheck:</span>
                 <div class="relative inline-block ml-2">
                   <span
-                    class="absolute left-2 top-1/2 -translate-y-1/2 text-blue-700"
+                    class="absolute left-2 top-1/2 -translate-y-1/2 text-brand-primary"
                     >$</span
                   >
                   <input
@@ -294,20 +310,20 @@ const getPayPeriodStatus = (index: number) => {
                     @change="(e) => handlePaycheckAmountChange(index, e)"
                     @focus="handleBillAmountFocus"
                     @blur="handleBillAmountBlur"
-                    class="w-32 pl-6 pr-2 py-1 text-sm border rounded focus:outline-none focus:ring-1 focus:ring-indigo-500 text-right bg-blue-50 border-blue-200 font-medium text-blue-900"
+                    class="w-32 pl-6 pr-2 py-1 text-sm border rounded focus:outline-none focus:ring-1 focus:ring-brand-primary text-right bg-brand-primary/10 border-brand-primary/20 font-medium text-brand-primary"
                   />
                 </div>
               </div>
               <div>
-                <span class="text-blue-700">Total Outgoing:</span>
-                <span class="ml-2 font-medium text-blue-900">{{
+                <span class="text-brand-primary">Total Outgoing:</span>
+                <span class="ml-2 font-medium text-brand-primary">{{
                   formatCurrency(
                     payPeriod.totalAmount + (payPeriod.totalExpenses || 0)
                   )
                 }}</span>
               </div>
               <div>
-                <span class="text-blue-700">Remaining:</span>
+                <span class="text-brand-primary">Remaining:</span>
                 <span
                   class="ml-2 font-medium"
                   :class="
@@ -315,8 +331,8 @@ const getPayPeriodStatus = (index: number) => {
                       (payPeriod.totalAmount +
                         (payPeriod.totalExpenses || 0)) >=
                     0
-                      ? 'text-green-600'
-                      : 'text-red-600'
+                      ? 'text-brand-success'
+                      : 'text-brand-danger'
                   "
                 >
                   {{
@@ -330,26 +346,26 @@ const getPayPeriodStatus = (index: number) => {
             </div>
           </div>
           <div>
-            <span class="text-gray-500">Total Bills:</span>
-            <span class="ml-2 font-medium">{{
+            <span class="text-brand-muted">Total Bills:</span>
+            <span class="ml-2 font-medium text-brand-text">{{
               formatCurrency(payPeriod.totalAmount)
             }}</span>
           </div>
           <div>
-            <span class="text-gray-500">Paid Bills:</span>
-            <span class="ml-2 font-medium text-green-600">{{
+            <span class="text-brand-muted">Paid Bills:</span>
+            <span class="ml-2 font-medium text-brand-success">{{
               formatCurrency(payPeriod.paidAmount)
             }}</span>
           </div>
           <div>
-            <span class="text-gray-500">Unpaid Bills:</span>
-            <span class="ml-2 font-medium text-red-600">{{
+            <span class="text-brand-muted">Unpaid Bills:</span>
+            <span class="ml-2 font-medium text-brand-danger">{{
               formatCurrency(payPeriod.unpaidAmount)
             }}</span>
           </div>
           <div>
-            <span class="text-gray-500">Total Expenses:</span>
-            <span class="ml-2 font-medium text-purple-600">{{
+            <span class="text-brand-muted">Total Expenses:</span>
+            <span class="ml-2 font-medium text-brand-primary">{{
               formatCurrency(payPeriod.totalExpenses || 0)
             }}</span>
           </div>
@@ -357,106 +373,79 @@ const getPayPeriodStatus = (index: number) => {
       </div>
 
       <div class="border-t" :class="getPayPeriodStatus(index).class">
-        <div class="px-4 py-3 bg-gray-50 border-b">
-          <h4 class="text-lg font-medium text-gray-900">Bills</h4>
-        </div>
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-opacity-50" :class="getPayPeriodStatus(index).class">
-            <tr>
-              <th
-                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Bill Name
-              </th>
-              <th
-                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Amount
-              </th>
-              <th
-                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Due Date
-              </th>
-              <th
-                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Days Until Due
-              </th>
-              <th
-                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Status
-              </th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-200">
-            <tr v-for="bill in payPeriod.bills" :key="bill.name">
-              <td
-                class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
-              >
-                {{ bill.name }}
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <div class="flex items-center space-x-2">
-                  <div class="relative">
-                    <span
-                      class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500"
-                      >$</span
-                    >
-                    <input
-                      type="text"
-                      :value="formatCurrencyInput(bill.amount)"
-                      @change="
-                        (e) => handleBillAmountChange(index, bill.name, e)
-                      "
-                      @focus="handleBillAmountFocus"
-                      @blur="handleBillAmountBlur"
-                      class="w-32 pl-6 pr-2 py-1 text-sm border rounded focus:outline-none focus:ring-1 focus:ring-indigo-500 text-right"
-                    />
-                  </div>
+        <BaseSection
+          title="Bills"
+          :action="{
+            label: 'Add Bill',
+            variant: 'secondary',
+            onClick: () => handleAddBill(index),
+          }"
+        />
+        <BaseTable
+          :headers="tableHeaders"
+          :rows="payPeriod.bills"
+          :status="getPayPeriodStatus(index)"
+        >
+          <tr v-for="bill in payPeriod.bills" :key="bill.name">
+            <td
+              class="px-6 py-4 whitespace-nowrap text-sm font-medium text-brand-text"
+            >
+              {{ bill.name }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-brand-muted">
+              <div class="flex items-center space-x-2">
+                <div class="relative">
+                  <span
+                    class="absolute left-2 top-1/2 -translate-y-1/2 text-brand-muted"
+                    >$</span
+                  >
+                  <input
+                    type="text"
+                    :value="formatCurrencyInput(bill.amount)"
+                    @change="(e) => handleBillAmountChange(index, bill.name, e)"
+                    @focus="handleBillAmountFocus"
+                    @blur="handleBillAmountBlur"
+                    class="w-32 pl-6 pr-2 py-1 text-sm border rounded focus:outline-none focus:ring-1 focus:ring-brand-primary text-right"
+                  />
                 </div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {{ formatDate(bill.dueDate) }}
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {{ calculateDaysUntilDue(bill.dueDate) }}
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <button
-                  @click="handleTogglePaid(index, bill.name)"
-                  :class="[
-                    'px-3 py-1 rounded-full text-sm font-medium',
-                    bill.isPaid
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-yellow-100 text-yellow-800',
-                  ]"
-                >
-                  {{ bill.isPaid ? "Paid" : "Unpaid" }}
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-brand-muted">
+              {{ formatDate(bill.dueDate) }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-brand-muted">
+              {{ calculateDaysUntilDue(bill.dueDate) }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-brand-muted">
+              <BaseButton
+                :variant="bill.isPaid ? 'success' : 'warning'"
+                size="sm"
+                @click="handleTogglePaid(index, bill.name)"
+              >
+                {{ bill.isPaid ? "Paid" : "Unpaid" }}
+              </BaseButton>
+            </td>
+          </tr>
+        </BaseTable>
       </div>
 
       <div class="border-t" :class="getPayPeriodStatus(index).class">
         <div
-          class="px-4 py-3 bg-gray-50 border-b flex justify-between items-center"
+          class="px-4 py-3 bg-brand-surface border-b flex justify-between items-center"
         >
-          <h4 class="text-lg font-medium text-gray-900">Expenses</h4>
-          <button
+          <h4 class="text-lg font-medium text-brand-text">Expenses</h4>
+          <BaseButton
+            variant="secondary"
+            size="sm"
             @click="handleAddExpense(index)"
-            class="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200"
           >
             Add Expense
-          </button>
+          </BaseButton>
         </div>
-        <div class="divide-y divide-gray-200">
+        <div class="divide-y divide-brand-surface">
           <div
             v-if="!payPeriod.expenses || payPeriod.expenses.length === 0"
-            class="p-4 text-center text-gray-500"
+            class="p-4 text-center text-brand-muted"
           >
             No expenses added yet
           </div>
@@ -466,8 +455,8 @@ const getPayPeriodStatus = (index: number) => {
             class="px-4 py-3 flex justify-between items-center"
           >
             <div>
-              <div class="font-medium text-gray-900">{{ expense.name }}</div>
-              <div class="text-sm text-gray-500">
+              <div class="font-medium text-brand-text">{{ expense.name }}</div>
+              <div class="text-sm text-brand-muted">
                 Added on {{ formatDate(expense.date) }}
               </div>
             </div>
@@ -475,7 +464,7 @@ const getPayPeriodStatus = (index: number) => {
               <div class="flex items-center space-x-2">
                 <div class="relative">
                   <span
-                    class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500"
+                    class="absolute left-2 top-1/2 -translate-y-1/2 text-brand-muted"
                     >$</span
                   >
                   <input
@@ -486,21 +475,17 @@ const getPayPeriodStatus = (index: number) => {
                     "
                     @focus="handleBillAmountFocus"
                     @blur="handleBillAmountBlur"
-                    class="w-32 pl-6 pr-2 py-1 text-sm border rounded focus:outline-none focus:ring-1 focus:ring-indigo-500 text-right"
+                    class="w-32 pl-6 pr-2 py-1 text-sm border rounded focus:outline-none focus:ring-1 focus:ring-brand-primary text-right"
                   />
                 </div>
               </div>
-              <button
+              <BaseButton
+                :variant="expense.isPaid ? 'success' : 'warning'"
+                size="sm"
                 @click="handleToggleExpensePaid(index, expense.id)"
-                :class="[
-                  'px-3 py-1 rounded-full text-sm font-medium',
-                  expense.isPaid
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-yellow-100 text-yellow-800',
-                ]"
               >
                 {{ expense.isPaid ? "Paid" : "Unpaid" }}
-              </button>
+              </BaseButton>
             </div>
           </div>
         </div>
@@ -509,8 +494,8 @@ const getPayPeriodStatus = (index: number) => {
   </div>
 
   <div v-else class="text-center py-12">
-    <h3 class="text-lg font-medium text-gray-900">No Budget Open</h3>
-    <p class="mt-2 text-sm text-gray-500">
+    <h3 class="text-lg font-medium text-brand-text">No Budget Open</h3>
+    <p class="mt-2 text-sm text-brand-muted">
       Please open or create a budget to get started.
     </p>
   </div>
