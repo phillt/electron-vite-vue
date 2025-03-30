@@ -28,6 +28,12 @@ export interface Income {
   nextPayday: string; // ISO date string
 }
 
+export interface Bill {
+  name: string;
+  dueDay: number; // 1-31
+  amount: number;
+}
+
 export interface Budget {
   name: string;
   description: string;
@@ -36,6 +42,7 @@ export interface Budget {
   filePath?: string;
   items: Item[];
   incomes: Income[];
+  bills: Bill[];
 }
 
 class BudgetService {
@@ -54,7 +61,7 @@ class BudgetService {
   async createBudget(
     budget: Omit<
       Budget,
-      "createdAt" | "updatedAt" | "filePath" | "items" | "incomes"
+      "createdAt" | "updatedAt" | "filePath" | "items" | "incomes" | "bills"
     >
   ): Promise<Budget> {
     try {
@@ -78,6 +85,7 @@ class BudgetService {
         filePath: result.filePath,
         items: [],
         incomes: [],
+        bills: [],
       };
 
       // Save the budget to file
@@ -209,6 +217,52 @@ class BudgetService {
     }
 
     this.currentBudget.incomes[index] = updatedIncome;
+    this.currentBudget.updatedAt = new Date().toISOString();
+
+    // Save the updated budget
+    if (this.currentBudget.filePath) {
+      await window.electron.ipcRenderer.invoke("file:save", {
+        filePath: this.currentBudget.filePath,
+        content: JSON.stringify(this.currentBudget, null, 2),
+      });
+    }
+  }
+
+  async addBill(bill: Bill): Promise<void> {
+    if (!this.currentBudget) {
+      throw new Error("No budget is currently open");
+    }
+
+    // Ensure bills array exists
+    if (!this.currentBudget.bills) {
+      this.currentBudget.bills = [];
+    }
+
+    this.currentBudget.bills.push(bill);
+    this.currentBudget.updatedAt = new Date().toISOString();
+
+    // Save the updated budget
+    if (this.currentBudget.filePath) {
+      await window.electron.ipcRenderer.invoke("file:save", {
+        filePath: this.currentBudget.filePath,
+        content: JSON.stringify(this.currentBudget, null, 2),
+      });
+    }
+  }
+
+  async deleteBill(name: string): Promise<void> {
+    if (!this.currentBudget) {
+      throw new Error("No budget is currently open");
+    }
+
+    const index = this.currentBudget.bills.findIndex(
+      (bill) => bill.name === name
+    );
+    if (index === -1) {
+      throw new Error("Bill not found");
+    }
+
+    this.currentBudget.bills.splice(index, 1);
     this.currentBudget.updatedAt = new Date().toISOString();
 
     // Save the updated budget

@@ -153,10 +153,10 @@
               </button>
               <button
                 v-else
-                @click="$router.push('/add-expense')"
+                @click="$router.push('/add-bill')"
                 class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
               >
-                Add New Expense
+                Add New Bill
               </button>
             </div>
           </div>
@@ -164,7 +164,7 @@
           <!-- List of Items -->
           <div class="mt-8">
             <h3 class="text-lg font-medium text-gray-900 mb-4">
-              {{ activeTab === "income" ? "Income Sources" : "Expenses" }} List
+              {{ activeTab === "income" ? "Income Sources" : "Bills" }} List
             </h3>
             <div class="bg-white shadow overflow-hidden sm:rounded-md">
               <ul class="divide-y divide-gray-200">
@@ -210,23 +210,39 @@
                 </template>
                 <template v-else>
                   <li
-                    v-for="item in items"
-                    :key="item.id"
+                    v-for="bill in currentBudget?.bills || []"
+                    :key="bill.name"
                     class="px-4 py-4 sm:px-6"
                   >
                     <div class="flex items-center justify-between">
                       <div class="flex-1 min-w-0">
                         <p class="text-sm font-medium text-indigo-600 truncate">
-                          {{ item.description }}
+                          {{ bill.name }}
                         </p>
                         <p class="text-sm text-gray-500">
-                          {{ new Date(item.date).toLocaleDateString() }}
+                          Due on the {{ bill.dueDay }}th of each month
                         </p>
                       </div>
-                      <div class="ml-4 flex-shrink-0">
+                      <div
+                        class="ml-4 flex-shrink-0 flex items-center space-x-4"
+                      >
                         <span class="text-sm font-medium text-red-600">
-                          -${{ item.amount.toFixed(2) }}
+                          ${{ bill.amount.toFixed(2) }}
                         </span>
+                        <div class="flex space-x-2">
+                          <button
+                            @click="editBill(bill)"
+                            class="text-indigo-600 hover:text-indigo-900"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            @click="deleteBill(bill)"
+                            class="text-red-600 hover:text-red-900"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </li>
@@ -247,13 +263,14 @@ import {
   budgetService,
   type Item,
   type Income,
+  type Bill,
 } from "../services/budgetService";
 
 const router = useRouter();
 
 const tabs = [
   { name: "income", label: "Income" },
-  { name: "expense", label: "Expenses" },
+  { name: "bills", label: "Bills" },
 ];
 
 const activeTab = ref("income");
@@ -332,6 +349,25 @@ const deleteIncome = async (income: Income) => {
     await budgetService.deleteIncome(income.name);
   } catch (error) {
     console.error("Error deleting income:", error);
+  }
+};
+
+const editBill = (bill: Bill) => {
+  router.push({
+    path: "/add-bill",
+    query: { edit: bill.name },
+  });
+};
+
+const deleteBill = async (bill: Bill) => {
+  if (!confirm(`Are you sure you want to delete "${bill.name}"?`)) {
+    return;
+  }
+
+  try {
+    await budgetService.deleteBill(bill.name);
+  } catch (error) {
+    console.error("Error deleting bill:", error);
   }
 };
 </script>

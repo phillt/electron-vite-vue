@@ -24,9 +24,9 @@ const router = createRouter({
       component: () => import("../views/AddIncome.vue"),
     },
     {
-      path: "/add-expense",
-      name: "add-expense",
-      component: () => import("../views/AddExpense.vue"),
+      path: "/add-bill",
+      name: "add-bill",
+      component: () => import("../views/AddBill.vue"),
     },
   ],
 });
