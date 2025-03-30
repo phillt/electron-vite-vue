@@ -2,8 +2,10 @@
 <script setup lang="ts">
 import { useRouter } from "vue-router";
 import { budgetService } from "../services/budgetService";
+import { computed } from "vue";
 
 const router = useRouter();
+const currentBudget = computed(() => budgetService.getCurrentBudget());
 
 const handleOpenBudget = async () => {
   const budget = await budgetService.openBudget();
@@ -38,6 +40,16 @@ const handleOpenBudget = async () => {
         >
           Open Existing Budget
         </button>
+
+        <template v-if="currentBudget">
+          <hr class="border-gray-200" />
+          <button
+            @click="router.push('/budget')"
+            class="w-full flex justify-center py-3 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            Return to {{ currentBudget.name }}
+          </button>
+        </template>
       </div>
     </div>
   </div>
