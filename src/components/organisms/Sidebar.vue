@@ -2,7 +2,7 @@
 <script setup lang="ts">
 import { useRouter, useRoute } from "vue-router";
 import NavItem from "../molecules/NavItem.vue";
-
+import BaseCard from "../atoms/BaseCard.vue";
 const router = useRouter();
 const route = useRoute();
 
@@ -26,20 +26,15 @@ const navigation = [
 </script>
 
 <template>
-  <div class="w-64 bg-white shadow-lg">
-    <div class="h-16 flex items-center justify-center border-b border-gray-200">
-      <h1 class="text-xl font-semibold text-brand-text">Budget Manager</h1>
-    </div>
-    <nav class="mt-6">
-      <div class="px-3 space-y-1">
-        <NavItem
-          v-for="item in navigation"
-          :key="item.name"
-          v-bind="item"
-          :is-active="route.path === item.path"
-          @click="router.push(item.path)"
-        />
-      </div>
+  <BaseCard theme="default" class="h-full sticky top-0" padding="none">
+    <nav>
+      <NavItem
+        v-for="item in navigation"
+        :key="item.name"
+        v-bind="item"
+        :is-active="route.path === item.path"
+        @click="router.push(item.path)"
+      />
     </nav>
-  </div>
+  </BaseCard>
 </template>

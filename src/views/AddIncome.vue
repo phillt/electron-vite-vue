@@ -6,12 +6,6 @@
           <h2 class="text-2xl font-bold text-gray-900">
             {{ isEditing ? "Edit Income" : "Add Income" }}
           </h2>
-          <button
-            @click="$router.push('/income-expenses')"
-            class="text-sm text-gray-600 hover:text-gray-900"
-          >
-            Back to Income & Expenses
-          </button>
         </div>
 
         <div v-if="!currentBudget" class="text-center py-12">
