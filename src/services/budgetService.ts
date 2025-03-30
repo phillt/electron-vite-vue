@@ -20,6 +20,13 @@ export interface Item {
   type: "income" | "expense";
 }
 
+export interface Income {
+  name: string;
+  amount: number;
+  frequency: "weekly" | "biweekly" | "monthly";
+  originalAmount: number;
+}
+
 export interface Budget {
   name: string;
   description: string;
@@ -27,6 +34,7 @@ export interface Budget {
   updatedAt: string;
   filePath?: string;
   items: Item[];
+  incomes: Income[];
 }
 
 class BudgetService {
@@ -43,7 +51,10 @@ class BudgetService {
   }
 
   async createBudget(
-    budget: Omit<Budget, "createdAt" | "updatedAt" | "filePath" | "items">
+    budget: Omit<
+      Budget,
+      "createdAt" | "updatedAt" | "filePath" | "items" | "incomes"
+    >
   ): Promise<Budget> {
     try {
       const result = await window.electron.dialog.showSaveDialog({
@@ -65,6 +76,7 @@ class BudgetService {
         updatedAt: new Date().toISOString(),
         filePath: result.filePath,
         items: [],
+        incomes: [],
       };
 
       // Save the budget to file
@@ -131,6 +143,23 @@ class BudgetService {
     }
 
     return newItem;
+  }
+
+  async addIncome(income: Income): Promise<void> {
+    if (!this.currentBudget) {
+      throw new Error("No budget is currently open");
+    }
+
+    this.currentBudget.incomes.push(income);
+    this.currentBudget.updatedAt = new Date().toISOString();
+
+    // Save the updated budget
+    if (this.currentBudget.filePath) {
+      await window.electron.ipcRenderer.invoke("file:save", {
+        filePath: this.currentBudget.filePath,
+        content: JSON.stringify(this.currentBudget, null, 2),
+      });
+    }
   }
 
   getCurrentBudget(): Budget | null {

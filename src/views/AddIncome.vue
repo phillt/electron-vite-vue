@@ -24,6 +24,34 @@
 
         <template v-else>
           <form @submit.prevent="handleSubmit" class="space-y-6">
+            <div v-if="error" class="rounded-md bg-red-50 p-4">
+              <div class="flex">
+                <div class="ml-3">
+                  <h3 class="text-sm font-medium text-red-800">Error</h3>
+                  <div class="mt-2 text-sm text-red-700">
+                    {{ error }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label for="name" class="block text-sm font-medium text-gray-700">
+                Income Name
+              </label>
+              <input
+                type="text"
+                id="name"
+                v-model="income.name"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                required
+                placeholder="e.g., Main Job, Side Gig, etc."
+              />
+              <p class="mt-1 text-sm text-gray-500">
+                Give this income source a unique name to help you identify it.
+              </p>
+            </div>
+
             <div>
               <label
                 for="amount"
@@ -100,30 +128,63 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
-import { budgetService } from "../services/budgetService";
+import { budgetService, type Income } from "../services/budgetService";
 
 const router = useRouter();
 const currentBudget = computed(() => budgetService.getCurrentBudget());
 const isSubmitting = ref(false);
+const error = ref<string | null>(null);
 
 const income = ref({
+  name: "",
   amount: 0,
-  frequency: "",
+  frequency: "monthly" as "weekly" | "biweekly" | "monthly",
 });
 
 const handleSubmit = async () => {
   isSubmitting.value = true;
+  error.value = null;
+
   try {
-    // TODO: Implement income addition logic
-    console.log("Income data:", income.value);
-    await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulated delay
+    // Check if name already exists
+    const existingIncomes = currentBudget.value?.incomes || [];
+    if (existingIncomes.some((inc: Income) => inc.name === income.value.name)) {
+      error.value = "An income source with this name already exists.";
+      return;
+    }
+
+    // Calculate monthly amount based on frequency
+    let monthlyAmount = income.value.amount;
+    switch (income.value.frequency) {
+      case "weekly":
+        monthlyAmount = income.value.amount * 4.33; // Average weeks in a month
+        break;
+      case "biweekly":
+        monthlyAmount = income.value.amount * 2.17; // Average bi-weekly periods in a month
+        break;
+      case "monthly":
+        monthlyAmount = income.value.amount;
+        break;
+    }
+
+    // Add the income to the budget
+    await budgetService.addIncome({
+      name: income.value.name,
+      amount: monthlyAmount,
+      frequency: income.value.frequency,
+      originalAmount: income.value.amount,
+    });
+
     // Reset form
+    income.value.name = "";
     income.value.amount = 0;
     income.value.frequency = "";
+
     // Navigate back to income-expenses
     router.push("/income-expenses");
-  } catch (error) {
-    console.error("Error adding income:", error);
+  } catch (err) {
+    console.error("Error adding income:", err);
+    error.value = "Failed to add income. Please try again.";
   } finally {
     isSubmitting.value = false;
   }
