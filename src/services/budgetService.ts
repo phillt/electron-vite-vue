@@ -856,6 +856,31 @@ class BudgetService {
       });
     }
   }
+
+  async updatePayPeriodPaycheckAmount(
+    payPeriodIndex: number,
+    newAmount: number
+  ): Promise<void> {
+    if (!this.currentBudget.value) {
+      throw new Error("No budget is currently open");
+    }
+
+    const payPeriod = this.currentBudget.value.payPeriods[payPeriodIndex];
+    if (!payPeriod) {
+      throw new Error("Pay period not found");
+    }
+
+    // Update the paycheck amount
+    payPeriod.paycheckAmount = newAmount;
+    this.currentBudget.value.updatedAt = new Date().toISOString();
+
+    if (this.currentBudget.value.filePath) {
+      await window.electron.ipcRenderer.invoke("file:save", {
+        filePath: this.currentBudget.value.filePath,
+        content: JSON.stringify(this.currentBudget.value, null, 2),
+      });
+    }
+  }
 }
 
 export const budgetService = BudgetService.getInstance();

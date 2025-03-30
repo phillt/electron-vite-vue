@@ -153,6 +153,30 @@ const handleBillAmountBlur = (event: Event) => {
   input.value = formatCurrencyInput(amount);
 };
 
+const handleUpdatePaycheckAmount = async (
+  payPeriodIndex: number,
+  newAmount: number
+) => {
+  try {
+    await budgetService.updatePayPeriodPaycheckAmount(
+      payPeriodIndex,
+      newAmount
+    );
+  } catch (e: any) {
+    error.value = e.message;
+  }
+};
+
+const handlePaycheckAmountChange = (payPeriodIndex: number, event: Event) => {
+  const input = event.target as HTMLInputElement;
+  const newAmount = parseCurrencyInput(input.value);
+  if (!isNaN(newAmount)) {
+    handleUpdatePaycheckAmount(payPeriodIndex, newAmount);
+    // Update the input value with proper formatting
+    input.value = formatCurrencyInput(newAmount);
+  }
+};
+
 const handleAddExpense = (index: number) => {
   router.push(`/add-expense?payPeriodIndex=${index}`);
 };
@@ -259,9 +283,20 @@ const getPayPeriodStatus = (index: number) => {
             <div class="mt-1 grid grid-cols-3 gap-4">
               <div>
                 <span class="text-blue-700">Paycheck:</span>
-                <span class="ml-2 font-medium text-blue-900">{{
-                  formatCurrency(payPeriod.paycheckAmount)
-                }}</span>
+                <div class="relative inline-block ml-2">
+                  <span
+                    class="absolute left-2 top-1/2 -translate-y-1/2 text-blue-700"
+                    >$</span
+                  >
+                  <input
+                    type="text"
+                    :value="formatCurrencyInput(payPeriod.paycheckAmount)"
+                    @change="(e) => handlePaycheckAmountChange(index, e)"
+                    @focus="handleBillAmountFocus"
+                    @blur="handleBillAmountBlur"
+                    class="w-32 pl-6 pr-2 py-1 text-sm border rounded focus:outline-none focus:ring-1 focus:ring-indigo-500 text-right bg-blue-50 border-blue-200 font-medium text-blue-900"
+                  />
+                </div>
               </div>
               <div>
                 <span class="text-blue-700">Total Outgoing:</span>
