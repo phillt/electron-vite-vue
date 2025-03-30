@@ -2,7 +2,9 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { budgetService } from "../services/budgetService";
+import { useRouter } from "vue-router";
 
+const router = useRouter();
 const currentBudget = computed(() => budgetService.getCurrentBudget());
 </script>
 
@@ -63,9 +65,9 @@ const currentBudget = computed(() => budgetService.getCurrentBudget());
               <button
                 type="button"
                 class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                @click="budgetService.openBudget()"
+                @click="$router.push('/')"
               >
-                Open Different Budget
+                Open or Create Budget
               </button>
             </div>
           </div>
