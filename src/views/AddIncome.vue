@@ -1,154 +1,113 @@
 <template>
-  <div class="min-h-screen bg-gray-100 py-6">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="bg-white rounded-lg shadow-lg p-6">
-        <div class="flex justify-between items-center mb-6">
-          <h2 class="text-2xl font-bold text-gray-900">
-            {{ isEditing ? "Edit Income" : "Add Income" }}
-          </h2>
-        </div>
-
-        <div v-if="!currentBudget" class="text-center py-12">
-          <p class="text-gray-500">No budget is currently open.</p>
-          <button
-            @click="$router.push('/')"
-            class="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            Open or Create Budget
-          </button>
-        </div>
-
-        <template v-else>
-          <form @submit.prevent="handleSubmit" class="space-y-6">
-            <div v-if="error" class="rounded-md bg-red-50 p-4">
-              <div class="flex">
-                <div class="ml-3">
-                  <h3 class="text-sm font-medium text-red-800">Error</h3>
-                  <div class="mt-2 text-sm text-red-700">
-                    {{ error }}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <label for="name" class="block text-sm font-medium text-gray-700">
-                Income Name
-              </label>
-              <input
-                type="text"
-                id="name"
-                v-model="income.name"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                required
-                placeholder="e.g., Main Job, Side Gig, etc."
-                :disabled="isEditing"
-              />
-              <p class="mt-1 text-sm text-gray-500">
-                Give this income source a unique name to help you identify it.
-              </p>
-            </div>
-
-            <div>
-              <label
-                for="amount"
-                class="block text-sm font-medium text-gray-700"
-              >
-                Amount
-              </label>
-              <div class="mt-1 relative rounded-md shadow-sm">
-                <div
-                  class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
-                >
-                  <span class="text-gray-500 sm:text-sm">$</span>
-                </div>
-                <input
-                  type="number"
-                  id="amount"
-                  v-model="income.amount"
-                  class="pl-7 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                  required
-                  min="0"
-                  step="0.01"
-                  placeholder="0.00"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label
-                for="frequency"
-                class="block text-sm font-medium text-gray-700"
-              >
-                Pay Frequency
-              </label>
-              <select
-                id="frequency"
-                v-model="income.frequency"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                required
-              >
-                <option value="bi-weekly">Bi-weekly</option>
-              </select>
-              <p class="mt-1 text-sm text-gray-500">
-                Select how often you receive this income.
-              </p>
-            </div>
-
-            <div>
-              <label
-                for="lastPayday"
-                class="block text-sm font-medium text-gray-700"
-              >
-                Last Payday
-              </label>
-              <input
-                type="date"
-                id="lastPayday"
-                v-model="income.lastPayday"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                required
-                :min="lastWeekDate"
-              />
-              <p class="mt-1 text-sm text-gray-500">
-                Select the date of your most recent payday for this income
-                source.
-              </p>
-            </div>
-
-            <div class="flex justify-end space-x-3">
-              <button
-                type="button"
-                @click="$router.push('/income-expenses')"
-                class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                :disabled="isSubmitting"
-                class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
-              >
-                {{
-                  isSubmitting
-                    ? "Saving..."
-                    : isEditing
-                    ? "Save Changes"
-                    : "Add Income"
-                }}
-              </button>
-            </div>
-          </form>
-        </template>
+  <BasePage :title="isEditing ? 'Edit Income' : 'Add Income'">
+    <BaseCard>
+      <div v-if="!currentBudget" class="text-center py-12">
+        <p class="text-brand-muted">No budget is currently open.</p>
+        <BaseButton variant="primary" class="mt-4" @click="$router.push('/')">
+          Open or Create Budget
+        </BaseButton>
       </div>
-    </div>
-  </div>
+
+      <template v-else>
+        <form @submit.prevent="handleSubmit" class="space-y-6">
+          <div v-if="error" class="rounded-md bg-brand-danger/10 p-4">
+            <div class="flex">
+              <div class="ml-3">
+                <h3 class="text-sm font-medium text-brand-danger">Error</h3>
+                <div class="mt-2 text-sm text-brand-danger/80">
+                  {{ error }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <BaseInput
+            v-model="incomeName"
+            label="Income Name"
+            name="name"
+            placeholder="e.g., Main Job, Side Gig, etc."
+            :disabled="isEditing"
+            required
+            helper-text="Give this income source a unique name to help you identify it."
+          />
+
+          <BaseInput
+            v-model="incomeAmount"
+            type="number"
+            label="Amount"
+            name="amount"
+            prefix="$"
+            placeholder="0.00"
+            required
+            min="0"
+            step="0.01"
+          />
+
+          <div>
+            <label
+              for="frequency"
+              class="block text-sm font-medium text-brand-text"
+            >
+              Pay Frequency
+            </label>
+            <select
+              id="frequency"
+              v-model="income.frequency"
+              class="mt-1 block w-full rounded-md border-brand-surface shadow-sm focus:border-brand-dark focus:ring-brand-dark sm:text-sm"
+              required
+            >
+              <option value="bi-weekly">Bi-weekly</option>
+            </select>
+            <p class="mt-1 text-sm text-brand-muted">
+              Select how often you receive this income.
+            </p>
+          </div>
+
+          <BaseInput
+            v-model="incomeLastPayday"
+            type="date"
+            label="Last Payday"
+            name="lastPayday"
+            required
+            :min="lastWeekDate"
+            helper-text="Select the date of your most recent payday for this income source."
+          />
+
+          <div class="flex justify-end space-x-3">
+            <BaseButton
+              variant="outline"
+              @click="$router.push('/income-expenses')"
+            >
+              Cancel
+            </BaseButton>
+            <BaseButton
+              type="submit"
+              variant="success"
+              :disabled="isSubmitting"
+            >
+              {{
+                isSubmitting
+                  ? "Saving..."
+                  : isEditing
+                  ? "Save Changes"
+                  : "Add Income"
+              }}
+            </BaseButton>
+          </div>
+        </form>
+      </template>
+    </BaseCard>
+  </BasePage>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { budgetService, type Income } from "../services/budgetService";
+import BaseButton from "../components/atoms/BaseButton.vue";
+import BaseCard from "../components/atoms/BaseCard.vue";
+import BasePage from "../components/atoms/BasePage.vue";
+import BaseInput from "../components/atoms/BaseInput.vue";
 
 const router = useRouter();
 const route = useRoute();
@@ -172,6 +131,28 @@ const income = ref<Partial<Income>>({
   frequency: "bi-weekly" as const,
   lastPayday: today,
   payPeriods: [],
+});
+
+// Computed properties for v-model bindings
+const incomeName = computed({
+  get: () => income.value.name || "",
+  set: (value: string) => {
+    income.value.name = value;
+  },
+});
+
+const incomeAmount = computed({
+  get: () => income.value.amount || 0,
+  set: (value: number) => {
+    income.value.amount = value;
+  },
+});
+
+const incomeLastPayday = computed({
+  get: () => income.value.lastPayday || today,
+  set: (value: string) => {
+    income.value.lastPayday = value;
+  },
 });
 
 onMounted(() => {
