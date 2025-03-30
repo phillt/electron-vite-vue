@@ -9,92 +9,149 @@
       </div>
 
       <template v-else>
-        <form @submit.prevent="handleSubmit" class="space-y-6">
-          <div v-if="error" class="rounded-md bg-brand-danger/10 p-4">
-            <div class="flex">
-              <div class="ml-3">
-                <h3 class="text-sm font-medium text-brand-danger">Error</h3>
-                <div class="mt-2 text-sm text-brand-danger/80">
-                  {{ error }}
-                </div>
-              </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <!-- Left Column: Information -->
+          <div class="space-y-6">
+            <div>
+              <h3 class="text-lg font-medium text-brand-text">
+                About Income Sources
+              </h3>
+              <p class="mt-2 text-brand-muted">
+                Income sources help you track your regular income streams. Each
+                source can have its own pay schedule and amount.
+              </p>
+            </div>
+
+            <div>
+              <h3 class="text-lg font-medium text-brand-text">Pay Periods</h3>
+              <p class="mt-2 text-brand-muted">
+                The system will automatically generate 5 pay periods based on
+                your last payday. Each period:
+              </p>
+              <ul class="mt-2 space-y-2 text-brand-muted">
+                <li class="flex items-start">
+                  <span class="text-brand-accent mr-2">•</span>
+                  Starts the day after your last payday
+                </li>
+                <li class="flex items-start">
+                  <span class="text-brand-accent mr-2">•</span>
+                  Runs for 14 days (bi-weekly)
+                </li>
+                <li class="flex items-start">
+                  <span class="text-brand-accent mr-2">•</span>
+                  Helps track your income across the budget period
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 class="text-lg font-medium text-brand-text">Tips</h3>
+              <ul class="mt-2 space-y-2 text-brand-muted">
+                <li class="flex items-start">
+                  <span class="text-brand-accent mr-2">•</span>
+                  Use clear, descriptive names for your income sources
+                </li>
+                <li class="flex items-start">
+                  <span class="text-brand-accent mr-2">•</span>
+                  Enter your net income (after taxes and deductions)
+                </li>
+                <li class="flex items-start">
+                  <span class="text-brand-accent mr-2">•</span>
+                  Make sure your last payday is accurate for proper period
+                  calculation
+                </li>
+              </ul>
             </div>
           </div>
 
-          <BaseInput
-            v-model="incomeName"
-            label="Income Name"
-            name="name"
-            placeholder="e.g., Main Job, Side Gig, etc."
-            :disabled="isEditing"
-            required
-            helper-text="Give this income source a unique name to help you identify it."
-          />
+          <!-- Right Column: Form -->
+          <form @submit.prevent="handleSubmit" class="space-y-6">
+            <div v-if="error" class="rounded-md bg-brand-danger/10 p-4">
+              <div class="flex">
+                <div class="ml-3">
+                  <h3 class="text-sm font-medium text-brand-danger">Error</h3>
+                  <div class="mt-2 text-sm text-brand-danger/80">
+                    {{ error }}
+                  </div>
+                </div>
+              </div>
+            </div>
 
-          <BaseInput
-            v-model="incomeAmount"
-            type="number"
-            label="Amount"
-            name="amount"
-            prefix="$"
-            placeholder="0.00"
-            required
-            min="0"
-            step="0.01"
-          />
-
-          <div>
-            <label
-              for="frequency"
-              class="block text-sm font-medium text-brand-text"
-            >
-              Pay Frequency
-            </label>
-            <select
-              id="frequency"
-              v-model="income.frequency"
-              class="mt-1 block w-full rounded-md border-brand-surface shadow-sm focus:border-brand-dark focus:ring-brand-dark sm:text-sm"
+            <BaseInput
+              v-model="incomeName"
+              label="Income Name"
+              name="name"
+              placeholder="e.g., Main Job, Side Gig, etc."
+              :disabled="isEditing"
               required
-            >
-              <option value="bi-weekly">Bi-weekly</option>
-            </select>
-            <p class="mt-1 text-sm text-brand-muted">
-              Select how often you receive this income.
-            </p>
-          </div>
+              helper-text="Give this income source a unique name to help you identify it."
+            />
 
-          <BaseInput
-            v-model="incomeLastPayday"
-            type="date"
-            label="Last Payday"
-            name="lastPayday"
-            required
-            :min="lastWeekDate"
-            helper-text="Select the date of your most recent payday for this income source."
-          />
+            <BaseInput
+              v-model="incomeAmount"
+              type="number"
+              label="Amount"
+              name="amount"
+              prefix="$"
+              placeholder="0.00"
+              required
+              min="0"
+              step="0.01"
+            />
 
-          <div class="flex justify-end space-x-3">
-            <BaseButton
-              variant="outline"
-              @click="$router.push('/income-expenses')"
-            >
-              Cancel
-            </BaseButton>
-            <BaseButton
-              type="submit"
-              variant="success"
-              :disabled="isSubmitting"
-            >
-              {{
-                isSubmitting
-                  ? "Saving..."
-                  : isEditing
-                  ? "Save Changes"
-                  : "Add Income"
-              }}
-            </BaseButton>
-          </div>
-        </form>
+            <div>
+              <label
+                for="frequency"
+                class="block text-sm font-medium text-brand-text"
+              >
+                Pay Frequency
+              </label>
+              <select
+                id="frequency"
+                v-model="income.frequency"
+                class="mt-1 block w-full rounded-md border-brand-surface shadow-sm focus:border-brand-dark focus:ring-brand-dark sm:text-sm"
+                required
+              >
+                <option value="bi-weekly">Bi-weekly</option>
+              </select>
+              <p class="mt-1 text-sm text-brand-muted">
+                Select how often you receive this income.
+              </p>
+            </div>
+
+            <BaseInput
+              v-model="incomeLastPayday"
+              type="date"
+              label="Last Payday"
+              name="lastPayday"
+              required
+              :min="lastWeekDate"
+              helper-text="Select the date of your most recent payday for this income source."
+            />
+
+            <div class="flex justify-end space-x-3">
+              <BaseButton
+                variant="outline"
+                @click="$router.push('/income-expenses')"
+              >
+                Cancel
+              </BaseButton>
+              <BaseButton
+                type="submit"
+                variant="success"
+                :disabled="isSubmitting || !isFormValid"
+              >
+                {{
+                  isSubmitting
+                    ? "Saving..."
+                    : isEditing
+                    ? "Save Changes"
+                    : "Add Income"
+                }}
+              </BaseButton>
+            </div>
+          </form>
+        </div>
       </template>
     </BaseCard>
   </BasePage>
@@ -153,6 +210,16 @@ const incomeLastPayday = computed({
   set: (value: string) => {
     income.value.lastPayday = value;
   },
+});
+
+// Add form validation computed property
+const isFormValid = computed(() => {
+  return (
+    incomeName.value.trim() !== "" &&
+    incomeAmount.value > 0 &&
+    income.value.frequency === "bi-weekly" &&
+    incomeLastPayday.value !== ""
+  );
 });
 
 onMounted(() => {
