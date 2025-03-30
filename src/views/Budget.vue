@@ -59,6 +59,14 @@ const handleAddExpense = (index: number) => {
   router.push(`/add-expense?payPeriodIndex=${index}`);
 };
 
+const handleDeleteLastPayPeriod = async () => {
+  try {
+    await budgetService.deleteLastPayPeriod();
+  } catch (e: any) {
+    error.value = e.message;
+  }
+};
+
 const getPayPeriodStatus = (index: number) => {
   if (index === currentPayPeriodIndex.value) {
     return {
@@ -86,13 +94,25 @@ const getPayPeriodStatus = (index: number) => {
   <div v-if="currentBudget" class="space-y-6">
     <div class="flex justify-between items-center">
       <h1 class="text-2xl font-bold text-gray-900">Budget Overview</h1>
-      <button
-        @click="handleCreatePayPeriod"
-        :disabled="loading"
-        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-      >
-        {{ loading ? "Creating..." : "Create Next Pay Period" }}
-      </button>
+      <div class="flex space-x-4">
+        <button
+          v-if="
+            currentBudget.payPeriods.length > 0 &&
+            currentPayPeriodIndex !== currentBudget.payPeriods.length - 1
+          "
+          @click="handleDeleteLastPayPeriod"
+          class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+        >
+          Delete Last Period
+        </button>
+        <button
+          @click="handleCreatePayPeriod"
+          :disabled="loading"
+          class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+        >
+          {{ loading ? "Creating..." : "Create Next Pay Period" }}
+        </button>
+      </div>
     </div>
 
     <div v-if="error" class="rounded-md bg-red-50 p-4">
