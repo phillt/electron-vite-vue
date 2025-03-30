@@ -55,6 +55,17 @@ const handleTogglePaid = async (payPeriodIndex: number, billName: string) => {
   }
 };
 
+const handleToggleExpensePaid = async (
+  payPeriodIndex: number,
+  expenseId: string
+) => {
+  try {
+    await budgetService.toggleExpensePaid(payPeriodIndex, expenseId);
+  } catch (e: any) {
+    error.value = e.message;
+  }
+};
+
 const handleAddExpense = (index: number) => {
   router.push(`/add-expense?payPeriodIndex=${index}`);
 };
@@ -321,8 +332,21 @@ const getPayPeriodStatus = (index: number) => {
                 Added on {{ formatDate(expense.date) }}
               </div>
             </div>
-            <div class="font-medium text-gray-900">
-              {{ formatCurrency(expense.amount) }}
+            <div class="flex items-center space-x-4">
+              <div class="font-medium text-gray-900">
+                {{ formatCurrency(expense.amount) }}
+              </div>
+              <button
+                @click="handleToggleExpensePaid(index, expense.id)"
+                :class="[
+                  'px-3 py-1 rounded-full text-sm font-medium',
+                  expense.isPaid
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-yellow-100 text-yellow-800',
+                ]"
+              >
+                {{ expense.isPaid ? "Paid" : "Unpaid" }}
+              </button>
             </div>
           </div>
         </div>

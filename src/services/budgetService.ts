@@ -42,6 +42,7 @@ export interface Expense {
   name: string;
   amount: number;
   date: string;
+  isPaid: boolean;
 }
 
 export interface PayPeriodBill extends Bill {
@@ -655,10 +656,66 @@ class BudgetService {
       ...expense,
       id: Date.now().toString(),
       date: new Date().toISOString(),
+      isPaid: false,
     };
 
     payPeriod.expenses.push(newExpense);
     payPeriod.totalExpenses += newExpense.amount;
+
+    this.currentBudget.value.updatedAt = new Date().toISOString();
+
+    // Save the updated budget
+    if (this.currentBudget.value.filePath) {
+      await window.electron.ipcRenderer.invoke("file:save", {
+        filePath: this.currentBudget.value.filePath,
+        content: JSON.stringify(this.currentBudget.value, null, 2),
+      });
+    }
+  }
+
+  async toggleExpensePaid(
+    payPeriodIndex: number,
+    expenseId: string
+  ): Promise<void> {
+    if (!this.currentBudget.value) {
+      throw new Error("No budget is currently open");
+    }
+
+    const payPeriod = this.currentBudget.value.payPeriods[payPeriodIndex];
+    if (!payPeriod) {
+      throw new Error("Pay period not found");
+    }
+
+    const expense = payPeriod.expenses.find((e) => e.id === expenseId);
+    if (!expense) {
+      throw new Error("Expense not found");
+    }
+
+    // Toggle the paid status
+    expense.isPaid = !expense.isPaid;
+
+    // Update the paid and unpaid amounts to include expenses
+    const paidBills = payPeriod.bills.reduce(
+      (sum, bill) => sum + (bill.isPaid ? bill.amount : 0),
+      0
+    );
+    const paidExpenses = payPeriod.expenses.reduce(
+      (sum, exp) => sum + (exp.isPaid ? exp.amount : 0),
+      0
+    );
+    payPeriod.paidAmount = paidBills + paidExpenses;
+
+    const totalAmount = payPeriod.bills.reduce(
+      (sum, bill) => sum + bill.amount,
+      0
+    );
+    const totalExpenses = payPeriod.expenses.reduce(
+      (sum, exp) => sum + exp.amount,
+      0
+    );
+    payPeriod.totalAmount = totalAmount;
+    payPeriod.totalExpenses = totalExpenses;
+    payPeriod.unpaidAmount = totalAmount + totalExpenses - payPeriod.paidAmount;
 
     this.currentBudget.value.updatedAt = new Date().toISOString();
 
