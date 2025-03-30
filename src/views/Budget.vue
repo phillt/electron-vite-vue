@@ -85,16 +85,11 @@ const calculatePaycheckAmount = (payPeriod: PayPeriod) => {
   if (!currentBudget.value) return 0;
 
   let totalPaycheck = 0;
-  const periodStart = new Date(payPeriod.startDate);
-  const periodEnd = new Date(payPeriod.endDate);
 
   // For each income source
   currentBudget.value.incomes.forEach((income: Income) => {
-    // Get the next payday after the period start
-    let nextPayday = new Date(income.nextPayday);
-
-    // Check if this payday falls within our pay period
-    if (nextPayday >= periodStart && nextPayday <= periodEnd) {
+    // For biweekly pay periods, add the full amount of biweekly incomes
+    if (currentBudget.value?.payFrequency === "biweekly") {
       totalPaycheck += income.amount;
     }
   });
