@@ -1,12 +1,13 @@
-import { createRouter, createWebHashHistory } from "vue-router";
+import { createRouter, createWebHistory } from "vue-router";
+import MainLayout from "../components/MainLayout.vue";
 
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHistory(),
   routes: [
     {
       path: "/",
       name: "welcome",
-      component: () => import("../views/WelcomeScreen.vue"),
+      component: () => import("../views/Welcome.vue"),
     },
     {
       path: "/create-budget",
@@ -14,9 +15,25 @@ const router = createRouter({
       component: () => import("../views/CreateBudget.vue"),
     },
     {
-      path: "/income-expenses",
-      name: "income-expenses",
-      component: () => import("../views/IncomeExpenses.vue"),
+      path: "/",
+      component: MainLayout,
+      children: [
+        {
+          path: "budget",
+          name: "budget",
+          component: () => import("../views/Budget.vue"),
+        },
+        {
+          path: "income-expenses",
+          name: "income-expenses",
+          component: () => import("../views/IncomeExpenses.vue"),
+        },
+        {
+          path: "settings",
+          name: "settings",
+          component: () => import("../views/Settings.vue"),
+        },
+      ],
     },
     {
       path: "/add-income",

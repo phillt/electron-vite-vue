@@ -8,10 +8,10 @@ const router = useRouter();
 onMounted(async () => {
   await budgetService.initialize();
 
-  // If a budget is loaded, redirect to the income-expenses page
+  // If a budget is loaded, redirect to the budget page
   // otherwise, stay on the welcome page
   if (budgetService.getCurrentBudget()) {
-    router.push("/income-expenses");
+    router.push("/budget");
   }
 });
 </script>

@@ -1,56 +1,53 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-100">
-    <div class="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-lg">
-      <div class="text-center">
-        <h2 class="mt-6 text-3xl font-extrabold text-gray-900">
+  <div class="min-h-screen flex items-center justify-center bg-gray-50">
+    <div class="max-w-md w-full space-y-8 p-8">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900 text-center">
           Create New Budget
-        </h2>
+        </h1>
       </div>
-      <form class="mt-8 space-y-6" @submit.prevent="handleSubmit">
-        <div class="rounded-md shadow-sm space-y-4">
-          <div>
-            <label for="name" class="block text-sm font-medium text-gray-700"
-              >Budget Name</label
-            >
+
+      <form @submit.prevent="handleSubmit" class="space-y-6">
+        <div>
+          <label for="name" class="block text-sm font-medium text-gray-700">
+            Budget Name
+          </label>
+          <div class="mt-1">
             <input
               id="name"
               v-model="budget.name"
               type="text"
               required
-              class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+              class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              placeholder="e.g., Personal Budget 2024"
             />
           </div>
-          <div>
-            <label
-              for="description"
-              class="block text-sm font-medium text-gray-700"
-              >Description</label
-            >
+        </div>
+
+        <div>
+          <label
+            for="description"
+            class="block text-sm font-medium text-gray-700"
+          >
+            Description
+          </label>
+          <div class="mt-1">
             <textarea
               id="description"
               v-model="budget.description"
               rows="3"
-              required
-              class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+              class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              placeholder="A brief description of your budget"
             ></textarea>
           </div>
         </div>
 
-        <div v-if="error" class="rounded-md bg-red-50 p-4">
-          <div class="flex">
-            <div class="ml-3">
-              <h3 class="text-sm font-medium text-red-800">Error</h3>
-              <div class="mt-2 text-sm text-red-700">
-                {{ error }}
-              </div>
-            </div>
-          </div>
-        </div>
+        <div v-if="error" class="text-red-600 text-sm">{{ error }}</div>
 
         <div class="flex items-center justify-between">
           <button
             type="button"
-            @click="$router.push('/')"
+            @click="router.push('/')"
             class="text-sm text-gray-600 hover:text-gray-900"
           >
             Back to Welcome
@@ -87,7 +84,7 @@ const handleSubmit = async () => {
 
   try {
     await budgetService.createBudget(budget.value);
-    router.push("/income-expenses");
+    router.push("/budget");
   } catch (e: any) {
     if (e.message === "Save operation cancelled") {
       // User cancelled the save dialog, no need to show error
