@@ -591,6 +591,22 @@ class BudgetService {
       });
     }
   }
+
+  getCurrentPayPeriodIndex(): number {
+    if (
+      !this.currentBudget.value ||
+      this.currentBudget.value.payPeriods.length === 0
+    ) {
+      return -1;
+    }
+
+    const now = new Date();
+    return this.currentBudget.value.payPeriods.findIndex((period) => {
+      const startDate = new Date(period.startDate);
+      const endDate = new Date(period.endDate);
+      return now >= startDate && now <= endDate;
+    });
+  }
 }
 
 export const budgetService = BudgetService.getInstance();

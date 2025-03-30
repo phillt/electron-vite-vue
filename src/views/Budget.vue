@@ -8,6 +8,10 @@ const currentBudget = computed(() => budgetService.getCurrentBudget());
 const loading = ref(false);
 const error = ref<string | null>(null);
 
+const currentPayPeriodIndex = computed(() =>
+  budgetService.getCurrentPayPeriodIndex()
+);
+
 const calculateDaysUntilDue = (dueDate: string) => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -47,6 +51,28 @@ const handleTogglePaid = async (payPeriodIndex: number, billName: string) => {
     error.value = e.message;
   }
 };
+
+const getPayPeriodStatus = (index: number) => {
+  if (index === currentPayPeriodIndex.value) {
+    return {
+      label: "Current Period",
+      class: "bg-green-50 border-green-200",
+      badge: "bg-green-100 text-green-800",
+    };
+  } else if (index < currentPayPeriodIndex.value) {
+    return {
+      label: "Past Period",
+      class: "bg-gray-50 border-gray-200",
+      badge: "bg-gray-100 text-gray-600",
+    };
+  } else {
+    return {
+      label: "Future Period",
+      class: "bg-blue-50 border-blue-200",
+      badge: "bg-blue-100 text-blue-800",
+    };
+  }
+};
 </script>
 
 <template>
@@ -77,14 +103,32 @@ const handleTogglePaid = async (payPeriodIndex: number, billName: string) => {
       v-else
       v-for="(payPeriod, index) in currentBudget.payPeriods"
       :key="payPeriod.startDate"
-      class="bg-white shadow rounded-lg overflow-hidden"
+      class="overflow-hidden rounded-lg border"
+      :class="getPayPeriodStatus(index).class"
     >
-      <div class="px-4 py-5 sm:px-6 bg-gray-50">
-        <h3 class="text-lg font-medium text-gray-900">
-          Pay Period: {{ formatDate(payPeriod.startDate) }} -
-          {{ formatDate(payPeriod.endDate) }}
-        </h3>
-        <div class="mt-2 grid grid-cols-3 gap-4 text-sm">
+      <div class="px-4 py-5 sm:px-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-lg font-medium text-gray-900">
+              Pay Period: {{ formatDate(payPeriod.startDate) }} -
+              {{ formatDate(payPeriod.endDate) }}
+            </h3>
+            <span
+              class="mt-1 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+              :class="getPayPeriodStatus(index).badge"
+            >
+              {{ getPayPeriodStatus(index).label }}
+            </span>
+          </div>
+          <div class="text-right">
+            <div class="text-sm text-gray-500">Progress</div>
+            <div class="mt-1 text-lg font-semibold">
+              {{ formatCurrency(payPeriod.paidAmount) }} /
+              {{ formatCurrency(payPeriod.totalAmount) }}
+            </div>
+          </div>
+        </div>
+        <div class="mt-4 grid grid-cols-3 gap-4 text-sm">
           <div>
             <span class="text-gray-500">Total:</span>
             <span class="ml-2 font-medium">{{
@@ -106,9 +150,9 @@ const handleTogglePaid = async (payPeriodIndex: number, billName: string) => {
         </div>
       </div>
 
-      <div class="border-t border-gray-200">
+      <div class="border-t" :class="getPayPeriodStatus(index).class">
         <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
+          <thead class="bg-opacity-50" :class="getPayPeriodStatus(index).class">
             <tr>
               <th
                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
@@ -137,7 +181,7 @@ const handleTogglePaid = async (payPeriodIndex: number, billName: string) => {
               </th>
             </tr>
           </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
+          <tbody class="divide-y divide-gray-200">
             <tr v-for="bill in payPeriod.bills" :key="bill.name">
               <td
                 class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
