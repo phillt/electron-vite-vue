@@ -15,6 +15,7 @@ defineProps<{
 <template>
   <div class="flex justify-between items-center mb-6">
     <h3 class="text-lg font-medium text-brand-text">{{ title }}</h3>
+    <slot />
     <BaseButton
       v-if="action"
       :variant="action?.variant || 'primary'"
