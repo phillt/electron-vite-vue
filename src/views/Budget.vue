@@ -1,148 +1,182 @@
 <!-- Budget.vue -->
 <script setup lang="ts">
-import { computed } from "vue";
+import { ref, computed } from "vue";
 import { budgetService } from "../services/budgetService";
+import type { PayPeriod } from "../services/budgetService";
 
 const currentBudget = computed(() => budgetService.getCurrentBudget());
-const totalIncome = computed(() => {
-  if (!currentBudget.value) return 0;
-  return currentBudget.value.incomes.reduce(
-    (sum, income) => sum + income.amount,
-    0
-  );
-});
+const loading = ref(false);
+const error = ref<string | null>(null);
 
-const totalBills = computed(() => {
-  if (!currentBudget.value) return 0;
-  return currentBudget.value.bills.reduce((sum, bill) => sum + bill.amount, 0);
-});
+const calculateDaysUntilDue = (dueDate: string) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const due = new Date(dueDate);
+  const diffTime = due.getTime() - today.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays;
+};
 
-const monthlyBalance = computed(() => totalIncome.value - totalBills.value);
+const formatDate = (date: string) => {
+  return new Date(date).toLocaleDateString();
+};
+
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(amount);
+};
+
+const handleCreatePayPeriod = async () => {
+  loading.value = true;
+  error.value = null;
+  try {
+    await budgetService.createPayPeriod();
+  } catch (e: any) {
+    error.value = e.message;
+  } finally {
+    loading.value = false;
+  }
+};
+
+const handleTogglePaid = async (payPeriodIndex: number, billName: string) => {
+  try {
+    await budgetService.toggleBillPaid(payPeriodIndex, billName);
+  } catch (e: any) {
+    error.value = e.message;
+  }
+};
 </script>
 
 <template>
-  <div class="p-6">
-    <header class="mb-8">
+  <div v-if="currentBudget" class="space-y-6">
+    <div class="flex justify-between items-center">
       <h1 class="text-2xl font-bold text-gray-900">Budget Overview</h1>
-      <p class="mt-2 text-sm text-gray-600">
-        View your monthly income, expenses, and balance
+      <button
+        @click="handleCreatePayPeriod"
+        :disabled="loading"
+        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+      >
+        {{ loading ? "Creating..." : "Create Next Pay Period" }}
+      </button>
+    </div>
+
+    <div v-if="error" class="rounded-md bg-red-50 p-4">
+      <div class="text-sm text-red-700">{{ error }}</div>
+    </div>
+
+    <div v-if="currentBudget.payPeriods.length === 0" class="text-center py-12">
+      <h3 class="text-lg font-medium text-gray-900">No Pay Periods Yet</h3>
+      <p class="mt-2 text-sm text-gray-500">
+        Click the button above to create your first pay period.
       </p>
-    </header>
+    </div>
 
-    <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
-      <!-- Monthly Income Card -->
-      <div class="bg-white overflow-hidden shadow rounded-lg">
-        <div class="p-5">
-          <div class="flex items-center">
-            <div class="flex-shrink-0">
-              <svg
-                class="h-6 w-6 text-green-400"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-            </div>
-            <div class="ml-5 w-0 flex-1">
-              <dl>
-                <dt class="text-sm font-medium text-gray-500 truncate">
-                  Monthly Income
-                </dt>
-                <dd class="flex items-baseline">
-                  <div class="text-2xl font-semibold text-gray-900">
-                    ${{ totalIncome.toFixed(2) }}
-                  </div>
-                </dd>
-              </dl>
-            </div>
+    <div
+      v-else
+      v-for="(payPeriod, index) in currentBudget.payPeriods"
+      :key="payPeriod.startDate"
+      class="bg-white shadow rounded-lg overflow-hidden"
+    >
+      <div class="px-4 py-5 sm:px-6 bg-gray-50">
+        <h3 class="text-lg font-medium text-gray-900">
+          Pay Period: {{ formatDate(payPeriod.startDate) }} -
+          {{ formatDate(payPeriod.endDate) }}
+        </h3>
+        <div class="mt-2 grid grid-cols-3 gap-4 text-sm">
+          <div>
+            <span class="text-gray-500">Total:</span>
+            <span class="ml-2 font-medium">{{
+              formatCurrency(payPeriod.totalAmount)
+            }}</span>
+          </div>
+          <div>
+            <span class="text-gray-500">Paid:</span>
+            <span class="ml-2 font-medium text-green-600">{{
+              formatCurrency(payPeriod.paidAmount)
+            }}</span>
+          </div>
+          <div>
+            <span class="text-gray-500">Remaining:</span>
+            <span class="ml-2 font-medium text-red-600">{{
+              formatCurrency(payPeriod.unpaidAmount)
+            }}</span>
           </div>
         </div>
       </div>
 
-      <!-- Monthly Bills Card -->
-      <div class="bg-white overflow-hidden shadow rounded-lg">
-        <div class="p-5">
-          <div class="flex items-center">
-            <div class="flex-shrink-0">
-              <svg
-                class="h-6 w-6 text-red-400"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+      <div class="border-t border-gray-200">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
               >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
-                />
-              </svg>
-            </div>
-            <div class="ml-5 w-0 flex-1">
-              <dl>
-                <dt class="text-sm font-medium text-gray-500 truncate">
-                  Monthly Bills
-                </dt>
-                <dd class="flex items-baseline">
-                  <div class="text-2xl font-semibold text-gray-900">
-                    ${{ totalBills.toFixed(2) }}
-                  </div>
-                </dd>
-              </dl>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Monthly Balance Card -->
-      <div class="bg-white overflow-hidden shadow rounded-lg">
-        <div class="p-5">
-          <div class="flex items-center">
-            <div class="flex-shrink-0">
-              <svg
-                class="h-6 w-6"
-                :class="monthlyBalance >= 0 ? 'text-green-400' : 'text-red-400'"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+                Bill Name
+              </th>
+              <th
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
               >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                />
-              </svg>
-            </div>
-            <div class="ml-5 w-0 flex-1">
-              <dl>
-                <dt class="text-sm font-medium text-gray-500 truncate">
-                  Monthly Balance
-                </dt>
-                <dd class="flex items-baseline">
-                  <div
-                    class="text-2xl font-semibold"
-                    :class="
-                      monthlyBalance >= 0 ? 'text-green-600' : 'text-red-600'
-                    "
-                  >
-                    ${{ monthlyBalance.toFixed(2) }}
-                  </div>
-                </dd>
-              </dl>
-            </div>
-          </div>
-        </div>
+                Amount
+              </th>
+              <th
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Due Date
+              </th>
+              <th
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Days Until Due
+              </th>
+              <th
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Status
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr v-for="bill in payPeriod.bills" :key="bill.name">
+              <td
+                class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
+              >
+                {{ bill.name }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {{ formatCurrency(bill.amount) }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {{ formatDate(bill.dueDate) }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {{ calculateDaysUntilDue(bill.dueDate) }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <button
+                  @click="handleTogglePaid(index, bill.name)"
+                  :class="[
+                    'px-3 py-1 rounded-full text-sm font-medium',
+                    bill.isPaid
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-yellow-100 text-yellow-800',
+                  ]"
+                >
+                  {{ bill.isPaid ? "Paid" : "Unpaid" }}
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
+  </div>
+
+  <div v-else class="text-center py-12">
+    <h3 class="text-lg font-medium text-gray-900">No Budget Open</h3>
+    <p class="mt-2 text-sm text-gray-500">
+      Please open or create a budget to get started.
+    </p>
   </div>
 </template>

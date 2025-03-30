@@ -38,6 +38,20 @@ export interface Bill {
   amount: number;
 }
 
+export interface PayPeriodBill extends Bill {
+  isPaid: boolean;
+  dueDate: string; // ISO date string
+}
+
+export interface PayPeriod {
+  startDate: string; // ISO date string
+  endDate: string; // ISO date string
+  bills: PayPeriodBill[];
+  totalAmount: number;
+  paidAmount: number;
+  unpaidAmount: number;
+}
+
 export interface Budget {
   name: string;
   description: string;
@@ -47,6 +61,9 @@ export interface Budget {
   items: Item[];
   incomes: Income[];
   bills: Bill[];
+  payPeriods: PayPeriod[];
+  payFrequency: "weekly" | "biweekly";
+  lastPayday?: string; // ISO date string
 }
 
 import { ref } from "vue";
@@ -92,13 +109,24 @@ class BudgetService {
           settings.lastBudgetPath
         );
         const budget = JSON.parse(content) as Budget;
-        // Ensure incomes and bills arrays exist for older budget files
+
+        // Ensure all required arrays and properties exist
         if (!budget.incomes) {
           budget.incomes = [];
         }
         if (!budget.bills) {
           budget.bills = [];
         }
+        if (!budget.payPeriods) {
+          budget.payPeriods = [];
+        }
+        if (!budget.payFrequency) {
+          budget.payFrequency = "biweekly";
+        }
+        if (!budget.lastPayday) {
+          budget.lastPayday = new Date().toISOString();
+        }
+
         this.currentBudget.value = budget;
         console.log("Last budget loaded successfully");
       } else {
@@ -123,7 +151,13 @@ class BudgetService {
   async createBudget(
     budget: Omit<
       Budget,
-      "createdAt" | "updatedAt" | "filePath" | "items" | "incomes" | "bills"
+      | "createdAt"
+      | "updatedAt"
+      | "filePath"
+      | "items"
+      | "incomes"
+      | "bills"
+      | "payPeriods"
     >
   ): Promise<Budget> {
     try {
@@ -148,6 +182,9 @@ class BudgetService {
         items: [],
         incomes: [],
         bills: [],
+        payPeriods: [],
+        payFrequency: budget.payFrequency || "biweekly",
+        lastPayday: budget.lastPayday || new Date().toISOString(),
       };
 
       // Save the budget to file
@@ -183,13 +220,24 @@ class BudgetService {
           filePath
         );
         const budget = JSON.parse(content) as Budget;
-        // Ensure incomes and bills arrays exist for older budget files
+
+        // Ensure all required arrays and properties exist
         if (!budget.incomes) {
           budget.incomes = [];
         }
         if (!budget.bills) {
           budget.bills = [];
         }
+        if (!budget.payPeriods) {
+          budget.payPeriods = [];
+        }
+        if (!budget.payFrequency) {
+          budget.payFrequency = "biweekly";
+        }
+        if (!budget.lastPayday) {
+          budget.lastPayday = new Date().toISOString();
+        }
+
         this.currentBudget.value = budget;
         // Save the path to settings
         await this.saveLastBudgetPath(filePath);
@@ -405,6 +453,143 @@ class BudgetService {
 
   getBalance(): number {
     return this.getTotalIncome() - this.getTotalExpenses();
+  }
+
+  private calculateNextPayday(
+    lastPayday: string,
+    frequency: "weekly" | "biweekly"
+  ): Date {
+    const date = new Date(lastPayday);
+    if (frequency === "weekly") {
+      date.setDate(date.getDate() + 7);
+    } else {
+      date.setDate(date.getDate() + 14);
+    }
+    return date;
+  }
+
+  private getBillsForPayPeriod(
+    startDate: Date,
+    endDate: Date,
+    bills: Bill[]
+  ): PayPeriodBill[] {
+    const payPeriodBills: PayPeriodBill[] = [];
+
+    for (const bill of bills) {
+      // Create a date object for this month with the bill's due day
+      const billDate = new Date(startDate);
+      billDate.setDate(bill.dueDay);
+
+      // If the bill date is before the start date, try next month
+      if (billDate < startDate) {
+        billDate.setMonth(billDate.getMonth() + 1);
+      }
+
+      // If the bill falls within this pay period, add it
+      if (billDate >= startDate && billDate <= endDate) {
+        payPeriodBills.push({
+          ...bill,
+          isPaid: false,
+          dueDate: billDate.toISOString(),
+        });
+      }
+    }
+
+    return payPeriodBills;
+  }
+
+  async createPayPeriod(): Promise<PayPeriod | null> {
+    if (!this.currentBudget.value) {
+      throw new Error("No budget is currently open");
+    }
+
+    const budget = this.currentBudget.value;
+
+    // Determine the start date (either today or the day after the last pay period)
+    let startDate: Date;
+    if (budget.payPeriods.length === 0) {
+      if (!budget.lastPayday) {
+        throw new Error("No last payday set");
+      }
+      startDate = new Date(budget.lastPayday);
+    } else {
+      const lastPayPeriod = budget.payPeriods[budget.payPeriods.length - 1];
+      startDate = new Date(lastPayPeriod.endDate);
+      startDate.setDate(startDate.getDate() + 1);
+    }
+
+    // Calculate the end date based on frequency
+    const endDate = this.calculateNextPayday(
+      startDate.toISOString(),
+      budget.payFrequency
+    );
+
+    // Get bills for this period
+    const bills = this.getBillsForPayPeriod(startDate, endDate, budget.bills);
+
+    // Calculate totals
+    const totalAmount = bills.reduce((sum, bill) => sum + bill.amount, 0);
+
+    const payPeriod: PayPeriod = {
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+      bills,
+      totalAmount,
+      paidAmount: 0,
+      unpaidAmount: totalAmount,
+    };
+
+    budget.payPeriods.push(payPeriod);
+    budget.updatedAt = new Date().toISOString();
+
+    // Save the updated budget
+    if (budget.filePath) {
+      await window.electron.ipcRenderer.invoke("file:save", {
+        filePath: budget.filePath,
+        content: JSON.stringify(budget, null, 2),
+      });
+    }
+
+    return payPeriod;
+  }
+
+  async toggleBillPaid(
+    payPeriodIndex: number,
+    billName: string
+  ): Promise<void> {
+    if (!this.currentBudget.value) {
+      throw new Error("No budget is currently open");
+    }
+
+    const payPeriod = this.currentBudget.value.payPeriods[payPeriodIndex];
+    if (!payPeriod) {
+      throw new Error("Pay period not found");
+    }
+
+    const bill = payPeriod.bills.find((b) => b.name === billName);
+    if (!bill) {
+      throw new Error("Bill not found");
+    }
+
+    // Toggle the paid status
+    bill.isPaid = !bill.isPaid;
+
+    // Recalculate paid and unpaid amounts
+    payPeriod.paidAmount = payPeriod.bills.reduce(
+      (sum, b) => sum + (b.isPaid ? b.amount : 0),
+      0
+    );
+    payPeriod.unpaidAmount = payPeriod.totalAmount - payPeriod.paidAmount;
+
+    this.currentBudget.value.updatedAt = new Date().toISOString();
+
+    // Save the updated budget
+    if (this.currentBudget.value.filePath) {
+      await window.electron.ipcRenderer.invoke("file:save", {
+        filePath: this.currentBudget.value.filePath,
+        content: JSON.stringify(this.currentBudget.value, null, 2),
+      });
+    }
   }
 }
 
