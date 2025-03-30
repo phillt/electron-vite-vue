@@ -45,6 +45,11 @@ const router = createRouter({
       name: "add-bill",
       component: () => import("../views/AddBill.vue"),
     },
+    {
+      path: "/add-expense",
+      name: "add-expense",
+      component: () => import("../views/AddExpense.vue"),
+    },
   ],
 });
 

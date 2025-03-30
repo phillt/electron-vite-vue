@@ -38,6 +38,13 @@ export interface Bill {
   amount: number;
 }
 
+export interface Expense {
+  id: string;
+  name: string;
+  amount: number;
+  date: string;
+}
+
 export interface PayPeriodBill extends Bill {
   isPaid: boolean;
   dueDate: string; // ISO date string
@@ -47,9 +54,11 @@ export interface PayPeriod {
   startDate: string; // ISO date string
   endDate: string; // ISO date string
   bills: PayPeriodBill[];
+  expenses: Expense[];
   totalAmount: number;
   paidAmount: number;
   unpaidAmount: number;
+  totalExpenses: number;
 }
 
 export interface Budget {
@@ -126,6 +135,19 @@ class BudgetService {
         if (!budget.lastPayday) {
           budget.lastPayday = new Date().toISOString();
         }
+
+        // Initialize expenses array and totalExpenses for each pay period
+        budget.payPeriods.forEach((period) => {
+          if (!period.expenses) {
+            period.expenses = [];
+          }
+          if (typeof period.totalExpenses !== "number") {
+            period.totalExpenses = period.expenses.reduce(
+              (sum, expense) => sum + expense.amount,
+              0
+            );
+          }
+        });
 
         this.currentBudget.value = budget;
         console.log("Last budget loaded successfully");
@@ -238,7 +260,22 @@ class BudgetService {
           budget.lastPayday = new Date().toISOString();
         }
 
+        // Initialize expenses array and totalExpenses for each pay period
+        budget.payPeriods.forEach((period) => {
+          if (!period.expenses) {
+            period.expenses = [];
+          }
+          if (typeof period.totalExpenses !== "number") {
+            period.totalExpenses = period.expenses.reduce(
+              (sum, expense) => sum + expense.amount,
+              0
+            );
+          }
+        });
+
+        budget.filePath = filePath;
         this.currentBudget.value = budget;
+
         // Save the path to settings
         await this.saveLastBudgetPath(filePath);
         return budget;
@@ -246,7 +283,7 @@ class BudgetService {
       return null;
     } catch (error) {
       console.error("Error opening budget:", error);
-      return null;
+      throw error;
     }
   }
 
@@ -534,9 +571,11 @@ class BudgetService {
       startDate: startDate.toISOString(),
       endDate: endDate.toISOString(),
       bills,
+      expenses: [],
       totalAmount,
       paidAmount: 0,
       unpaidAmount: totalAmount,
+      totalExpenses: 0,
     };
 
     budget.payPeriods.push(payPeriod);
@@ -606,6 +645,39 @@ class BudgetService {
       const endDate = new Date(period.endDate);
       return now >= startDate && now <= endDate;
     });
+  }
+
+  async addExpense(
+    payPeriodIndex: number,
+    expense: Omit<Expense, "id" | "date">
+  ): Promise<void> {
+    if (!this.currentBudget.value) {
+      throw new Error("No budget is currently open");
+    }
+
+    const payPeriod = this.currentBudget.value.payPeriods[payPeriodIndex];
+    if (!payPeriod) {
+      throw new Error("Pay period not found");
+    }
+
+    const newExpense: Expense = {
+      ...expense,
+      id: Date.now().toString(),
+      date: new Date().toISOString(),
+    };
+
+    payPeriod.expenses.push(newExpense);
+    payPeriod.totalExpenses += newExpense.amount;
+
+    this.currentBudget.value.updatedAt = new Date().toISOString();
+
+    // Save the updated budget
+    if (this.currentBudget.value.filePath) {
+      await window.electron.ipcRenderer.invoke("file:save", {
+        filePath: this.currentBudget.value.filePath,
+        content: JSON.stringify(this.currentBudget.value, null, 2),
+      });
+    }
   }
 }
 

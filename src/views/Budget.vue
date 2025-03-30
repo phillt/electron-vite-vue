@@ -3,6 +3,7 @@
 import { ref, computed } from "vue";
 import { budgetService } from "../services/budgetService";
 import type { PayPeriod } from "../services/budgetService";
+import { useRouter } from "vue-router";
 
 const currentBudget = computed(() => budgetService.getCurrentBudget());
 const loading = ref(false);
@@ -11,6 +12,8 @@ const error = ref<string | null>(null);
 const currentPayPeriodIndex = computed(() =>
   budgetService.getCurrentPayPeriodIndex()
 );
+
+const router = useRouter();
 
 const calculateDaysUntilDue = (dueDate: string) => {
   const today = new Date();
@@ -50,6 +53,10 @@ const handleTogglePaid = async (payPeriodIndex: number, billName: string) => {
   } catch (e: any) {
     error.value = e.message;
   }
+};
+
+const handleAddExpense = (index: number) => {
+  router.push(`/add-expense?payPeriodIndex=${index}`);
 };
 
 const getPayPeriodStatus = (index: number) => {
@@ -128,29 +135,38 @@ const getPayPeriodStatus = (index: number) => {
             </div>
           </div>
         </div>
-        <div class="mt-4 grid grid-cols-3 gap-4 text-sm">
+        <div class="mt-4 grid grid-cols-4 gap-4 text-sm">
           <div>
-            <span class="text-gray-500">Total:</span>
+            <span class="text-gray-500">Total Bills:</span>
             <span class="ml-2 font-medium">{{
               formatCurrency(payPeriod.totalAmount)
             }}</span>
           </div>
           <div>
-            <span class="text-gray-500">Paid:</span>
+            <span class="text-gray-500">Paid Bills:</span>
             <span class="ml-2 font-medium text-green-600">{{
               formatCurrency(payPeriod.paidAmount)
             }}</span>
           </div>
           <div>
-            <span class="text-gray-500">Remaining:</span>
+            <span class="text-gray-500">Unpaid Bills:</span>
             <span class="ml-2 font-medium text-red-600">{{
               formatCurrency(payPeriod.unpaidAmount)
+            }}</span>
+          </div>
+          <div>
+            <span class="text-gray-500">Total Expenses:</span>
+            <span class="ml-2 font-medium text-purple-600">{{
+              formatCurrency(payPeriod.totalExpenses || 0)
             }}</span>
           </div>
         </div>
       </div>
 
       <div class="border-t" :class="getPayPeriodStatus(index).class">
+        <div class="px-4 py-3 bg-gray-50 border-b">
+          <h4 class="text-lg font-medium text-gray-900">Bills</h4>
+        </div>
         <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-opacity-50" :class="getPayPeriodStatus(index).class">
             <tr>
@@ -213,6 +229,43 @@ const getPayPeriodStatus = (index: number) => {
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <div class="border-t" :class="getPayPeriodStatus(index).class">
+        <div
+          class="px-4 py-3 bg-gray-50 border-b flex justify-between items-center"
+        >
+          <h4 class="text-lg font-medium text-gray-900">Expenses</h4>
+          <button
+            @click="handleAddExpense(index)"
+            class="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200"
+          >
+            Add Expense
+          </button>
+        </div>
+        <div class="divide-y divide-gray-200">
+          <div
+            v-if="!payPeriod.expenses || payPeriod.expenses.length === 0"
+            class="p-4 text-center text-gray-500"
+          >
+            No expenses added yet
+          </div>
+          <div
+            v-for="expense in payPeriod.expenses"
+            :key="expense.id"
+            class="px-4 py-3 flex justify-between items-center"
+          >
+            <div>
+              <div class="font-medium text-gray-900">{{ expense.name }}</div>
+              <div class="text-sm text-gray-500">
+                Added on {{ formatDate(expense.date) }}
+              </div>
+            </div>
+            <div class="font-medium text-gray-900">
+              {{ formatCurrency(expense.amount) }}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
