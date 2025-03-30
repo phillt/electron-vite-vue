@@ -2,66 +2,42 @@
 <script setup lang="ts">
 defineProps<{
   title?: string;
-  padding?: "none" | "sm" | "md" | "lg";
-  theme?:
-    | "default"
-    | "primary"
-    | "secondary"
-    | "success"
-    | "warning"
-    | "danger";
+  elevated?: boolean;
+  padding?: number;
+  footerBorder?: boolean;
+  className?: string;
 }>();
-
-const paddingClasses = {
-  none: "",
-  sm: "p-4",
-  md: "p-6",
-  lg: "p-8",
-};
-
-const themeClasses = {
-  default: {
-    background: "bg-brand-surface",
-    border: "border-gray-200",
-  },
-  primary: {
-    background: "bg-brand-dark/10",
-    border: "border-brand-dark/30",
-  },
-  secondary: {
-    background: "bg-brand-accent/10",
-    border: "border-brand-accent/30",
-  },
-  success: {
-    background: "bg-brand-success/10",
-    border: "border-brand-success/30",
-  },
-  warning: {
-    background: "bg-brand-warning/10",
-    border: "border-brand-warning/30",
-  },
-  danger: {
-    background: "bg-red-50",
-    border: "border-red-200",
-  },
-};
 </script>
 
 <template>
   <div
     :class="[
-      themeClasses[theme || 'default'].background,
-      'rounded-lg shadow-sm',
+      'bg-white rounded-2xl shadow-sm border border-gray-200',
+      elevated ? 'shadow-md' : 'shadow-sm',
+      className,
     ]"
   >
     <div
-      v-if="title"
-      :class="['px-6 py-4 border-b', themeClasses[theme || 'default'].border]"
+      v-if="title || $slots.header"
+      class="px-6 py-4 border-b border-gray-200"
     >
-      <h3 class="text-lg font-medium text-brand-text">{{ title }}</h3>
+      <div class="flex items-center justify-between">
+        <h3 v-if="title" class="text-lg font-medium text-gray-900">
+          {{ title }}
+        </h3>
+        <slot name="header" />
+      </div>
     </div>
-    <div :class="paddingClasses[padding || 'md']">
-      <slot></slot>
+
+    <div :class="[padding ? `p-${padding}` : 'p-6']">
+      <slot />
+    </div>
+
+    <div
+      v-if="$slots.footer"
+      :class="[footerBorder && 'border-t border-gray-200', 'px-6 py-4']"
+    >
+      <slot name="footer" />
     </div>
   </div>
 </template>

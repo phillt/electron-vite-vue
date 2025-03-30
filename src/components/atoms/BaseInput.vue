@@ -1,78 +1,155 @@
 <!-- BaseInput.vue -->
 <script setup lang="ts">
-defineProps<{
-  modelValue: string | number;
-  type?: "text" | "number" | "date" | "email" | "password" | "tel";
-  label?: string;
-  name?: string;
-  id?: string;
-  placeholder?: string;
-  required?: boolean;
-  disabled?: boolean;
-  min?: string | number;
-  max?: string | number;
-  step?: string | number;
-  helperText?: string;
-  error?: string;
-  prefix?: string;
-}>();
+import { computed } from "vue";
 
-defineEmits<{
-  (e: "update:modelValue", value: string | number): void;
-  (e: "focus", event: FocusEvent): void;
-  (e: "blur", event: FocusEvent): void;
-  (e: "change", event: Event): void;
-}>();
+const props = defineProps({
+  modelValue: {
+    type: [String, Number],
+    default: "",
+  },
+  label: {
+    type: String,
+    default: "",
+  },
+  type: {
+    type: String,
+    default: "text",
+  },
+  name: {
+    type: String,
+    required: true,
+  },
+  id: {
+    type: String,
+    default: () => `input-${Math.random().toString(36).substr(2, 9)}`,
+  },
+  placeholder: {
+    type: String,
+    default: "",
+  },
+  helperText: {
+    type: String,
+    default: "",
+  },
+  error: {
+    type: String,
+    default: "",
+  },
+  required: {
+    type: Boolean,
+    default: false,
+  },
+  disabled: {
+    type: Boolean,
+    default: false,
+  },
+  icon: {
+    type: String,
+    default: "",
+  },
+  prefix: {
+    type: String,
+    default: "",
+  },
+  suffix: {
+    type: String,
+    default: "",
+  },
+});
+
+const emit = defineEmits(["update:modelValue", "blur"]);
+
+const inputRef = computed(() => `input-${props.name}`);
+
+const handleInput = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  emit("update:modelValue", target.value);
+};
+
+const handleBlur = (event: Event) => {
+  emit("blur", event);
+};
 </script>
 
 <template>
-  <div>
+  <div class="space-y-1">
     <label
       v-if="label"
-      :for="id || name"
-      class="block text-sm font-medium text-brand-text"
+      :for="id"
+      class="block text-sm font-medium text-gray-700"
     >
       {{ label }}
+      <span v-if="required" class="text-error">*</span>
     </label>
-    <div class="mt-1 relative rounded-md shadow-sm">
+
+    <div class="relative rounded-2xl shadow-sm">
+      <!-- Left Icon/Prefix -->
       <div
-        v-if="prefix"
+        v-if="icon || prefix"
         class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
       >
-        <span class="text-brand-muted sm:text-sm">{{ prefix }}</span>
+        <span v-if="icon" :class="[icon, 'text-gray-400 w-5 h-5']"></span>
+        <span v-else-if="prefix" class="text-gray-500">{{ prefix }}</span>
       </div>
+
+      <!-- Input Element -->
       <input
-        :type="type || 'text'"
-        :id="id || name"
-        :name="name"
+        :id="id"
+        :ref="inputRef"
+        v-bind="$attrs"
         :value="modelValue"
-        @input="
-          $emit('update:modelValue', ($event.target as HTMLInputElement).value)
-        "
-        @focus="$emit('focus', $event)"
-        @blur="$emit('blur', $event)"
-        @change="$emit('change', $event)"
-        :class="[
-          prefix ? 'pl-7' : 'pl-3',
-          'block w-full rounded-md border-brand-surface shadow-sm focus:border-brand-dark focus:ring-brand-dark sm:text-sm',
-          disabled ? 'bg-brand-surface/50 cursor-not-allowed' : 'bg-white',
-          error
-            ? 'border-brand-danger focus:border-brand-danger focus:ring-brand-danger'
-            : '',
-        ]"
+        :type="type"
+        :name="name"
         :placeholder="placeholder"
-        :required="required"
         :disabled="disabled"
-        :min="min"
-        :max="max"
-        :step="step"
+        :required="required"
+        :class="[
+          'block w-full py-3 border-gray-200 rounded-2xl focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow',
+          icon || prefix ? 'pl-10' : 'pl-4',
+          suffix ? 'pr-10' : 'pr-4',
+          disabled ? 'bg-gray-50 text-gray-500 cursor-not-allowed' : 'bg-white',
+          error ? 'border-error focus:ring-error/30' : 'border-gray-200',
+        ]"
+        @input="handleInput"
+        @blur="handleBlur"
       />
+
+      <!-- Right Icon/Suffix -->
+      <div
+        v-if="suffix"
+        class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none"
+      >
+        <span class="text-gray-500">{{ suffix }}</span>
+      </div>
     </div>
-    <p v-if="helperText && !error" class="mt-1 text-sm text-brand-muted">
-      {{ helperText }}
-    </p>
-    <p v-if="error" class="mt-1 text-sm text-brand-danger">
-      {{ error }}
+
+    <!-- Helper Text -->
+    <p
+      v-if="helperText || error"
+      class="text-sm"
+      :class="error ? 'text-error' : 'text-gray-500'"
+    >
+      {{ error || helperText }}
     </p>
   </div>
 </template>
+
+<style scoped>
+input[type="date"]::-webkit-calendar-picker-indicator {
+  color: transparent;
+  background: none;
+  z-index: 1;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator::after {
+  content: "";
+  display: block;
+  background: var(--color-gray-400);
+  width: 14px;
+  height: 14px;
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M19,4H17V3a1,1,0,0,0-2,0V4H9V3A1,1,0,0,0,7,3V4H5A3,3,0,0,0,2,7V19a3,3,0,0,0,3,3H19a3,3,0,0,0,3-3V7A3,3,0,0,0,19,4Zm1,15a1,1,0,0,1-1,1H5a1,1,0,0,1-1-1V12H20Zm0-9H4V7A1,1,0,0,1,5,6H7V7A1,1,0,0,0,9,7V6h6V7a1,1,0,0,0,2,0V6h2a1,1,0,0,1,1,1Z'/%3E%3C/svg%3E");
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+}
+</style>

@@ -1,170 +1,189 @@
 <template>
-  <BasePage :title="isEditing ? 'Edit Income' : 'Add Income'">
-    <BaseCard>
-      <div v-if="!currentBudget" class="text-center py-12">
-        <p class="text-brand-muted">No budget is currently open.</p>
-        <BaseButton variant="primary" class="mt-4" @click="$router.push('/')">
-          Open or Create Budget
+  <BasePage :title="'Add New Income'">
+    <div class="max-w-5xl mx-auto">
+      <!-- Header -->
+      <div class="flex justify-between items-center mb-8">
+        <div>
+          <h1 class="text-xl font-medium text-gray-900">Add New Income</h1>
+          <p class="text-sm text-gray-500 mt-1">
+            Configure your income details and payment schedule
+          </p>
+        </div>
+        <BaseButton
+          variant="outline"
+          size="sm"
+          @click="$router.push('/income-expenses')"
+        >
+          View All
         </BaseButton>
       </div>
 
-      <template v-else>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <!-- Left Column: Information -->
-          <div class="space-y-6">
-            <div>
-              <h3 class="text-lg font-medium text-brand-text">
-                About Income Sources
-              </h3>
-              <p class="mt-2 text-brand-muted">
-                Income sources help you track your regular income streams. Each
-                source can have its own pay schedule and amount.
-              </p>
-            </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Left Column: Form -->
+        <div class="md:col-span-2">
+          <BaseCard>
+            <form @submit.prevent="handleSubmit" class="space-y-6">
+              <!-- Income Name -->
+              <div class="space-y-1">
+                <label class="block text-sm font-medium text-gray-700"
+                  >Income Name</label
+                >
+                <input
+                  v-model="incomeName"
+                  type="text"
+                  class="block w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1 focus:ring-primary focus:border-primary"
+                  placeholder="e.g., Main Job, Side Gig, etc."
+                />
+                <p class="text-sm text-gray-500">
+                  Give this income source a unique name
+                </p>
+              </div>
 
-            <div>
-              <h3 class="text-lg font-medium text-brand-text">Pay Periods</h3>
-              <p class="mt-2 text-brand-muted">
-                The system will automatically generate 5 pay periods based on
-                your last payday. Each period:
-              </p>
-              <ul class="mt-2 space-y-2 text-brand-muted">
-                <li class="flex items-start">
-                  <span class="text-brand-accent mr-2">•</span>
-                  Starts the day after your last payday
-                </li>
-                <li class="flex items-start">
-                  <span class="text-brand-accent mr-2">•</span>
-                  Runs for 14 days (bi-weekly)
-                </li>
-                <li class="flex items-start">
-                  <span class="text-brand-accent mr-2">•</span>
-                  Helps track your income across the budget period
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 class="text-lg font-medium text-brand-text">Tips</h3>
-              <ul class="mt-2 space-y-2 text-brand-muted">
-                <li class="flex items-start">
-                  <span class="text-brand-accent mr-2">•</span>
-                  Use clear, descriptive names for your income sources
-                </li>
-                <li class="flex items-start">
-                  <span class="text-brand-accent mr-2">•</span>
-                  Enter your net income (after taxes and deductions)
-                </li>
-                <li class="flex items-start">
-                  <span class="text-brand-accent mr-2">•</span>
-                  Make sure your last payday is accurate for proper period
-                  calculation
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <!-- Right Column: Form -->
-          <form @submit.prevent="handleSubmit" class="space-y-6">
-            <div v-if="error" class="rounded-md bg-brand-danger/10 p-4">
-              <div class="flex">
-                <div class="ml-3">
-                  <h3 class="text-sm font-medium text-brand-danger">Error</h3>
-                  <div class="mt-2 text-sm text-brand-danger/80">
-                    {{ error }}
+              <!-- Amount -->
+              <div class="space-y-1">
+                <label class="block text-sm font-medium text-gray-700"
+                  >Amount</label
+                >
+                <div class="relative">
+                  <div
+                    class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"
+                  >
+                    <span class="text-gray-500">$</span>
                   </div>
+                  <input
+                    v-model="incomeAmount"
+                    type="number"
+                    class="block w-full pl-8 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1 focus:ring-primary focus:border-primary"
+                    placeholder="0"
+                  />
                 </div>
               </div>
-            </div>
 
-            <BaseInput
-              v-model="incomeName"
-              label="Income Name"
-              name="name"
-              placeholder="e.g., Main Job, Side Gig, etc."
-              :disabled="isEditing"
-              required
-              helper-text="Give this income source a unique name to help you identify it."
-            />
+              <!-- Pay Frequency -->
+              <div class="space-y-1">
+                <label class="block text-sm font-medium text-gray-700"
+                  >Pay Frequency</label
+                >
+                <select
+                  v-model="income.frequency"
+                  class="block w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1 focus:ring-primary focus:border-primary"
+                >
+                  <option value="bi-weekly">Bi-weekly</option>
+                </select>
+              </div>
 
-            <BaseInput
-              v-model="incomeAmount"
-              type="number"
-              label="Amount"
-              name="amount"
-              prefix="$"
-              placeholder="0.00"
-              required
-              min="0"
-              step="0.01"
-            />
+              <!-- Last Payday -->
+              <div class="space-y-1">
+                <label class="block text-sm font-medium text-gray-700"
+                  >Last Payday</label
+                >
+                <input
+                  v-model="incomeLastPayday"
+                  type="date"
+                  class="block w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1 focus:ring-primary focus:border-primary"
+                  :min="lastWeekDate"
+                />
+                <p class="text-sm text-gray-500">
+                  Select your most recent payday
+                </p>
+              </div>
 
-            <div>
-              <label
-                for="frequency"
-                class="block text-sm font-medium text-brand-text"
-              >
-                Pay Frequency
-              </label>
-              <select
-                id="frequency"
-                v-model="income.frequency"
-                class="mt-1 block w-full rounded-md border-brand-surface shadow-sm focus:border-brand-dark focus:ring-brand-dark sm:text-sm"
-                required
-              >
-                <option value="bi-weekly">Bi-weekly</option>
-              </select>
-              <p class="mt-1 text-sm text-brand-muted">
-                Select how often you receive this income.
-              </p>
-            </div>
-
-            <BaseInput
-              v-model="incomeLastPayday"
-              type="date"
-              label="Last Payday"
-              name="lastPayday"
-              required
-              :min="lastWeekDate"
-              helper-text="Select the date of your most recent payday for this income source."
-            />
-
-            <div class="flex justify-end space-x-3">
-              <BaseButton
-                variant="outline"
-                @click="$router.push('/income-expenses')"
-              >
-                Cancel
-              </BaseButton>
-              <BaseButton
-                type="submit"
-                variant="success"
-                :disabled="isSubmitting || !isFormValid"
-              >
-                {{
-                  isSubmitting
-                    ? "Saving..."
-                    : isEditing
-                    ? "Save Changes"
-                    : "Add Income"
-                }}
-              </BaseButton>
-            </div>
-          </form>
+              <!-- Action Buttons -->
+              <div class="flex justify-end space-x-3 pt-4">
+                <BaseButton
+                  variant="outline"
+                  @click="$router.push('/income-expenses')"
+                >
+                  Cancel
+                </BaseButton>
+                <BaseButton
+                  type="submit"
+                  variant="primary"
+                  :disabled="isSubmitting || !isFormValid"
+                >
+                  {{ isSubmitting ? "Saving..." : "Add Income" }}
+                </BaseButton>
+              </div>
+            </form>
+          </BaseCard>
         </div>
-      </template>
-    </BaseCard>
+
+        <!-- Right Column: Info Cards -->
+        <div class="space-y-4">
+          <!-- Quick Tips -->
+          <BaseCard>
+            <h3 class="text-base font-medium text-gray-900 mb-4">Quick Tips</h3>
+            <ul class="space-y-3">
+              <li class="flex items-start">
+                <div
+                  class="flex-shrink-0 flex items-center justify-center h-6 w-6 rounded-full bg-blue-50 text-blue-600 text-sm font-medium mr-3"
+                >
+                  1
+                </div>
+                <p class="text-sm text-gray-600">
+                  Use clear, descriptive names for your income sources
+                </p>
+              </li>
+              <li class="flex items-start">
+                <div
+                  class="flex-shrink-0 flex items-center justify-center h-6 w-6 rounded-full bg-blue-50 text-blue-600 text-sm font-medium mr-3"
+                >
+                  2
+                </div>
+                <p class="text-sm text-gray-600">
+                  Enter your net income (after taxes and deductions)
+                </p>
+              </li>
+              <li class="flex items-start">
+                <div
+                  class="flex-shrink-0 flex items-center justify-center h-6 w-6 rounded-full bg-blue-50 text-blue-600 text-sm font-medium mr-3"
+                >
+                  3
+                </div>
+                <p class="text-sm text-gray-600">
+                  Make sure your last payday is accurate
+                </p>
+              </li>
+            </ul>
+          </BaseCard>
+
+          <!-- About Pay Periods -->
+          <BaseCard>
+            <h3 class="text-base font-medium text-gray-900 mb-4">
+              About Pay Periods
+            </h3>
+            <p class="text-sm text-gray-600 mb-3">
+              The system will automatically generate 5 pay periods based on your
+              last payday:
+            </p>
+            <ul class="space-y-2">
+              <li class="flex items-center text-sm text-gray-600">
+                <span class="text-blue-600 mr-2">•</span>
+                Starts the day after your last payday
+              </li>
+              <li class="flex items-center text-sm text-gray-600">
+                <span class="text-blue-600 mr-2">•</span>
+                Runs for 14 days (bi-weekly)
+              </li>
+              <li class="flex items-center text-sm text-gray-600">
+                <span class="text-blue-600 mr-2">•</span>
+                Helps track your income across the budget period
+              </li>
+            </ul>
+          </BaseCard>
+        </div>
+      </div>
+    </div>
   </BasePage>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { budgetService, type Income } from "../services/budgetService";
 import BaseButton from "../components/atoms/BaseButton.vue";
 import BaseCard from "../components/atoms/BaseCard.vue";
 import BasePage from "../components/atoms/BasePage.vue";
-import BaseInput from "../components/atoms/BaseInput.vue";
 
 const router = useRouter();
 const route = useRoute();
@@ -177,10 +196,6 @@ const today = new Date().toISOString().split("T")[0];
 const lastWeek = new Date();
 lastWeek.setDate(lastWeek.getDate() - 7);
 const lastWeekDate = lastWeek.toISOString().split("T")[0];
-
-const isEditing = computed(() => {
-  return !!route.query.edit;
-});
 
 const income = ref<Partial<Income>>({
   name: "",
@@ -212,7 +227,6 @@ const incomeLastPayday = computed({
   },
 });
 
-// Add form validation computed property
 const isFormValid = computed(() => {
   return (
     incomeName.value.trim() !== "" &&
@@ -222,67 +236,20 @@ const isFormValid = computed(() => {
   );
 });
 
-onMounted(() => {
-  if (isEditing.value) {
-    const incomeName = route.query.edit as string;
-    const existingIncome = currentBudget.value?.incomes.find(
-      (inc) => inc.name === incomeName
-    );
-
-    if (existingIncome) {
-      income.value = { ...existingIncome };
-    } else {
-      error.value = "Income not found";
-    }
-  }
-});
-
 const handleSubmit = async () => {
+  if (!isFormValid.value) return;
+
   isSubmitting.value = true;
   error.value = null;
 
   try {
-    // Check if name already exists (only for new incomes)
-    if (!isEditing.value) {
-      const existingIncomes = currentBudget.value?.incomes || [];
-      if (
-        existingIncomes.some((inc: Income) => inc.name === income.value.name)
-      ) {
-        error.value = "An income source with this name already exists.";
-        return;
-      }
-    }
-
-    // Generate pay periods
     const payPeriods = generatePayPeriods(income.value.lastPayday!, 5);
+    await budgetService.addIncome({
+      ...income.value,
+      payPeriods,
+      frequency: "bi-weekly" as const,
+    } as Income);
 
-    if (isEditing.value) {
-      // Update existing income
-      await budgetService.updateIncome(
-        route.query.edit as string,
-        {
-          ...income.value,
-          payPeriods,
-          frequency: "bi-weekly" as const,
-        } as Income
-      );
-    } else {
-      // Add new income
-      await budgetService.addIncome({
-        ...income.value,
-        payPeriods,
-        frequency: "bi-weekly" as const,
-      } as Income);
-    }
-
-    // Reset form
-    income.value.name = "";
-    income.value.amount = 0;
-    income.value.frequency = "bi-weekly" as const;
-    income.value.lastPayday = today;
-    income.value.payPeriods = [];
-
-    // Navigate back to income-expenses
     router.push("/income-expenses");
   } catch (err) {
     console.error("Error saving income:", err);
@@ -292,26 +259,39 @@ const handleSubmit = async () => {
   }
 };
 
-// Helper function to generate pay periods
 function generatePayPeriods(lastPayday: string, count: number) {
   const periods = [];
   let currentDate = new Date(lastPayday);
-  currentDate.setDate(currentDate.getDate() + 1); // Start one day after the payday
+  currentDate.setDate(currentDate.getDate() + 1);
 
   for (let i = 0; i < count; i++) {
     const start = new Date(currentDate);
     const end = new Date(currentDate);
-    end.setDate(end.getDate() + 14); // Set to the next payday
+    end.setDate(end.getDate() + 14);
 
     periods.push({
       start: start.toISOString(),
       end: end.toISOString(),
     });
 
-    // Move to next payday
     currentDate.setDate(currentDate.getDate() + 14);
   }
 
   return periods;
 }
 </script>
+
+<style scoped>
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+</style>
