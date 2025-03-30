@@ -62,6 +62,7 @@ describe("Budget.vue", () => {
           paidAmount: 0,
           unpaidAmount: 0,
           totalExpenses: 0,
+          paycheckAmount: 3500,
         },
       ],
     };
@@ -143,6 +144,7 @@ describe("Budget.vue", () => {
           paidAmount: 0,
           unpaidAmount: 1000,
           totalExpenses: 200, // Total expenses
+          paycheckAmount: 3500,
         },
       ],
     };

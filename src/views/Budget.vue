@@ -80,22 +80,6 @@ const getPayPeriodStatus = (index: number) => {
     };
   }
 };
-
-const calculatePaycheckAmount = (payPeriod: PayPeriod) => {
-  if (!currentBudget.value) return 0;
-
-  let totalPaycheck = 0;
-
-  // For each income source
-  currentBudget.value.incomes.forEach((income: Income) => {
-    // For biweekly pay periods, add the full amount of biweekly incomes
-    if (currentBudget.value?.payFrequency === "biweekly") {
-      totalPaycheck += income.amount;
-    }
-  });
-
-  return totalPaycheck;
-};
 </script>
 
 <template>
@@ -158,7 +142,7 @@ const calculatePaycheckAmount = (payPeriod: PayPeriod) => {
               <div>
                 <span class="text-blue-700">Paycheck:</span>
                 <span class="ml-2 font-medium text-blue-900">{{
-                  formatCurrency(calculatePaycheckAmount(payPeriod))
+                  formatCurrency(payPeriod.paycheckAmount)
                 }}</span>
               </div>
               <div>
@@ -174,7 +158,7 @@ const calculatePaycheckAmount = (payPeriod: PayPeriod) => {
                 <span
                   class="ml-2 font-medium"
                   :class="
-                    calculatePaycheckAmount(payPeriod) -
+                    payPeriod.paycheckAmount -
                       (payPeriod.totalAmount +
                         (payPeriod.totalExpenses || 0)) >=
                     0
@@ -184,7 +168,7 @@ const calculatePaycheckAmount = (payPeriod: PayPeriod) => {
                 >
                   {{
                     formatCurrency(
-                      calculatePaycheckAmount(payPeriod) -
+                      payPeriod.paycheckAmount -
                         (payPeriod.totalAmount + (payPeriod.totalExpenses || 0))
                     )
                   }}

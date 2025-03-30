@@ -59,6 +59,7 @@ export interface PayPeriod {
   paidAmount: number;
   unpaidAmount: number;
   totalExpenses: number;
+  paycheckAmount: number; // Store the paycheck amount at creation time
 }
 
 export interface Budget {
@@ -535,6 +536,18 @@ class BudgetService {
     return payPeriodBills;
   }
 
+  private calculatePaycheckAmount(): number {
+    if (!this.currentBudget.value) return 0;
+
+    let totalPaycheck = 0;
+    this.currentBudget.value.incomes.forEach((income: Income) => {
+      if (this.currentBudget.value?.payFrequency === "biweekly") {
+        totalPaycheck += income.amount;
+      }
+    });
+    return totalPaycheck;
+  }
+
   async createPayPeriod(): Promise<PayPeriod | null> {
     if (!this.currentBudget.value) {
       throw new Error("No budget is currently open");
@@ -576,6 +589,7 @@ class BudgetService {
       paidAmount: 0,
       unpaidAmount: totalAmount,
       totalExpenses: 0,
+      paycheckAmount: this.calculatePaycheckAmount(), // Store the current paycheck amount
     };
 
     budget.payPeriods.push(payPeriod);
