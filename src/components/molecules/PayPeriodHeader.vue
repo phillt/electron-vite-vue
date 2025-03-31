@@ -2,6 +2,7 @@
 <script setup lang="ts">
 import type { PayPeriod } from "../../services/budgetService";
 import BaseInput from "../atoms/BaseInput.vue";
+import { ref } from "vue";
 
 const props = defineProps<{
   payPeriod: PayPeriod;
@@ -15,6 +16,9 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: "update:paycheckAmount", value: number): void;
 }>();
+
+const isEditingPaycheck = ref(false);
+const tempPaycheckAmount = ref(props.payPeriod.paycheckAmount);
 
 const formatDate = (date: string) => {
   return new Date(date).toLocaleDateString();
@@ -30,8 +34,22 @@ const formatCurrency = (amount: number) => {
 const handlePaycheckAmountChange = (value: string | number) => {
   const newAmount = parseFloat(value.toString());
   if (!isNaN(newAmount)) {
-    emit("update:paycheckAmount", newAmount);
+    tempPaycheckAmount.value = newAmount;
   }
+};
+
+const startEditingPaycheck = () => {
+  isEditingPaycheck.value = true;
+};
+
+const savePaycheckAmount = () => {
+  emit("update:paycheckAmount", tempPaycheckAmount.value);
+  isEditingPaycheck.value = false;
+};
+
+const cancelEditingPaycheck = () => {
+  tempPaycheckAmount.value = props.payPeriod.paycheckAmount;
+  isEditingPaycheck.value = false;
 };
 </script>
 
@@ -76,21 +94,29 @@ const handlePaycheckAmountChange = (value: string | number) => {
       <div class="bg-brand-primary/10 rounded-lg">
         <div class="flex justify-between items-start text-sm">
           <div>
-            <div class="font-medium text-brand-primary mb-2">
-              Expected Income
-            </div>
-            <div class="flex items-center">
-              <span class="text-brand-muted">Paycheck:</span>
-              <div class="relative inline-block ml-2">
-                <BaseInput
-                  v-model="payPeriod.paycheckAmount"
-                  name="paycheck-amount"
-                  type="number"
-                  class="w-32"
-                  size="sm"
-                  prefix="$"
-                  @update:modelValue="handlePaycheckAmountChange"
-                />
+            <div class="flex flex-col">
+              <span class="text-brand-muted text-xs mb-1">Paycheck</span>
+              <div class="relative inline-block">
+                <div
+                  v-if="!isEditingPaycheck"
+                  class="cursor-pointer hover:text-brand-primary transition-colors text-2xl font-bold"
+                  @click="startEditingPaycheck"
+                >
+                  {{ formatCurrency(payPeriod.paycheckAmount) }}
+                </div>
+                <div v-else class="flex items-center gap-2">
+                  <BaseInput
+                    v-model="tempPaycheckAmount"
+                    name="paycheck-amount"
+                    type="number"
+                    class="w-32 text-2xl font-bold"
+                    size="sm"
+                    prefix="$"
+                    @blur="savePaycheckAmount"
+                    @keyup.enter="savePaycheckAmount"
+                    @keyup.esc="cancelEditingPaycheck"
+                  />
+                </div>
               </div>
             </div>
           </div>
