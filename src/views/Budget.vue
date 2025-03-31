@@ -233,7 +233,7 @@ const handleAddBill = (index: number) => {
   <BasePage title="Budget Overview">
     <template #actions>
       <BaseButton
-        variant="danger"
+        variant="outline"
         v-if="
           currentBudget &&
           currentBudget.payPeriods.length > 0 &&
