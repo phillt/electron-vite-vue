@@ -33,11 +33,11 @@ const calculateDaysUntilDue = (dueDate: string) => {
 };
 
 const headers = [
-  { label: "Name", key: "name" },
-  { label: "Amount", key: "amount" },
-  { label: "Due Date", key: "dueDate" },
-  { label: "Days Until Due", key: "daysUntilDue" },
-  { label: "Paid", key: "paid" },
+  { label: "Name", key: "name", class: "w-2/5" },
+  { label: "Amount", key: "amount", class: "w-1/5 text-right" },
+  { label: "Due Date", key: "dueDate", class: "w-1/5 text-right" },
+  { label: "Days Until Due", key: "daysUntilDue", class: "w-1/5 text-right" },
+  { label: "Paid", key: "paid", class: "w-1/5 text-center" },
 ];
 
 const handleAmountChange = (billName: string, amount: string) => {
@@ -48,31 +48,37 @@ const handleAmountChange = (billName: string, amount: string) => {
 <template>
   <div class="p-4">
     <BaseTable :headers="headers" :rows="payPeriod.bills">
-      <tbody>
-        <tr v-for="bill in payPeriod.bills" :key="bill.name">
-          <td>{{ bill.name }}</td>
-          <td class="text-right">
-            <BaseInput
-              v-model="bill.amount"
-              type="number"
-              name="bill-amount"
-              prefix="$"
-              class="w-32"
-              @blur="handleAmountChange(bill.name, bill.amount.toString())"
-            />
-          </td>
-          <td class="text-right">{{ bill.dueDate }}</td>
-          <td class="text-right">{{ calculateDaysUntilDue(bill.dueDate) }}</td>
-          <td class="text-center">
-            <BaseButton
-              :variant="bill.isPaid ? 'primary' : 'outline'"
-              @click="emit('togglePaid', bill.name)"
-            >
-              {{ bill.isPaid ? "Paid" : "Unpaid" }}
-            </BaseButton>
-          </td>
-        </tr>
-      </tbody>
+      <tr
+        v-for="bill in payPeriod.bills"
+        :key="bill.name"
+        class="divide-x divide-brand-surface"
+      >
+        <td class="px-6 py-4 whitespace-nowrap w-2/5">{{ bill.name }}</td>
+        <td class="px-6 py-4 whitespace-nowrap w-1/5 text-right">
+          <BaseInput
+            v-model="bill.amount"
+            type="number"
+            name="bill-amount"
+            prefix="$"
+            class="w-32"
+            @blur="handleAmountChange(bill.name, bill.amount.toString())"
+          />
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap w-1/5 text-right">
+          {{ formatDate(bill.dueDate) }}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap w-1/5 text-right">
+          {{ calculateDaysUntilDue(bill.dueDate) }}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap w-1/5 text-center">
+          <BaseButton
+            :variant="bill.isPaid ? 'primary' : 'outline'"
+            @click="emit('togglePaid', bill.name)"
+          >
+            {{ bill.isPaid ? "Paid" : "Unpaid" }}
+          </BaseButton>
+        </td>
+      </tr>
     </BaseTable>
   </div>
 </template>
