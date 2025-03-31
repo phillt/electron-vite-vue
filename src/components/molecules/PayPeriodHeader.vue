@@ -39,22 +39,34 @@ const handlePaycheckAmountChange = (value: string | number) => {
   <div class="px-4 py-5 sm:px-6">
     <div class="flex items-center justify-between">
       <div>
-        <h3 class="text-lg font-medium text-brand-text">
-          Pay Period: {{ formatDate(payPeriod.startDate) }} -
-          {{ formatDate(payPeriod.endDate) }}
-        </h3>
-        <span
-          class="mt-1 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-          :class="status.badge"
-        >
-          {{ status.label }}
-        </span>
+        <div class="flex items-center gap-2">
+          <h3 class="text-lg font-medium text-brand-text">
+            {{ formatDate(payPeriod.startDate) }} -
+            {{ formatDate(payPeriod.endDate) }}
+          </h3>
+          <span
+            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+            :class="status.badge"
+          >
+            {{ status.label }}
+          </span>
+        </div>
       </div>
       <div class="text-right">
-        <div class="text-sm text-brand-muted">Progress</div>
-        <div class="mt-1 text-lg font-semibold text-brand-text">
-          {{ formatCurrency(payPeriod.paidAmount) }} /
-          {{ formatCurrency(payPeriod.totalAmount) }}
+        <div class="flex items-center justify-end gap-2">
+          <span class="text-sm text-brand-muted">Progress:</span>
+          <span class="text-sm font-semibold text-brand-text">
+            {{ formatCurrency(payPeriod.paidAmount) }} /
+            {{ formatCurrency(payPeriod.totalAmount) }}
+          </span>
+        </div>
+        <div class="w-48 h-1.5 mt-2 bg-gray-100 rounded-full overflow-hidden">
+          <div
+            class="h-full bg-brand-success transition-all duration-300 rounded-full"
+            :style="{
+              width: `${(payPeriod.paidAmount / payPeriod.totalAmount) * 100}%`,
+            }"
+          ></div>
         </div>
       </div>
     </div>
