@@ -4,6 +4,7 @@ import type { PayPeriod } from "../../services/budgetService";
 import BaseTable from "../atoms/BaseTable.vue";
 import BaseInput from "../atoms/BaseInput.vue";
 import BaseButton from "../atoms/BaseButton.vue";
+import { computed } from "vue";
 
 const props = defineProps<{
   payPeriod: PayPeriod;
@@ -32,6 +33,16 @@ const calculateDaysUntilDue = (dueDate: string) => {
   return diffDays;
 };
 
+const isPastDue = (dueDate: string) => {
+  return new Date(dueDate) < new Date();
+};
+
+const sortedBills = computed(() => {
+  return [...props.payPeriod.bills].sort((a, b) => {
+    return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+  });
+});
+
 const headers = [
   { label: "Name", key: "name", class: "w-2/5" },
   { label: "Amount", key: "amount", class: "w-1/5 text-right" },
@@ -47,10 +58,17 @@ const handleAmountChange = (billName: string, amount: string) => {
 
 <template>
   <div class="p-4">
-    <BaseTable :headers="headers" :rows="payPeriod.bills">
+    <BaseTable :headers="headers" :rows="sortedBills">
       <template #default="{ row: bill, class: rowClass }">
         <tr :class="rowClass">
-          <td class="px-4 py-2 whitespace-nowrap w-2/5">{{ bill.name }}</td>
+          <td
+            class="px-4 py-2 whitespace-nowrap w-2/5"
+            :class="{
+              'text-red-700 font-bold': !bill.isPaid && isPastDue(bill.dueDate),
+            }"
+          >
+            {{ bill.name }}
+          </td>
           <td class="px-4 py-2 whitespace-nowrap w-1/5 text-right">
             <BaseInput
               v-model="bill.amount"
@@ -65,7 +83,12 @@ const handleAmountChange = (billName: string, amount: string) => {
           <td class="px-4 py-2 whitespace-nowrap w-1/5 text-right">
             {{ formatDate(bill.dueDate) }}
           </td>
-          <td class="px-4 py-2 whitespace-nowrap w-1/5 text-right">
+          <td
+            class="px-4 py-2 whitespace-nowrap w-1/5 text-right"
+            :class="{
+              'text-red-700 font-bold': !bill.isPaid && isPastDue(bill.dueDate),
+            }"
+          >
             {{ calculateDaysUntilDue(bill.dueDate) }}
           </td>
           <td class="px-4 py-2 whitespace-nowrap w-1/5 text-center">
