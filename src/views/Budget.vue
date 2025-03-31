@@ -430,7 +430,7 @@ const handleAddBill = (index: number) => {
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-brand-muted">
                 <BaseButton
-                  :variant="bill.isPaid ? 'success' : 'warning'"
+                  :variant="bill.isPaid ? 'popular' : 'ghost'"
                   size="sm"
                   @click="handleTogglePaid(index, bill.name)"
                 >
@@ -447,7 +447,7 @@ const handleAddBill = (index: number) => {
           >
             <h4 class="text-lg font-medium text-brand-text">Expenses</h4>
             <BaseButton
-              variant="secondary"
+              variant="ghost"
               size="sm"
               @click="handleAddExpense(index)"
             >
@@ -494,7 +494,7 @@ const handleAddBill = (index: number) => {
                   </div>
                 </div>
                 <BaseButton
-                  :variant="expense.isPaid ? 'success' : 'warning'"
+                  :variant="expense.isPaid ? 'popular' : 'ghost'"
                   size="sm"
                   @click="handleToggleExpensePaid(index, expense.id)"
                 >
