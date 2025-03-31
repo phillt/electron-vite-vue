@@ -34,6 +34,12 @@ const budgetInfo = computed(() => [
       : "N/A",
   },
 ]);
+
+const handleOpenInFolder = async () => {
+  if (currentBudget.value?.filePath) {
+    await window.electron.shell.showItemInFolder(currentBudget.value.filePath);
+  }
+};
 </script>
 
 <template>
@@ -56,7 +62,9 @@ const budgetInfo = computed(() => [
 
           <div class="pt-6">
             <div class="flex justify-end">
-              <BaseButton variant="outline">Open In Folder</BaseButton>
+              <BaseButton variant="outline" @click="handleOpenInFolder"
+                >Open In Folder</BaseButton
+              >
             </div>
           </div>
         </div>

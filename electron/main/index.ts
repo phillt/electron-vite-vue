@@ -207,3 +207,14 @@ ipcMain.handle("file:read", async (_, filePath) => {
     throw error;
   }
 });
+
+// Handle showing items in folder
+ipcMain.handle("shell:showItemInFolder", async (_, filePath) => {
+  try {
+    shell.showItemInFolder(filePath);
+    return true;
+  } catch (error) {
+    console.error("Error showing item in folder:", error);
+    throw error;
+  }
+});

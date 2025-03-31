@@ -12,6 +12,9 @@ declare global {
         get: () => Promise<{ lastBudgetPath: string | null }>;
         set: (settings: { lastBudgetPath: string | null }) => Promise<void>;
       };
+      shell: {
+        showItemInFolder: (filePath: string) => Promise<boolean>;
+      };
     };
   }
 }

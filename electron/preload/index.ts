@@ -36,6 +36,10 @@ contextBridge.exposeInMainWorld("electron", {
     get: () => ipcRenderer.invoke("settings:get"),
     set: (settings: any) => ipcRenderer.invoke("settings:set", settings),
   },
+  shell: {
+    showItemInFolder: (filePath: string) =>
+      ipcRenderer.invoke("shell:showItemInFolder", filePath),
+  },
 });
 
 // --------- Preload scripts loading ---------
