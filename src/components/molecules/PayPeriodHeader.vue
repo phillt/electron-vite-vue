@@ -37,7 +37,9 @@ const handlePaycheckAmountChange = (value: string | number) => {
 
 <template>
   <div class="px-4 py-5 sm:px-6">
-    <div class="flex items-center justify-between">
+    <div
+      class="flex items-center justify-between border-b border-gray-200 pb-3"
+    >
       <div>
         <div class="flex items-center gap-2">
           <h3 class="text-lg font-medium text-brand-text">
@@ -70,50 +72,59 @@ const handlePaycheckAmountChange = (value: string | number) => {
         </div>
       </div>
     </div>
-    <div class="mt-4 grid grid-cols-4 gap-4 text-sm">
-      <div class="col-span-4 bg-brand-primary/10 p-3 rounded-lg">
-        <div class="font-medium text-brand-primary">Expected Income</div>
-        <div class="mt-1 grid grid-cols-3 gap-4">
+    <div class="mt-4">
+      <div class="bg-brand-primary/10 rounded-lg">
+        <div class="flex justify-between items-start text-sm">
           <div>
-            <span class="text-brand-primary">Paycheck:</span>
-            <div class="relative inline-block ml-2">
-              <BaseInput
-                v-model="payPeriod.paycheckAmount"
-                name="paycheck-amount"
-                type="number"
-                class="w-32"
-                prefix="$"
-                @update:modelValue="handlePaycheckAmountChange"
-              />
+            <div class="font-medium text-brand-primary mb-2">
+              Expected Income
+            </div>
+            <div class="flex items-center">
+              <span class="text-brand-muted">Paycheck:</span>
+              <div class="relative inline-block ml-2">
+                <BaseInput
+                  v-model="payPeriod.paycheckAmount"
+                  name="paycheck-amount"
+                  type="number"
+                  class="w-32"
+                  size="sm"
+                  prefix="$"
+                  @update:modelValue="handlePaycheckAmountChange"
+                />
+              </div>
             </div>
           </div>
-          <div>
-            <span class="text-brand-primary">Total Outgoing:</span>
-            <span class="ml-2 font-medium text-brand-primary">{{
-              formatCurrency(
-                payPeriod.totalAmount + (payPeriod.totalExpenses || 0)
-              )
-            }}</span>
-          </div>
-          <div>
-            <span class="text-brand-primary">Remaining:</span>
-            <span
-              class="ml-2 font-medium"
-              :class="
-                payPeriod.paycheckAmount -
-                  (payPeriod.totalAmount + (payPeriod.totalExpenses || 0)) >=
-                0
-                  ? 'text-brand-success'
-                  : 'text-brand-danger'
-              "
-            >
-              {{
-                formatCurrency(
+          <div class="text-right space-y-2">
+            <div>
+              <span class="text-brand-muted">Total Outgoing:</span>
+              <span class="ml-2 font-normal text-brand-primary">
+                {{
+                  formatCurrency(
+                    payPeriod.totalAmount + (payPeriod.totalExpenses || 0)
+                  )
+                }}
+              </span>
+            </div>
+            <div class="flex items-center justify-end gap-2">
+              <span class="text-brand-muted">Remaining:</span>
+              <span
+                class="font-semibold"
+                :class="
                   payPeriod.paycheckAmount -
-                    (payPeriod.totalAmount + (payPeriod.totalExpenses || 0))
-                )
-              }}
-            </span>
+                    (payPeriod.totalAmount + (payPeriod.totalExpenses || 0)) >=
+                  0
+                    ? 'text-brand-success'
+                    : 'text-brand-danger'
+                "
+              >
+                {{
+                  formatCurrency(
+                    payPeriod.paycheckAmount -
+                      (payPeriod.totalAmount + (payPeriod.totalExpenses || 0))
+                  )
+                }}
+              </span>
+            </div>
           </div>
         </div>
       </div>
