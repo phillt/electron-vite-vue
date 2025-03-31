@@ -1,23 +1,9 @@
 <template>
-  <BasePage :title="'Add New Income'">
+  <BasePage
+    :title="'Add New Income'"
+    description="Configure your income details and payment schedule"
+  >
     <div class="max-w-5xl mx-auto">
-      <!-- Header -->
-      <div class="flex justify-between items-center mb-8">
-        <div>
-          <h1 class="text-xl font-medium text-gray-900">Add New Income</h1>
-          <p class="text-sm text-gray-500 mt-1">
-            Configure your income details and payment schedule
-          </p>
-        </div>
-        <BaseButton
-          variant="outline"
-          size="sm"
-          @click="$router.push('/income-expenses')"
-        >
-          View All
-        </BaseButton>
-      </div>
-
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <!-- Left Column: Form -->
         <div class="md:col-span-2">
@@ -28,10 +14,10 @@
                 <label class="block text-sm font-medium text-gray-700"
                   >Income Name</label
                 >
-                <input
+                <BaseInput
                   v-model="incomeName"
                   type="text"
-                  class="block w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1 focus:ring-primary focus:border-primary"
+                  name="income-name"
                   placeholder="e.g., Main Job, Side Gig, etc."
                 />
                 <p class="text-sm text-gray-500">
@@ -44,19 +30,13 @@
                 <label class="block text-sm font-medium text-gray-700"
                   >Amount</label
                 >
-                <div class="relative">
-                  <div
-                    class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"
-                  >
-                    <span class="text-gray-500">$</span>
-                  </div>
-                  <input
-                    v-model="incomeAmount"
-                    type="number"
-                    class="block w-full pl-8 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1 focus:ring-primary focus:border-primary"
-                    placeholder="0"
-                  />
-                </div>
+                <BaseInput
+                  v-model="incomeAmount"
+                  type="number"
+                  name="income-amount"
+                  prefix="$"
+                  placeholder="0"
+                />
               </div>
 
               <!-- Pay Frequency -->
@@ -64,12 +44,12 @@
                 <label class="block text-sm font-medium text-gray-700"
                   >Pay Frequency</label
                 >
-                <select
+                <BaseInput
                   v-model="income.frequency"
-                  class="block w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1 focus:ring-primary focus:border-primary"
-                >
-                  <option value="bi-weekly">Bi-weekly</option>
-                </select>
+                  type="select"
+                  name="income-frequency"
+                  :options="[{ value: 'bi-weekly', label: 'Bi-weekly' }]"
+                />
               </div>
 
               <!-- Last Payday -->
@@ -77,16 +57,18 @@
                 <label class="block text-sm font-medium text-gray-700"
                   >Last Payday</label
                 >
-                <input
+                <BaseInput
                   v-model="incomeLastPayday"
                   type="date"
-                  class="block w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1 focus:ring-primary focus:border-primary"
+                  name="income-last-payday"
                   :min="lastWeekDate"
                 />
                 <p class="text-sm text-gray-500">
                   Select your most recent payday
                 </p>
               </div>
+
+              <div v-if="error" class="text-red-600 text-sm">{{ error }}</div>
 
               <!-- Action Buttons -->
               <div class="flex justify-end space-x-3 pt-4">
@@ -179,14 +161,14 @@
 
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import { useRouter, useRoute } from "vue-router";
+import { useRouter } from "vue-router";
 import { budgetService, type Income } from "../services/budgetService";
 import BaseButton from "../components/atoms/BaseButton.vue";
 import BaseCard from "../components/atoms/BaseCard.vue";
+import BaseInput from "../components/atoms/BaseInput.vue";
 import BasePage from "../components/atoms/BasePage.vue";
 
 const router = useRouter();
-const route = useRoute();
 const currentBudget = computed(() => budgetService.getCurrentBudget());
 const isSubmitting = ref(false);
 const error = ref<string | null>(null);
@@ -236,6 +218,27 @@ const isFormValid = computed(() => {
   );
 });
 
+function generatePayPeriods(lastPayday: string, count: number) {
+  const periods = [];
+  let currentDate = new Date(lastPayday);
+  currentDate.setDate(currentDate.getDate() + 1);
+
+  for (let i = 0; i < count; i++) {
+    const start = new Date(currentDate);
+    const end = new Date(currentDate);
+    end.setDate(end.getDate() + 14);
+
+    periods.push({
+      start: start.toISOString(),
+      end: end.toISOString(),
+    });
+
+    currentDate.setDate(currentDate.getDate() + 14);
+  }
+
+  return periods;
+}
+
 const handleSubmit = async () => {
   if (!isFormValid.value) return;
 
@@ -258,27 +261,6 @@ const handleSubmit = async () => {
     isSubmitting.value = false;
   }
 };
-
-function generatePayPeriods(lastPayday: string, count: number) {
-  const periods = [];
-  let currentDate = new Date(lastPayday);
-  currentDate.setDate(currentDate.getDate() + 1);
-
-  for (let i = 0; i < count; i++) {
-    const start = new Date(currentDate);
-    const end = new Date(currentDate);
-    end.setDate(end.getDate() + 14);
-
-    periods.push({
-      start: start.toISOString(),
-      end: end.toISOString(),
-    });
-
-    currentDate.setDate(currentDate.getDate() + 14);
-  }
-
-  return periods;
-}
 </script>
 
 <style scoped>

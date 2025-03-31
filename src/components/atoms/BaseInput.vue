@@ -82,7 +82,7 @@ const handleBlur = (event: Event) => {
       <span v-if="required" class="text-error">*</span>
     </label>
 
-    <div class="relative rounded-2xl shadow-sm">
+    <div class="relative rounded-lg shadow-sm">
       <!-- Left Icon/Prefix -->
       <div
         v-if="icon || prefix"
@@ -104,10 +104,12 @@ const handleBlur = (event: Event) => {
         :disabled="disabled"
         :required="required"
         :class="[
-          'block w-full py-3 border-gray-200 rounded-2xl focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow',
+          'block w-full py-3 border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow shadow-inner',
           icon || prefix ? 'pl-10' : 'pl-4',
           suffix ? 'pr-10' : 'pr-4',
-          disabled ? 'bg-gray-50 text-gray-500 cursor-not-allowed' : 'bg-white',
+          disabled
+            ? 'bg-gray-50 text-gray-500 cursor-not-allowed'
+            : 'bg-gray-50',
           error ? 'border-error focus:ring-error/30' : 'border-gray-200',
         ]"
         @input="handleInput"
@@ -151,5 +153,9 @@ input[type="date"]::-webkit-calendar-picker-indicator::after {
   mask-size: contain;
   mask-repeat: no-repeat;
   mask-position: center;
+}
+
+.shadow-inner {
+  box-shadow: inset 0 1px 2px 0 rgb(0 0 0 / 0.05);
 }
 </style>
