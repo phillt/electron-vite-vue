@@ -3,6 +3,7 @@
 import type { PayPeriod } from "../../services/budgetService";
 import BaseTable from "../atoms/BaseTable.vue";
 import BaseInput from "../atoms/BaseInput.vue";
+import BaseButton from "../atoms/BaseButton.vue";
 
 const props = defineProps<{
   payPeriod: PayPeriod;
@@ -31,6 +32,14 @@ const calculateDaysUntilDue = (dueDate: string) => {
   return diffDays;
 };
 
+const headers = [
+  { label: "Name", key: "name" },
+  { label: "Amount", key: "amount" },
+  { label: "Due Date", key: "dueDate" },
+  { label: "Days Until Due", key: "daysUntilDue" },
+  { label: "Paid", key: "paid" },
+];
+
 const handleAmountChange = (billName: string, amount: string) => {
   emit("updateAmount", billName, Number(amount));
 };
@@ -38,16 +47,7 @@ const handleAmountChange = (billName: string, amount: string) => {
 
 <template>
   <div class="p-4">
-    <BaseTable>
-      <thead>
-        <tr>
-          <th class="text-left">Name</th>
-          <th class="text-right">Amount</th>
-          <th class="text-right">Due Date</th>
-          <th class="text-right">Days Until Due</th>
-          <th class="text-center">Paid</th>
-        </tr>
-      </thead>
+    <BaseTable :headers="headers" :rows="payPeriod.bills">
       <tbody>
         <tr v-for="bill in payPeriod.bills" :key="bill.name">
           <td>{{ bill.name }}</td>
@@ -58,17 +58,17 @@ const handleAmountChange = (billName: string, amount: string) => {
               name="bill-amount"
               prefix="$"
               class="w-32"
-              @blur="handleAmountChange(bill.name, bill.amount)"
+              @blur="handleAmountChange(bill.name, bill.amount.toString())"
             />
           </td>
           <td class="text-right">{{ bill.dueDate }}</td>
-          <td class="text-right">{{ bill.daysUntilDue }}</td>
+          <td class="text-right">{{ calculateDaysUntilDue(bill.dueDate) }}</td>
           <td class="text-center">
             <BaseButton
-              :variant="bill.paid ? 'primary' : 'outline'"
+              :variant="bill.isPaid ? 'primary' : 'outline'"
               @click="emit('togglePaid', bill.name)"
             >
-              {{ bill.paid ? "Paid" : "Unpaid" }}
+              {{ bill.isPaid ? "Paid" : "Unpaid" }}
             </BaseButton>
           </td>
         </tr>
