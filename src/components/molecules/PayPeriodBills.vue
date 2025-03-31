@@ -48,13 +48,9 @@ const handleAmountChange = (billName: string, amount: string) => {
 <template>
   <div class="p-4">
     <BaseTable :headers="headers" :rows="payPeriod.bills">
-      <tr
-        v-for="bill in payPeriod.bills"
-        :key="bill.name"
-        class="divide-x divide-brand-surface"
-      >
-        <td class="px-6 py-4 whitespace-nowrap w-2/5">{{ bill.name }}</td>
-        <td class="px-6 py-4 whitespace-nowrap w-1/5 text-right">
+      <tr v-for="bill in payPeriod.bills" :key="bill.name">
+        <td class="px-4 py-2 whitespace-nowrap w-2/5">{{ bill.name }}</td>
+        <td class="px-4 py-2 whitespace-nowrap w-1/5 text-right">
           <BaseInput
             v-model="bill.amount"
             type="number"
@@ -64,13 +60,13 @@ const handleAmountChange = (billName: string, amount: string) => {
             @blur="handleAmountChange(bill.name, bill.amount.toString())"
           />
         </td>
-        <td class="px-6 py-4 whitespace-nowrap w-1/5 text-right">
+        <td class="px-4 py-2 whitespace-nowrap w-1/5 text-right">
           {{ formatDate(bill.dueDate) }}
         </td>
-        <td class="px-6 py-4 whitespace-nowrap w-1/5 text-right">
+        <td class="px-4 py-2 whitespace-nowrap w-1/5 text-right">
           {{ calculateDaysUntilDue(bill.dueDate) }}
         </td>
-        <td class="px-6 py-4 whitespace-nowrap w-1/5 text-center">
+        <td class="px-4 py-2 whitespace-nowrap w-1/5 text-center">
           <BaseButton
             :variant="bill.isPaid ? 'primary' : 'outline'"
             @click="emit('togglePaid', bill.name)"

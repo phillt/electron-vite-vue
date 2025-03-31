@@ -15,15 +15,18 @@ defineProps<{
 </script>
 
 <template>
-  <div class="overflow-hidden rounded-lg border" :class="status?.class">
-    <table class="min-w-full divide-y divide-brand-surface">
-      <thead class="bg-opacity-50" :class="status?.class">
-        <tr class="divide-x divide-brand-surface">
+  <div class="overflow-hidden">
+    <table class="min-w-full">
+      <thead
+        class="bg-opacity-50 border-b-2 border-brand-surface"
+        :class="status?.class"
+      >
+        <tr>
           <th
             v-for="header in headers"
             :key="header.key"
             :class="[
-              'px-6 py-3 text-xs font-medium text-brand-muted uppercase tracking-wider whitespace-nowrap',
+              'px-4 py-2 text-xs font-medium text-brand-muted uppercase tracking-wider whitespace-nowrap',
               header.class || 'text-left',
             ]"
           >
