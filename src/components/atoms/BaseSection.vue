@@ -6,7 +6,15 @@ defineProps<{
   title: string;
   action?: {
     label: string;
-    variant?: "primary" | "secondary" | "outline" | "ghost";
+    variant?:
+      | "primary"
+      | "outline"
+      | "popular"
+      | "cheapest"
+      | "recommended"
+      | "icon"
+      | "tag"
+      | "ghost";
     onClick: () => void;
   };
 }>();

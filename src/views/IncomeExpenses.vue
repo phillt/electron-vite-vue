@@ -14,7 +14,7 @@
           title="Income Sources"
           :action="{
             label: 'Add New Income',
-            variant: 'secondary',
+            variant: 'primary',
             onClick: () => $router.push('/add-income'),
           }"
         />
@@ -51,7 +51,7 @@
           title="Bills"
           :action="{
             label: 'Add New Bill',
-            variant: 'secondary',
+            variant: 'primary',
             onClick: () => $router.push('/add-bill'),
           }"
         />
