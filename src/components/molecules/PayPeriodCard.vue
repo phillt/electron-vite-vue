@@ -24,6 +24,7 @@ const emit = defineEmits<{
   (e: "updatePaycheckAmount", amount: number): void;
   (e: "addBill"): void;
   (e: "addExpense"): void;
+  (e: "deleteExpense", expenseId: string): void;
 }>();
 
 const showBills = ref(props.isCurrentPeriod);
@@ -131,23 +132,6 @@ const formatCurrency = (amount: number) => {
             {{ payPeriod.expenses.filter((expense) => expense.isPaid).length }}
             paid / {{ payPeriod.expenses.length }} total
           </span>
-          <span
-            v-if="
-              payPeriod.expenses.some(
-                (expense) =>
-                  !expense.isPaid && new Date(expense.date) < new Date()
-              )
-            "
-            class="text-sm text-red-700 font-bold"
-          >
-            {{
-              payPeriod.expenses.filter(
-                (expense) =>
-                  !expense.isPaid && new Date(expense.date) < new Date()
-              ).length
-            }}
-            past due
-          </span>
         </div>
       </div>
       <div v-show="showExpenses">
@@ -158,6 +142,7 @@ const formatCurrency = (amount: number) => {
           @update-amount="
             (expenseId: string, amount: number) => emit('updateExpenseAmount', expenseId, amount)
           "
+          @delete-expense="(expenseId: string) => emit('deleteExpense', expenseId)"
         />
         <div class="p-4 pt-0 flex justify-end">
           <BaseButton variant="outline" @click="emit('addExpense')"

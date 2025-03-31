@@ -2,7 +2,7 @@
   "name": "Rolling Thunder",
   "description": "My first attempt at creating a real budget.",
   "createdAt": "2025-03-30T05:35:16.804Z",
-  "updatedAt": "2025-03-31T02:05:36.680Z",
+  "updatedAt": "2025-03-31T02:14:30.047Z",
   "filePath": "/home/philllt/Projects/apps/electron-vite-vue/Rolling Thunder.bdgtmn",
   "items": [],
   "incomes": [
@@ -129,22 +129,37 @@
           "name": "StoreQuest",
           "dueDay": 27,
           "amount": 141,
-          "isPaid": false,
+          "isPaid": true,
           "dueDate": "2025-03-28T00:00:00.000Z"
         },
         {
           "name": "Federal Taxes",
           "dueDay": 27,
           "amount": 600,
-          "isPaid": false,
+          "isPaid": true,
           "dueDate": "2025-03-28T00:00:00.000Z"
         }
       ],
-      "expenses": [],
+      "expenses": [
+        {
+          "name": "Grooming",
+          "amount": "300",
+          "isPaid": false,
+          "id": "1743387089687",
+          "date": "2025-03-31T02:11:29.687Z"
+        },
+        {
+          "name": "Food",
+          "amount": "200",
+          "isPaid": false,
+          "id": "1743387270047",
+          "date": "2025-03-31T02:14:30.047Z"
+        }
+      ],
       "totalAmount": 1493.88,
-      "paidAmount": 752.88,
-      "unpaidAmount": 741.0000000000001,
-      "totalExpenses": 0,
+      "paidAmount": 1493.88,
+      "unpaidAmount": 0,
+      "totalExpenses": "0300200",
       "paycheckAmount": 3500
     },
     {

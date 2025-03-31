@@ -44,11 +44,11 @@ const sortedBills = computed(() => {
 });
 
 const headers = [
-  { label: "Name", key: "name", class: "w-2/5" },
-  { label: "Amount", key: "amount", class: "w-1/5 text-right" },
-  { label: "Due Date", key: "dueDate", class: "w-1/5 text-right" },
-  { label: "Days Until Due", key: "daysUntilDue", class: "w-1/5 text-right" },
-  { label: "Paid", key: "paid", class: "w-1/5 text-center" },
+  { label: "Name", key: "name", class: "w-2/5 text-left" },
+  { label: "Amount", key: "amount", class: "w-1/5 text-center" },
+  { label: "Due Date", key: "dueDate", class: "w-1/5 text-center" },
+  { label: "Days Until Due", key: "daysUntilDue", class: "w-1/5 text-center" },
+  { label: "Paid", key: "paid", class: "w-1/5 text-right" },
 ];
 
 const handleAmountChange = (billName: string, amount: string) => {
@@ -60,7 +60,7 @@ const handleAmountChange = (billName: string, amount: string) => {
   <div class="p-4">
     <BaseTable :headers="headers" :rows="sortedBills">
       <template #default="{ row: bill, class: rowClass }">
-        <tr :class="rowClass">
+        <tr :class="[rowClass, { 'opacity-50': bill.isPaid }]">
           <td
             class="px-4 py-2 whitespace-nowrap w-2/5"
             :class="{
@@ -69,7 +69,7 @@ const handleAmountChange = (billName: string, amount: string) => {
           >
             {{ bill.name }}
           </td>
-          <td class="px-4 py-2 whitespace-nowrap w-1/5 text-right">
+          <td class="px-4 py-2 whitespace-nowrap w-1/5 text-center">
             <BaseInput
               v-model="bill.amount"
               type="number"
@@ -80,18 +80,18 @@ const handleAmountChange = (billName: string, amount: string) => {
               @blur="handleAmountChange(bill.name, bill.amount.toString())"
             />
           </td>
-          <td class="px-4 py-2 whitespace-nowrap w-1/5 text-right">
+          <td class="px-4 py-2 whitespace-nowrap w-1/5 text-center">
             {{ formatDate(bill.dueDate) }}
           </td>
           <td
-            class="px-4 py-2 whitespace-nowrap w-1/5 text-right"
+            class="px-4 py-2 whitespace-nowrap w-1/5 text-center"
             :class="{
               'text-red-700 font-bold': !bill.isPaid && isPastDue(bill.dueDate),
             }"
           >
             {{ calculateDaysUntilDue(bill.dueDate) }}
           </td>
-          <td class="px-4 py-2 whitespace-nowrap w-1/5 text-center">
+          <td class="px-4 py-2 whitespace-nowrap w-1/5 text-right">
             <BaseButton
               :variant="bill.isPaid ? 'primary' : 'outline'"
               size="sm"
