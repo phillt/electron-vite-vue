@@ -1,10 +1,11 @@
 <!-- PayPeriodCard.vue -->
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import type { PayPeriod } from "../../services/budgetService";
 import PayPeriodHeader from "./PayPeriodHeader.vue";
 import PayPeriodBills from "./PayPeriodBills.vue";
 import PayPeriodExpenses from "./PayPeriodExpenses.vue";
+import BaseButton from "../atoms/BaseButton.vue";
 
 const props = defineProps<{
   payPeriod: PayPeriod;
@@ -24,6 +25,9 @@ const emit = defineEmits<{
   (e: "addBill"): void;
   (e: "addExpense"): void;
 }>();
+
+const showBills = ref(props.isCurrentPeriod);
+const showExpenses = ref(props.isCurrentPeriod);
 
 const status = computed(() => {
   if (props.isCurrentPeriod) {
@@ -53,31 +57,59 @@ const status = computed(() => {
     <PayPeriodHeader
       :pay-period="payPeriod"
       :status="status"
-      @update:paycheck-amount="(amount) => emit('updatePaycheckAmount', amount)"
+      @update:paycheck-amount="(amount: number) => emit('updatePaycheckAmount', amount)"
     />
 
     <div class="border-t" :class="status.class">
-      <PayPeriodBills
-        :pay-period="payPeriod"
-        :status="status"
-        @toggle-paid="(billName) => emit('toggleBillPaid', billName)"
-        @update-amount="
-          (billName, amount) => emit('updateBillAmount', billName, amount)
-        "
-        @add-bill="emit('addBill')"
-      />
+      <div class="flex items-center justify-between p-4">
+        <div
+          class="flex items-center cursor-pointer"
+          @click="showBills = !showBills"
+        >
+          <span class="text-brand-muted mr-2">{{ showBills ? "▼" : "▶" }}</span>
+          <h3 class="text-lg font-medium text-brand-text">Bills</h3>
+        </div>
+        <BaseButton variant="outline" @click="emit('addBill')"
+          >Add Bill</BaseButton
+        >
+      </div>
+      <div v-show="showBills">
+        <PayPeriodBills
+          :pay-period="payPeriod"
+          :status="status"
+          @toggle-paid="(billName: string) => emit('toggleBillPaid', billName)"
+          @update-amount="
+            (billName: string, amount: number) => emit('updateBillAmount', billName, amount)
+          "
+        />
+      </div>
     </div>
 
     <div class="border-t" :class="status.class">
-      <PayPeriodExpenses
-        :pay-period="payPeriod"
-        :status="status"
-        @toggle-paid="(expenseId) => emit('toggleExpensePaid', expenseId)"
-        @update-amount="
-          (expenseId, amount) => emit('updateExpenseAmount', expenseId, amount)
-        "
-        @add-expense="emit('addExpense')"
-      />
+      <div class="flex items-center justify-between p-4">
+        <div
+          class="flex items-center cursor-pointer"
+          @click="showExpenses = !showExpenses"
+        >
+          <span class="text-brand-muted mr-2">{{
+            showExpenses ? "▼" : "▶"
+          }}</span>
+          <h3 class="text-lg font-medium text-brand-text">Expenses</h3>
+        </div>
+        <BaseButton variant="outline" @click="emit('addExpense')"
+          >Add Expense</BaseButton
+        >
+      </div>
+      <div v-show="showExpenses">
+        <PayPeriodExpenses
+          :pay-period="payPeriod"
+          :status="status"
+          @toggle-paid="(expenseId: string) => emit('toggleExpensePaid', expenseId)"
+          @update-amount="
+            (expenseId: string, amount: number) => emit('updateExpenseAmount', expenseId, amount)
+          "
+        />
+      </div>
     </div>
   </div>
 </template>

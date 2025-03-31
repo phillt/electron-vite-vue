@@ -16,73 +16,47 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: "togglePaid", expenseId: string): void;
   (e: "updateAmount", expenseId: string, amount: number): void;
-  (e: "addExpense"): void;
 }>();
 
-const formatDate = (date: string) => {
-  return new Date(date).toLocaleDateString();
-};
-
-const handleExpenseAmountChange = (
-  expenseId: string,
-  value: string | number
-) => {
-  const newAmount = parseFloat(value.toString());
-  if (!isNaN(newAmount)) {
-    emit("updateAmount", expenseId, newAmount);
-  }
+const handleAmountChange = (expenseId: string, amount: string) => {
+  emit("updateAmount", expenseId, Number(amount));
 };
 </script>
 
 <template>
-  <div
-    class="px-4 py-3 bg-brand-surface border-b flex justify-between items-center"
-  >
-    <h4 class="text-lg font-medium text-brand-text">Expenses</h4>
-    <BaseButton variant="outline" size="sm" @click="emit('addExpense')">
-      Add Expense
-    </BaseButton>
-  </div>
-  <div class="divide-y divide-brand-surface">
+  <div class="p-4">
     <div
-      v-if="!payPeriod.expenses || payPeriod.expenses.length === 0"
-      class="p-4 text-center text-brand-muted"
+      v-if="payPeriod.expenses.length === 0"
+      class="text-center text-brand-muted py-4"
     >
       No expenses added yet
     </div>
-    <div
-      v-for="expense in payPeriod.expenses"
-      :key="expense.id"
-      class="px-4 py-3 flex justify-between items-center"
-    >
-      <div>
-        <div class="font-medium text-brand-text">
-          {{ expense.name }}
+    <div v-else class="space-y-4">
+      <div
+        v-for="expense in payPeriod.expenses"
+        :key="expense.id"
+        class="flex items-center justify-between p-4 bg-white rounded-lg border"
+      >
+        <div class="flex-1">
+          <h4 class="font-medium text-brand-text">{{ expense.name }}</h4>
+          <p class="text-sm text-brand-muted">Added {{ expense.dateAdded }}</p>
         </div>
-        <div class="text-sm text-brand-muted">
-          Added on {{ formatDate(expense.date) }}
-        </div>
-      </div>
-      <div class="flex items-center space-x-4">
-        <div class="flex items-center space-x-2">
+        <div class="flex items-center space-x-4">
           <BaseInput
             v-model="expense.amount"
-            :name="`expense-amount-${expense.id}`"
             type="number"
-            class="w-32"
+            name="expense-amount"
             prefix="$"
-            @update:modelValue="
-              (value) => handleExpenseAmountChange(expense.id, value)
-            "
+            class="w-32"
+            @blur="handleAmountChange(expense.id, expense.amount)"
           />
+          <BaseButton
+            :variant="expense.paid ? 'primary' : 'outline'"
+            @click="emit('togglePaid', expense.id)"
+          >
+            {{ expense.paid ? "Paid" : "Unpaid" }}
+          </BaseButton>
         </div>
-        <BaseButton
-          :variant="expense.isPaid ? 'primary' : 'outline'"
-          size="sm"
-          @click="emit('togglePaid', expense.id)"
-        >
-          {{ expense.isPaid ? "Paid" : "Unpaid" }}
-        </BaseButton>
       </div>
     </div>
   </div>

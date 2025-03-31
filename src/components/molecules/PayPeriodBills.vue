@@ -1,8 +1,6 @@
 <!-- PayPeriodBills.vue -->
 <script setup lang="ts">
 import type { PayPeriod } from "../../services/budgetService";
-import BaseButton from "../atoms/BaseButton.vue";
-import BaseSection from "../atoms/BaseSection.vue";
 import BaseTable from "../atoms/BaseTable.vue";
 import BaseInput from "../atoms/BaseInput.vue";
 
@@ -18,7 +16,6 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: "togglePaid", billName: string): void;
   (e: "updateAmount", billName: string, amount: number): void;
-  (e: "addBill"): void;
 }>();
 
 const formatDate = (date: string) => {
@@ -34,67 +31,48 @@ const calculateDaysUntilDue = (dueDate: string) => {
   return diffDays;
 };
 
-const handleBillAmountChange = (billName: string, value: string | number) => {
-  const newAmount = parseFloat(value.toString());
-  if (!isNaN(newAmount)) {
-    emit("updateAmount", billName, newAmount);
-  }
+const handleAmountChange = (billName: string, amount: string) => {
+  emit("updateAmount", billName, Number(amount));
 };
-
-const tableHeaders = [
-  { label: "Bill Name", key: "name" },
-  { label: "Amount", key: "amount" },
-  { label: "Due Date", key: "dueDate" },
-  { label: "Days Until Due", key: "daysUntilDue" },
-  { label: "Status", key: "status" },
-];
 </script>
 
 <template>
-  <BaseSection
-    title="Bills"
-    :action="{
-      label: 'Add Bill',
-      variant: 'outline',
-      onClick: () => emit('addBill'),
-    }"
-  />
-  <BaseTable :headers="tableHeaders" :rows="payPeriod.bills" :status="status">
-    <tr v-for="bill in payPeriod.bills" :key="bill.name">
-      <td
-        class="px-6 py-4 whitespace-nowrap text-sm font-medium text-brand-text"
-      >
-        {{ bill.name }}
-      </td>
-      <td class="px-6 py-4 whitespace-nowrap text-sm text-brand-muted">
-        <div class="flex items-center space-x-2">
-          <BaseInput
-            v-model="bill.amount"
-            :name="`bill-amount-${bill.name}`"
-            type="number"
-            class="w-32"
-            prefix="$"
-            @update:modelValue="
-              (value) => handleBillAmountChange(bill.name, value)
-            "
-          />
-        </div>
-      </td>
-      <td class="px-6 py-4 whitespace-nowrap text-sm text-brand-muted">
-        {{ formatDate(bill.dueDate) }}
-      </td>
-      <td class="px-6 py-4 whitespace-nowrap text-sm text-brand-muted">
-        {{ calculateDaysUntilDue(bill.dueDate) }}
-      </td>
-      <td class="px-6 py-4 whitespace-nowrap text-sm text-brand-muted">
-        <BaseButton
-          :variant="bill.isPaid ? 'primary' : 'outline'"
-          size="sm"
-          @click="emit('togglePaid', bill.name)"
-        >
-          {{ bill.isPaid ? "Paid" : "Unpaid" }}
-        </BaseButton>
-      </td>
-    </tr>
-  </BaseTable>
+  <div class="p-4">
+    <BaseTable>
+      <thead>
+        <tr>
+          <th class="text-left">Name</th>
+          <th class="text-right">Amount</th>
+          <th class="text-right">Due Date</th>
+          <th class="text-right">Days Until Due</th>
+          <th class="text-center">Paid</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="bill in payPeriod.bills" :key="bill.name">
+          <td>{{ bill.name }}</td>
+          <td class="text-right">
+            <BaseInput
+              v-model="bill.amount"
+              type="number"
+              name="bill-amount"
+              prefix="$"
+              class="w-32"
+              @blur="handleAmountChange(bill.name, bill.amount)"
+            />
+          </td>
+          <td class="text-right">{{ bill.dueDate }}</td>
+          <td class="text-right">{{ bill.daysUntilDue }}</td>
+          <td class="text-center">
+            <BaseButton
+              :variant="bill.paid ? 'primary' : 'outline'"
+              @click="emit('togglePaid', bill.name)"
+            >
+              {{ bill.paid ? "Paid" : "Unpaid" }}
+            </BaseButton>
+          </td>
+        </tr>
+      </tbody>
+    </BaseTable>
+  </div>
 </template>
