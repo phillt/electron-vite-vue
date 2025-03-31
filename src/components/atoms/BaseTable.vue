@@ -35,7 +35,15 @@ defineProps<{
         </tr>
       </thead>
       <tbody class="divide-y divide-brand-surface">
-        <slot></slot>
+        <slot name="no-data"></slot>
+        <template v-for="(row, index) in rows" :key="index">
+          <slot
+            :row="row"
+            :index="index"
+            :class="index % 2 === 0 ? '' : 'bg-gray-50'"
+          >
+          </slot>
+        </template>
       </tbody>
     </table>
   </div>

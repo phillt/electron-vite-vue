@@ -7,6 +7,11 @@ const props = defineProps({
     type: [String, Number],
     default: "",
   },
+  size: {
+    type: String,
+    default: "md",
+    validator: (value: string) => ["sm", "md", "lg"].includes(value),
+  },
   label: {
     type: String,
     default: "",
@@ -61,6 +66,15 @@ const emit = defineEmits(["update:modelValue", "blur"]);
 
 const inputRef = computed(() => `input-${props.name}`);
 
+const sizeClasses = computed(
+  () =>
+    ({
+      sm: "py-1.5 text-sm",
+      md: "py-2 text-base",
+      lg: "py-3 text-lg",
+    }[props.size])
+);
+
 const handleInput = (event: Event) => {
   const target = event.target as HTMLInputElement;
   emit("update:modelValue", target.value);
@@ -104,7 +118,8 @@ const handleBlur = (event: Event) => {
         :disabled="disabled"
         :required="required"
         :class="[
-          'block w-full py-3 border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow shadow-inner',
+          'block w-full border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow shadow-inner',
+          sizeClasses,
           icon || prefix ? 'pl-10' : 'pl-4',
           suffix ? 'pr-10' : 'pr-4',
           disabled
