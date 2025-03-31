@@ -50,6 +50,13 @@ const status = computed(() => {
     };
   }
 });
+
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(amount);
+};
 </script>
 
 <template>
@@ -67,11 +74,29 @@ const status = computed(() => {
           @click="showBills = !showBills"
         >
           <span class="text-brand-muted mr-2">{{ showBills ? "▼" : "▶" }}</span>
-          <h3 class="text-lg font-medium text-brand-text">Bills</h3>
+          <h3 class="text-base font-medium text-brand-text">Bills</h3>
         </div>
-        <BaseButton variant="outline" @click="emit('addBill')"
-          >Add Bill</BaseButton
-        >
+        <div class="flex items-center gap-2">
+          <span class="text-sm text-brand-muted">
+            {{ payPeriod.bills.filter((bill) => bill.isPaid).length }} paid /
+            {{ payPeriod.bills.length }} total
+          </span>
+          <span
+            v-if="
+              payPeriod.bills.some(
+                (bill) => !bill.isPaid && new Date(bill.dueDate) < new Date()
+              )
+            "
+            class="text-sm text-red-700 font-bold"
+          >
+            {{
+              payPeriod.bills.filter(
+                (bill) => !bill.isPaid && new Date(bill.dueDate) < new Date()
+              ).length
+            }}
+            past due
+          </span>
+        </div>
       </div>
       <div v-show="showBills">
         <PayPeriodBills
@@ -82,6 +107,11 @@ const status = computed(() => {
             (billName: string, amount: number) => emit('updateBillAmount', billName, amount)
           "
         />
+        <div class="p-4 pt-0 flex justify-end">
+          <BaseButton variant="outline" @click="emit('addBill')"
+            >Add Bill</BaseButton
+          >
+        </div>
       </div>
     </div>
 
@@ -94,11 +124,31 @@ const status = computed(() => {
           <span class="text-brand-muted mr-2">{{
             showExpenses ? "▼" : "▶"
           }}</span>
-          <h3 class="text-lg font-medium text-brand-text">Expenses</h3>
+          <h3 class="text-base font-medium text-brand-text">Expenses</h3>
         </div>
-        <BaseButton variant="outline" @click="emit('addExpense')"
-          >Add Expense</BaseButton
-        >
+        <div class="flex items-center gap-2">
+          <span class="text-sm text-brand-muted">
+            {{ payPeriod.expenses.filter((expense) => expense.isPaid).length }}
+            paid / {{ payPeriod.expenses.length }} total
+          </span>
+          <span
+            v-if="
+              payPeriod.expenses.some(
+                (expense) =>
+                  !expense.isPaid && new Date(expense.date) < new Date()
+              )
+            "
+            class="text-sm text-red-700 font-bold"
+          >
+            {{
+              payPeriod.expenses.filter(
+                (expense) =>
+                  !expense.isPaid && new Date(expense.date) < new Date()
+              ).length
+            }}
+            past due
+          </span>
+        </div>
       </div>
       <div v-show="showExpenses">
         <PayPeriodExpenses
@@ -109,6 +159,11 @@ const status = computed(() => {
             (expenseId: string, amount: number) => emit('updateExpenseAmount', expenseId, amount)
           "
         />
+        <div class="p-4 pt-0 flex justify-end">
+          <BaseButton variant="outline" @click="emit('addExpense')"
+            >Add Expense</BaseButton
+          >
+        </div>
       </div>
     </div>
   </div>
