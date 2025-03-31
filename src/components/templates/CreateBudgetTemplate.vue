@@ -2,6 +2,7 @@
 <script setup lang="ts">
 import BudgetForm from "../molecules/BudgetForm.vue";
 import type { Budget } from "../../services/budgetService";
+import BaseCard from "../atoms/BaseCard.vue";
 
 defineProps<{
   isSubmitting?: boolean;
@@ -16,12 +17,14 @@ defineEmits<{
 
 <template>
   <div class="min-h-screen flex items-center justify-center bg-gray-50">
-    <div class="max-w-md w-full space-y-8 p-8">
-      <div>
-        <h1 class="text-3xl font-bold text-gray-900 text-center">
-          Create New Budget
-        </h1>
-      </div>
+    <BaseCard class="space-y-8 p-8">
+      <template #header>
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900 text-center">
+            Create New Budget
+          </h1>
+        </div>
+      </template>
 
       <BudgetForm
         :is-submitting="isSubmitting"
@@ -29,6 +32,6 @@ defineEmits<{
         @submit="$emit('submit', $event)"
         @cancel="$emit('cancel')"
       />
-    </div>
+    </BaseCard>
   </div>
 </template>

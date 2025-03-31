@@ -41,22 +41,22 @@ const budgetInfo = computed(() => [
     title="Settings"
     description="Manage your budget settings and preferences"
   >
-    <BaseCard>
+    <template #actions>
+      <BaseButton variant="outline" @click="$router.push('/')">
+        Open or Create Budget
+      </BaseButton>
+    </template>
+    <BaseCard :title="currentBudget?.name">
       <div class="px-4 py-5 sm:p-6">
         <div class="space-y-6">
           <!-- Budget Information -->
-          <BaseSection title="Budget Information">
-            <div class="mt-2 max-w-xl text-sm text-brand-muted">
-              <p>Current budget details and file location.</p>
-            </div>
-            <BaseInfoList :items="budgetInfo" />
-          </BaseSection>
+
+          <div class="mt-2 max-w-xl text-sm text-brand-muted"></div>
+          <BaseInfoList :items="budgetInfo" />
 
           <div class="pt-6">
             <div class="flex justify-end">
-              <BaseButton variant="outline" @click="$router.push('/')">
-                Open or Create Budget
-              </BaseButton>
+              <BaseButton variant="outline">Open In Folder</BaseButton>
             </div>
           </div>
         </div>

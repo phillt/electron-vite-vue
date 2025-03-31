@@ -21,14 +21,18 @@ const handleOpenBudget = async () => {
   <div
     class="min-h-screen flex items-center justify-center bg-brand-background"
   >
-    <BaseCard class="max-w-md w-full" padding="lg">
-      <div class="text-center">
-        <h1 class="text-4xl font-bold text-brand-text mb-2">Budget Manager</h1>
-        <p class="text-brand-muted">
-          Welcome! Get started by creating a new budget or opening an existing
-          one.
-        </p>
-      </div>
+    <BaseCard class="max-w-md w-full">
+      <template #header>
+        <div class="text-center">
+          <h1 class="text-4xl font-bold text-brand-text mb-2">
+            Budget Manager
+          </h1>
+          <p class="text-brand-muted">
+            Welcome! Get started by creating a new budget or opening an existing
+            one.
+          </p>
+        </div>
+      </template>
 
       <div class="space-y-4 mt-8">
         <BaseButton
@@ -52,7 +56,7 @@ const handleOpenBudget = async () => {
         <template v-if="currentBudget">
           <hr class="border-brand-surface my-4" />
           <BaseButton
-            variant="ghost"
+            variant="outline"
             size="lg"
             class="w-full"
             @click="router.push('/budget')"
