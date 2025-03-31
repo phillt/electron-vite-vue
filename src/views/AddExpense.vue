@@ -3,6 +3,9 @@
 import { ref } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { budgetService } from "../services/budgetService";
+import BaseButton from "../components/atoms/BaseButton.vue";
+import BaseCard from "../components/atoms/BaseCard.vue";
+import BaseInput from "../components/atoms/BaseInput.vue";
 
 const router = useRouter();
 const route = useRoute();
@@ -11,6 +14,7 @@ const payPeriodIndex = parseInt(route.query.payPeriodIndex as string);
 const expense = ref({
   name: "",
   amount: 0,
+  isPaid: false,
 });
 
 const error = ref<string | null>(null);
@@ -37,75 +41,61 @@ const handleSubmit = async () => {
       <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between">
           <h1 class="text-2xl font-bold text-gray-900">Add Expense</h1>
-          <button
-            @click="router.back()"
-            class="text-sm text-gray-600 hover:text-gray-900"
-          >
+          <BaseButton variant="ghost" size="sm" @click="router.back()">
             Back
-          </button>
+          </BaseButton>
         </div>
       </div>
     </div>
 
     <div class="flex-1">
       <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <form
-          @submit.prevent="handleSubmit"
-          class="space-y-6 bg-white p-6 rounded-lg shadow"
-        >
-          <div>
-            <label for="name" class="block text-sm font-medium text-gray-700">
-              Expense Name
-            </label>
-            <div class="mt-1">
-              <input
-                id="name"
-                v-model="expense.name"
-                type="text"
-                required
-                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                placeholder="e.g., Groceries"
-              />
-            </div>
-          </div>
+        <BaseCard elevated>
+          <form @submit.prevent="handleSubmit" class="space-y-6">
+            <BaseInput
+              v-model="expense.name"
+              name="name"
+              label="Expense Name"
+              type="text"
+              required
+              placeholder="e.g., Groceries"
+            />
 
-          <div>
-            <label for="amount" class="block text-sm font-medium text-gray-700">
-              Amount
-            </label>
-            <div class="mt-1 relative rounded-md shadow-sm">
-              <div
-                class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
-              >
-                <span class="text-gray-500 sm:text-sm">$</span>
+            <BaseInput
+              v-model="expense.amount"
+              name="amount"
+              type="number"
+              label="Amount"
+              required
+              min="0"
+              step="0.01"
+              prefix="$"
+              placeholder="0.00"
+            />
+
+            <div v-if="error" class="rounded-md bg-red-50 p-4">
+              <div class="flex">
+                <div class="ml-3">
+                  <h3 class="text-sm font-medium text-red-800">Error</h3>
+                  <div class="mt-2 text-sm text-red-700">
+                    {{ error }}
+                  </div>
+                </div>
               </div>
-              <input
-                id="amount"
-                v-model="expense.amount"
-                type="number"
-                min="0"
-                step="0.01"
-                required
-                class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md"
-                placeholder="0.00"
-              />
             </div>
-          </div>
 
-          <div v-if="error" class="text-sm text-red-600">
-            {{ error }}
-          </div>
-
-          <div class="flex justify-end">
-            <button
-              type="submit"
-              :disabled="isSubmitting"
-              class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-            >
-              {{ isSubmitting ? "Adding..." : "Add Expense" }}
-            </button>
-          </div>
-        </form>
+            <div class="flex justify-end">
+              <BaseButton
+                type="submit"
+                :loading="isSubmitting"
+                :disabled="isSubmitting"
+                variant="primary"
+              >
+                Add Expense
+              </BaseButton>
+            </div>
+          </form>
+        </BaseCard>
       </div>
     </div>
   </div>
