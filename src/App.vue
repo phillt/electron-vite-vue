@@ -18,11 +18,9 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div
-    class="min-h-screen bg-gray-50 w-full flex flex-col rounded-lg overflow-hidden"
-  >
+  <div class="h-full w-full flex flex-col rounded-lg overflow-hidden">
     <TitleBar class="titlebar" />
-    <div class="flex-1">
+    <div class="flex-1 overflow-auto">
       <router-view></router-view>
     </div>
   </div>
@@ -37,8 +35,8 @@ html,
 body {
   background: transparent !important;
   margin: 0;
-  padding: 8px;
   height: 100vh;
+  overflow: hidden;
 }
 
 #app {
@@ -46,6 +44,6 @@ body {
   border-radius: 0.5rem;
   overflow: hidden;
   box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  height: calc(100vh - 16px);
+  height: 100vh;
 }
 </style>

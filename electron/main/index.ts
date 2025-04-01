@@ -103,6 +103,10 @@ async function createWindow() {
     transparent: true,
     backgroundColor: "#00000000",
     hasShadow: true,
+    width: 950,
+    height: 800,
+    minWidth: 800,
+    minHeight: 600,
     webPreferences: {
       preload,
       // Warning: Enable nodeIntegration and disable contextIsolation is not secure in production
