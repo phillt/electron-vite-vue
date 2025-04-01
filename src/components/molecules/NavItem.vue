@@ -1,5 +1,9 @@
 <!-- NavItem.vue -->
 <script setup lang="ts">
+import { useFontAwesome } from "../../composables/useFontAwesome";
+
+const { FontAwesomeIcon } = useFontAwesome();
+
 defineProps<{
   name: string;
   path: string;
@@ -22,27 +26,16 @@ defineEmits<{
       'group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full transition-colors mb-2',
     ]"
   >
-    <svg
+    <FontAwesomeIcon
       v-if="icon"
+      :icon="icon"
       class="mr-3 h-6 w-6"
       :class="[
         isActive
           ? 'text-white'
           : 'text-brand-muted group-hover:text-brand-text',
       ]"
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      aria-hidden="true"
-    >
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="2"
-        :d="icon"
-      />
-    </svg>
+    />
     {{ name }}
   </button>
 </template>

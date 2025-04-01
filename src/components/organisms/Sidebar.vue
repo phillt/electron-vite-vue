@@ -2,17 +2,22 @@
 <script setup lang="ts">
 import { useRouter, useRoute } from "vue-router";
 import NavItem from "../molecules/NavItem.vue";
+import { useFontAwesome } from "../../composables/useFontAwesome";
+
 const router = useRouter();
 const route = useRoute();
+const { FontAwesomeIcon } = useFontAwesome();
 
 const navigation = [
   {
     name: "Budget",
     path: "/budget",
+    icon: "receipt",
   },
   {
     name: "Income & Bills",
     path: "/income-expenses",
+    icon: "money-bill-transfer",
   },
 ];
 </script>
@@ -38,12 +43,14 @@ const navigation = [
       ]"
       @click="router.push('/settings')"
     >
+      <FontAwesomeIcon icon="sliders" class="mr-2" />
       Settings
     </button>
     <button
       class="group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full transition-colors text-brand-muted hover:bg-brand-background hover:text-brand-text text-left"
       @click="router.push('/')"
     >
+      <FontAwesomeIcon icon="folder-plus" class="mr-2" />
       Open/Create
     </button>
   </nav>
