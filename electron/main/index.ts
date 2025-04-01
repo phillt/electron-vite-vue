@@ -98,6 +98,11 @@ async function createWindow() {
   win = new BrowserWindow({
     title: "Main window",
     icon: path.join(process.env.VITE_PUBLIC, "favicon.ico"),
+    frame: false,
+    titleBarStyle: "hidden",
+    transparent: true,
+    backgroundColor: "#00000000",
+    hasShadow: true,
     webPreferences: {
       preload,
       // Warning: Enable nodeIntegration and disable contextIsolation is not secure in production
@@ -107,6 +112,27 @@ async function createWindow() {
       // Read more on https://www.electronjs.org/docs/latest/tutorial/context-isolation
       // contextIsolation: false,
     },
+  });
+
+  // Set up window controls
+  ipcMain.on("window:minimize", () => {
+    win?.minimize();
+  });
+
+  ipcMain.on("window:maximize", () => {
+    if (win?.isMaximized()) {
+      win.unmaximize();
+    } else {
+      win?.maximize();
+    }
+  });
+
+  ipcMain.on("window:close", () => {
+    win?.close();
+  });
+
+  ipcMain.handle("window:isMaximized", () => {
+    return win?.isMaximized();
   });
 
   if (VITE_DEV_SERVER_URL) {
