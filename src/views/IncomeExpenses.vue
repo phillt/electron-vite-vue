@@ -8,9 +8,8 @@
     </div>
 
     <template v-else>
-      <!-- Income Sources Section -->
-      <div class="mb-12">
-        <BaseSection title="Income Sources" />
+      <div class="flex flex-col gap-4">
+        <!-- Income Sources Section -->
 
         <div class="bg-white shadow overflow-hidden sm:rounded-md">
           <ul class="divide-y divide-brand-surface">
@@ -48,11 +47,8 @@
             </template>
           </ul>
         </div>
-      </div>
 
-      <!-- Bills Section -->
-      <div>
-        <BaseSection title="Bills" />
+        <!-- Bills Section -->
 
         <div class="bg-white shadow overflow-hidden sm:rounded-md">
           <ul class="divide-y divide-brand-surface">

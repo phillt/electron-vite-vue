@@ -22,7 +22,7 @@ defineProps<{
 </script>
 
 <template>
-  <div class="px-4 py-3 sm:px-6 bg-gray-50 border-b border-gray-200">
+  <div class="px-3 py-3 sm:px-4 bg-gray-50 border-b border-gray-200">
     <div class="flex items-center justify-between">
       <div class="flex-1 min-w-0">
         <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">
