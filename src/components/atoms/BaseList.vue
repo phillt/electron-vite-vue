@@ -1,13 +1,14 @@
 <!-- BaseList.vue -->
 <script setup lang="ts">
+import BaseButton from "./BaseButton.vue";
+
 defineProps<{
   title?: string;
   subtitle?: string;
   amount?: number | string;
-  amountColor?: "success" | "warning" | "default";
   actions?: {
     label: string;
-    color: "primary" | "danger" | "default";
+    color: "primary" | "outline" | "ghost";
     onClick: () => void;
   }[];
 }>();
@@ -23,39 +24,30 @@ defineProps<{
           <div class="flex-1 min-w-0">
             <p class="text-base font-medium text-gray-900 truncate">
               {{ title }}
-              <span v-if="subtitle" class="text-brand-muted">
-                &nbsp;&mdash;&nbsp;{{ subtitle }}
-              </span>
             </p>
           </div>
-          <div class="ml-4 flex-shrink-0 flex items-center space-x-4">
+          <div
+            class="ml-4 flex-shrink-0 flex items-center justify-between w-[400px]"
+          >
+            <span v-if="subtitle" class="text-xs text-gray-400">
+              {{ subtitle }}
+            </span>
             <span
               v-if="amount !== undefined"
-              class="text-sm font-medium"
-              :class="{
-                'text-brand-success': amountColor === 'success',
-                'text-brand-warning': amountColor === 'warning',
-                'text-brand-text': amountColor === 'default',
-              }"
+              class="text-sm font-medium text-gray-900"
             >
               ${{ Number(amount).toFixed(2) }}
             </span>
-            <div v-if="actions" class="flex space-x-2 w-24 justify-end">
-              <button
+            <div v-if="actions" class="flex space-x-2">
+              <BaseButton
                 v-for="action in actions"
                 :key="action.label"
+                :variant="action.color"
                 @click="action.onClick"
-                class="text-sm font-medium"
-                :class="{
-                  'text-brand-dark hover:text-brand-dark/80':
-                    action.color === 'primary',
-                  'text-red-600 hover:text-red-900': action.color === 'danger',
-                  'text-brand-muted hover:text-brand-text':
-                    action.color === 'default',
-                }"
+                size="sm"
               >
                 {{ action.label }}
-              </button>
+              </BaseButton>
             </div>
           </div>
         </div>

@@ -2,6 +2,7 @@
 <script setup lang="ts">
 defineProps<{
   title?: string;
+  subtitle?: string;
 }>();
 </script>
 
@@ -11,6 +12,9 @@ defineProps<{
       <div class="flex-1 min-w-0">
         <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">
           {{ title || "Details" }}
+        </p>
+        <p v-if="subtitle" class="text-xs text-gray-400 mt-1">
+          {{ subtitle }}
         </p>
       </div>
       <div class="ml-4 flex-shrink-0 flex items-center space-x-4">

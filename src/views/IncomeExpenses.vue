@@ -28,17 +28,16 @@
               :title="income.name"
               :subtitle="'Next payday: ' + getNextPayday(income)"
               :amount="income.amount"
-              amount-color="success"
               :actions="[
                 {
-                  label: 'Edit',
-                  color: 'primary',
-                  onClick: () => editIncome(income),
+                  label: 'Delete',
+                  color: 'ghost',
+                  onClick: () => deleteIncome(income),
                 },
                 {
-                  label: 'Delete',
-                  color: 'danger',
-                  onClick: () => deleteIncome(income),
+                  label: 'Edit',
+                  color: 'outline',
+                  onClick: () => editIncome(income),
                 },
               ]"
             />
@@ -66,17 +65,16 @@
               :title="bill.name"
               :subtitle="'Due on the ' + bill.dueDay + 'th of each month'"
               :amount="bill.amount"
-              amount-color="warning"
               :actions="[
                 {
-                  label: 'Edit',
-                  color: 'primary',
-                  onClick: () => editBill(bill),
+                  label: 'Delete',
+                  color: 'ghost',
+                  onClick: () => deleteBill(bill),
                 },
                 {
-                  label: 'Delete',
-                  color: 'danger',
-                  onClick: () => deleteBill(bill),
+                  label: 'Edit',
+                  color: 'outline',
+                  onClick: () => editBill(bill),
                 },
               ]"
             />
