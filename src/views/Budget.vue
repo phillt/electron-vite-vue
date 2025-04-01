@@ -6,6 +6,8 @@ import type { PayPeriod } from "../services/budgetService";
 import { useRouter } from "vue-router";
 import BaseButton from "../components/atoms/BaseButton.vue";
 import BasePage from "../components/atoms/BasePage.vue";
+import BaseCard from "../components/atoms/BaseCard.vue";
+import BaseToggle from "../components/atoms/BaseToggle.vue";
 import PayPeriodCard from "../components/molecules/PayPeriodCard.vue";
 
 const router = useRouter();
@@ -15,6 +17,50 @@ const currentPayPeriodIndex = computed(() =>
 );
 const loading = ref(false);
 const error = ref<string | null>(null);
+const filters = ref<Set<"past" | "current" | "future">>(new Set());
+
+const pastFilter = computed({
+  get: () => filters.value.has("past"),
+  set: (value: boolean) => {
+    if (value) filters.value.add("past");
+    else filters.value.delete("past");
+  },
+});
+
+const currentFilter = computed({
+  get: () => filters.value.has("current"),
+  set: (value: boolean) => {
+    if (value) filters.value.add("current");
+    else filters.value.delete("current");
+  },
+});
+
+const futureFilter = computed({
+  get: () => filters.value.has("future"),
+  set: (value: boolean) => {
+    if (value) filters.value.add("future");
+    else filters.value.delete("future");
+  },
+});
+
+const filteredPayPeriods = computed(() => {
+  if (!currentBudget.value) return [];
+
+  // If no filters are selected, show all periods
+  if (filters.value.size === 0) return currentBudget.value.payPeriods;
+
+  return currentBudget.value.payPeriods.filter((_, index) => {
+    const isPast = index < currentPayPeriodIndex.value;
+    const isCurrent = index === currentPayPeriodIndex.value;
+    const isFuture = index > currentPayPeriodIndex.value;
+
+    return (
+      (filters.value.has("past") && isPast) ||
+      (filters.value.has("current") && isCurrent) ||
+      (filters.value.has("future") && isFuture)
+    );
+  });
+});
 
 const handleCreatePayPeriod = async () => {
   loading.value = true;
@@ -147,6 +193,17 @@ const handleAddExpense = (payPeriodIndex: number) => {
       </BaseButton>
     </template>
 
+    <BaseCard class="mb-6">
+      <div class="flex items-center space-x-4">
+        <label class="text-sm font-medium text-brand-text">Filter:</label>
+        <div class="flex space-x-4">
+          <BaseToggle v-model="pastFilter" label="Past" />
+          <BaseToggle v-model="currentFilter" label="Current" />
+          <BaseToggle v-model="futureFilter" label="Future" />
+        </div>
+      </div>
+    </BaseCard>
+
     <div v-if="error" class="rounded-md bg-brand-danger/10 p-4">
       <div class="text-sm text-brand-danger">{{ error }}</div>
     </div>
@@ -170,12 +227,16 @@ const handleAddExpense = (payPeriodIndex: number) => {
 
     <div v-else class="space-y-6">
       <PayPeriodCard
-        v-for="(payPeriod, index) in currentBudget.payPeriods"
+        v-for="(payPeriod, index) in filteredPayPeriods"
         :key="payPeriod.startDate"
         :pay-period="payPeriod"
-        :index="index"
-        :is-current-period="index === currentPayPeriodIndex"
-        :is-past-period="index < currentPayPeriodIndex"
+        :index="currentBudget.payPeriods.indexOf(payPeriod)"
+        :is-current-period="
+          currentBudget.payPeriods.indexOf(payPeriod) === currentPayPeriodIndex
+        "
+        :is-past-period="
+          currentBudget.payPeriods.indexOf(payPeriod) < currentPayPeriodIndex
+        "
         @create-pay-period="handleCreatePayPeriod"
         @delete-last-pay-period="handleDeleteLastPayPeriod"
         @toggle-bill-paid="(billName) => handleToggleBillPaid(index, billName)"
