@@ -22,25 +22,30 @@
         <div class="bg-white shadow overflow-hidden sm:rounded-md">
           <ul class="divide-y divide-brand-surface">
             <BaseListHeader title="Income" />
-            <BaseList
-              v-for="income in currentBudget?.incomes || []"
+            <template
+              v-for="(income, index) in currentBudget?.incomes || []"
               :key="income.name"
-              :title="income.name"
-              :subtitle="'Next payday: ' + getNextPayday(income)"
-              :amount="income.amount"
-              :actions="[
-                {
-                  label: 'Delete',
-                  color: 'ghost',
-                  onClick: () => deleteIncome(income),
-                },
-                {
-                  label: 'Edit',
-                  color: 'outline',
-                  onClick: () => editIncome(income),
-                },
-              ]"
-            />
+            >
+              <li :class="index % 2 === 0 ? 'bg-white' : 'bg-gray-100'">
+                <BaseList
+                  :title="income.name"
+                  :subtitle="getNextPayday(income)"
+                  :amount="income.amount"
+                  :actions="[
+                    {
+                      label: 'Delete',
+                      color: 'ghost',
+                      onClick: () => deleteIncome(income),
+                    },
+                    {
+                      label: 'Edit',
+                      color: 'outline',
+                      onClick: () => editIncome(income),
+                    },
+                  ]"
+                />
+              </li>
+            </template>
           </ul>
         </div>
       </div>
@@ -60,8 +65,9 @@
           <ul class="divide-y divide-brand-surface">
             <BaseListHeader title="Bills" />
             <BaseList
-              v-for="bill in currentBudget?.bills || []"
+              v-for="(bill, index) in currentBudget?.bills || []"
               :key="bill.name"
+              class="even:bg-gray-100"
               :title="bill.name"
               :subtitle="getNextDueDate(bill.dueDay)"
               :amount="bill.amount"
@@ -127,7 +133,20 @@ const getNextPayday = (income: Income) => {
   const lastPayday = new Date(income.lastPayday);
   const nextPayday = new Date(lastPayday);
   nextPayday.setDate(nextPayday.getDate() + 15); // Add 15 days to get to the next payday (14 days for current period + 1 day)
-  return formatDate(nextPayday.toISOString());
+
+  // Calculate days until payday
+  const today = new Date();
+  const daysUntilPayday = Math.ceil(
+    (nextPayday.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+  );
+
+  if (daysUntilPayday <= 5) {
+    return `Next payday in ${daysUntilPayday} day${
+      daysUntilPayday === 1 ? "" : "s"
+    }`;
+  }
+
+  return `Next payday: ${formatDate(nextPayday.toISOString())}`;
 };
 
 const getNextDueDate = (dueDay: number) => {

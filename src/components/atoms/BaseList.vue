@@ -19,7 +19,7 @@ defineProps<{
     <!-- List -->
     <ul class="divide-y divide-gray-200">
       <!-- List Item -->
-      <li class="px-4 py-4 sm:px-6">
+      <li class="px-3 py-2 sm:px-4">
         <div class="flex items-center justify-between">
           <div class="flex-1 min-w-0">
             <p class="text-base font-medium text-gray-900 truncate">
@@ -44,7 +44,7 @@ defineProps<{
                 :key="action.label"
                 :variant="action.color"
                 @click="action.onClick"
-                size="sm"
+                size="xs"
               >
                 {{ action.label }}
               </BaseButton>
