@@ -43,5 +43,12 @@
     "vue": "^3.4.21",
     "vue-router": "^4.5.0",
     "vue-tsc": "^2.0.6"
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.7.2",
+    "@fortawesome/free-brands-svg-icons": "^6.7.2",
+    "@fortawesome/free-regular-svg-icons": "^6.7.2",
+    "@fortawesome/free-solid-svg-icons": "^6.7.2",
+    "@fortawesome/vue-fontawesome": "^3.0.8"
   }
 }
