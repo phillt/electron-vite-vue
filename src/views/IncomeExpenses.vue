@@ -52,7 +52,7 @@
           :action="{
             label: 'Add New Bill',
             variant: 'primary',
-            onClick: () => $router.push('/add-bill'),
+            onClick: () => (showAddBillModal = true),
           }"
         />
 
@@ -82,11 +82,20 @@
         </div>
       </div>
     </template>
+
+    <!-- Add Bill Modal -->
+    <BaseModal v-model="showAddBillModal" title="Add New Bill">
+      <BillForm
+        :existing-bills="currentBudget?.bills"
+        @submit="handleAddBill"
+        @cancel="showAddBillModal = false"
+      />
+    </BaseModal>
   </BasePage>
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { budgetService } from "../services/budgetService";
 import { useRouter } from "vue-router";
 import type { Income, Bill } from "../services/budgetService";
@@ -95,9 +104,12 @@ import BaseCard from "../components/atoms/BaseCard.vue";
 import BaseList from "../components/atoms/BaseList.vue";
 import BaseSection from "../components/atoms/BaseSection.vue";
 import BasePage from "../components/atoms/BasePage.vue";
+import BaseModal from "../components/atoms/BaseModal.vue";
+import BillForm from "../components/forms/BillForm.vue";
 
 const router = useRouter();
 const currentBudget = computed(() => budgetService.getCurrentBudget());
+const showAddBillModal = ref(false);
 
 const formatDate = (date: string) => {
   return new Date(date).toLocaleDateString();
@@ -135,6 +147,15 @@ const deleteBill = async (bill: Bill) => {
     } catch (error) {
       console.error("Error deleting bill:", error);
     }
+  }
+};
+
+const handleAddBill = async (bill: Bill) => {
+  try {
+    await budgetService.addBill(bill);
+    showAddBillModal.value = false;
+  } catch (error) {
+    console.error("Error adding bill:", error);
   }
 };
 </script>
