@@ -41,9 +41,6 @@ const handleSubmit = async () => {
       <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between">
           <h1 class="text-2xl font-bold text-gray-900">Add Expense</h1>
-          <BaseButton variant="ghost" size="sm" @click="router.back()">
-            Back
-          </BaseButton>
         </div>
       </div>
     </div>
@@ -84,7 +81,14 @@ const handleSubmit = async () => {
               </div>
             </div>
 
-            <div class="flex justify-end">
+            <div class="flex justify-end space-x-3">
+              <BaseButton
+                type="button"
+                variant="outline"
+                @click="router.back()"
+              >
+                Cancel
+              </BaseButton>
               <BaseButton
                 type="submit"
                 :loading="isSubmitting"
