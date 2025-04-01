@@ -2,7 +2,7 @@
   "name": "Rolling Thunder",
   "description": "My first attempt at creating a real budget.",
   "createdAt": "2025-03-30T05:35:16.804Z",
-  "updatedAt": "2025-04-01T02:30:04.413Z",
+  "updatedAt": "2025-04-01T02:31:16.326Z",
   "filePath": "/home/philllt/Projects/apps/electron-vite-vue/Rolling Thunder.bdgtmn",
   "items": [],
   "incomes": [
@@ -118,6 +118,11 @@
       "name": "Federal Taxes",
       "dueDay": 27,
       "amount": 600
+    },
+    {
+      "name": "test bill d",
+      "dueDay": 1,
+      "amount": "30"
     }
   ],
   "payPeriods": [
