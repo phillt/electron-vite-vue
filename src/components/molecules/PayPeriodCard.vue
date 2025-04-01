@@ -5,6 +5,7 @@ import type { PayPeriod } from "../../services/budgetService";
 import PayPeriodHeader from "./PayPeriodHeader.vue";
 import PayPeriodBills from "./PayPeriodBills.vue";
 import PayPeriodExpenses from "./PayPeriodExpenses.vue";
+import CollapsibleSection from "./CollapsibleSection.vue";
 import BaseButton from "../atoms/BaseButton.vue";
 
 const props = defineProps<{
@@ -52,12 +53,18 @@ const status = computed(() => {
   }
 });
 
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(amount);
-};
+const billsStats = computed(() => ({
+  paid: props.payPeriod.bills.filter((bill) => bill.isPaid).length,
+  total: props.payPeriod.bills.length,
+  pastDue: props.payPeriod.bills.filter(
+    (bill) => !bill.isPaid && new Date(bill.dueDate) < new Date()
+  ).length,
+}));
+
+const expensesStats = computed(() => ({
+  paid: props.payPeriod.expenses.filter((expense) => expense.isPaid).length,
+  total: props.payPeriod.expenses.length,
+}));
 </script>
 
 <template>
@@ -69,36 +76,12 @@ const formatCurrency = (amount: number) => {
     />
 
     <div class="border-t" :class="status.class">
-      <div class="flex items-center justify-between p-4">
-        <div
-          class="flex items-center cursor-pointer"
-          @click="showBills = !showBills"
-        >
-          <span class="text-brand-muted mr-2">{{ showBills ? "▼" : "▶" }}</span>
-          <h3 class="text-base font-medium text-brand-text">Bills</h3>
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="text-sm text-brand-muted">
-            {{ payPeriod.bills.filter((bill) => bill.isPaid).length }} paid /
-            {{ payPeriod.bills.length }} total
-          </span>
-          <span
-            v-if="
-              payPeriod.bills.some(
-                (bill) => !bill.isPaid && new Date(bill.dueDate) < new Date()
-              )
-            "
-            class="text-sm text-red-700 font-bold"
-          >
-            {{
-              payPeriod.bills.filter(
-                (bill) => !bill.isPaid && new Date(bill.dueDate) < new Date()
-              ).length
-            }}
-            past due
-          </span>
-        </div>
-      </div>
+      <CollapsibleSection
+        title="Bills"
+        :is-expanded="showBills"
+        :stats="billsStats"
+        @toggle="showBills = !showBills"
+      />
       <div v-show="showBills">
         <PayPeriodBills
           :pay-period="payPeriod"
@@ -117,23 +100,12 @@ const formatCurrency = (amount: number) => {
     </div>
 
     <div class="border-t" :class="status.class">
-      <div class="flex items-center justify-between p-4">
-        <div
-          class="flex items-center cursor-pointer"
-          @click="showExpenses = !showExpenses"
-        >
-          <span class="text-brand-muted mr-2">{{
-            showExpenses ? "▼" : "▶"
-          }}</span>
-          <h3 class="text-base font-medium text-brand-text">Expenses</h3>
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="text-sm text-brand-muted">
-            {{ payPeriod.expenses.filter((expense) => expense.isPaid).length }}
-            paid / {{ payPeriod.expenses.length }} total
-          </span>
-        </div>
-      </div>
+      <CollapsibleSection
+        title="Expenses"
+        :is-expanded="showExpenses"
+        :stats="expensesStats"
+        @toggle="showExpenses = !showExpenses"
+      />
       <div v-show="showExpenses">
         <PayPeriodExpenses
           :pay-period="payPeriod"

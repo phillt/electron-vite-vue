@@ -737,6 +737,59 @@ class BudgetService {
     }
   }
 
+  async deleteExpense(
+    payPeriodIndex: number,
+    expenseId: string
+  ): Promise<void> {
+    if (!this.currentBudget.value) {
+      throw new Error("No budget is currently open");
+    }
+
+    const payPeriod = this.currentBudget.value.payPeriods[payPeriodIndex];
+    if (!payPeriod) {
+      throw new Error("Pay period not found");
+    }
+
+    const expenseIndex = payPeriod.expenses.findIndex(
+      (e) => e.id === expenseId
+    );
+    if (expenseIndex === -1) {
+      throw new Error("Expense not found");
+    }
+
+    // Remove the expense
+    payPeriod.expenses.splice(expenseIndex, 1);
+
+    // Recalculate totals
+    const totalExpenses = payPeriod.expenses.reduce(
+      (sum, e) => sum + e.amount,
+      0
+    );
+    const paidBills = payPeriod.bills.reduce(
+      (sum, b) => sum + (b.isPaid ? b.amount : 0),
+      0
+    );
+    const paidExpenses = payPeriod.expenses.reduce(
+      (sum, e) => sum + (e.isPaid ? e.amount : 0),
+      0
+    );
+
+    payPeriod.totalExpenses = totalExpenses;
+    payPeriod.paidAmount = paidBills + paidExpenses;
+    payPeriod.unpaidAmount =
+      payPeriod.totalAmount + totalExpenses - payPeriod.paidAmount;
+
+    this.currentBudget.value.updatedAt = new Date().toISOString();
+
+    // Save the updated budget
+    if (this.currentBudget.value.filePath) {
+      await window.electron.ipcRenderer.invoke("file:save", {
+        filePath: this.currentBudget.value.filePath,
+        content: JSON.stringify(this.currentBudget.value, null, 2),
+      });
+    }
+  }
+
   async deleteLastPayPeriod(): Promise<void> {
     if (!this.currentBudget.value) {
       throw new Error("No budget is currently open");

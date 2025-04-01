@@ -90,6 +90,17 @@ const handleUpdateExpenseAmount = async (
   }
 };
 
+const handleDeleteExpense = async (
+  payPeriodIndex: number,
+  expenseId: string
+) => {
+  try {
+    await budgetService.deleteExpense(payPeriodIndex, expenseId);
+  } catch (e: any) {
+    error.value = e.message;
+  }
+};
+
 const handleUpdatePaycheckAmount = async (
   payPeriodIndex: number,
   newAmount: number
@@ -183,6 +194,7 @@ const handleAddExpense = (payPeriodIndex: number) => {
         "
         @add-bill="() => handleAddBill(index)"
         @add-expense="() => handleAddExpense(index)"
+        @delete-expense="(expenseId) => handleDeleteExpense(index, expenseId)"
       />
     </div>
   </BasePage>
