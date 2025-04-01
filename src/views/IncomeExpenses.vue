@@ -63,7 +63,7 @@
               v-for="bill in currentBudget?.bills || []"
               :key="bill.name"
               :title="bill.name"
-              :subtitle="'Due on the ' + bill.dueDay + 'th of each month'"
+              :subtitle="getNextDueDate(bill.dueDay)"
               :amount="bill.amount"
               :actions="[
                 {
@@ -128,6 +128,30 @@ const getNextPayday = (income: Income) => {
   const nextPayday = new Date(lastPayday);
   nextPayday.setDate(nextPayday.getDate() + 15); // Add 15 days to get to the next payday (14 days for current period + 1 day)
   return formatDate(nextPayday.toISOString());
+};
+
+const getNextDueDate = (dueDay: number) => {
+  const today = new Date();
+  const currentDay = today.getDate();
+  const nextDueDate = new Date(today);
+
+  if (currentDay > dueDay) {
+    // If we're past the due day this month, set it for next month
+    nextDueDate.setMonth(nextDueDate.getMonth() + 1);
+  }
+
+  nextDueDate.setDate(dueDay);
+
+  // Calculate days until due
+  const daysUntilDue = Math.ceil(
+    (nextDueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+  );
+
+  if (daysUntilDue <= 14) {
+    return `Due in ${daysUntilDue} day${daysUntilDue === 1 ? "" : "s"}`;
+  }
+
+  return `Due ${formatDate(nextDueDate.toISOString())}`;
 };
 
 const editIncome = (income: Income) => {
