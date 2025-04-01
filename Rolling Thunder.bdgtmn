@@ -2,7 +2,7 @@
   "name": "Rolling Thunder",
   "description": "My first attempt at creating a real budget.",
   "createdAt": "2025-03-30T05:35:16.804Z",
-  "updatedAt": "2025-04-01T02:31:16.326Z",
+  "updatedAt": "2025-04-01T03:01:44.975Z",
   "filePath": "/home/philllt/Projects/apps/electron-vite-vue/Rolling Thunder.bdgtmn",
   "items": [],
   "incomes": [
@@ -31,34 +31,6 @@
         {
           "start": "2025-05-23T00:00:00.000Z",
           "end": "2025-06-06T00:00:00.000Z"
-        }
-      ]
-    },
-    {
-      "name": "test",
-      "amount": 30,
-      "frequency": "bi-weekly",
-      "lastPayday": "2025-04-01",
-      "payPeriods": [
-        {
-          "start": "2025-04-02T00:00:00.000Z",
-          "end": "2025-04-16T00:00:00.000Z"
-        },
-        {
-          "start": "2025-04-16T00:00:00.000Z",
-          "end": "2025-04-30T00:00:00.000Z"
-        },
-        {
-          "start": "2025-04-30T00:00:00.000Z",
-          "end": "2025-05-14T00:00:00.000Z"
-        },
-        {
-          "start": "2025-05-14T00:00:00.000Z",
-          "end": "2025-05-28T00:00:00.000Z"
-        },
-        {
-          "start": "2025-05-28T00:00:00.000Z",
-          "end": "2025-06-11T00:00:00.000Z"
         }
       ]
     }
@@ -118,11 +90,6 @@
       "name": "Federal Taxes",
       "dueDay": 27,
       "amount": 600
-    },
-    {
-      "name": "test bill d",
-      "dueDay": 1,
-      "amount": "30"
     }
   ],
   "payPeriods": [

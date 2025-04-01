@@ -10,18 +10,18 @@
     <template v-else>
       <!-- Income Sources Section -->
       <div class="mb-12">
-        <BaseSection
-          title="Income Sources"
-          :action="{
-            label: 'Add New Income',
-            variant: 'primary',
-            onClick: () => (showAddIncomeModal = true),
-          }"
-        />
+        <BaseSection title="Income Sources" />
 
         <div class="bg-white shadow overflow-hidden sm:rounded-md">
           <ul class="divide-y divide-brand-surface">
-            <BaseListHeader title="Income" />
+            <BaseListHeader
+              title="Income"
+              :action="{
+                label: 'Add New Income',
+                variant: 'primary',
+                onClick: () => (showAddIncomeModal = true),
+              }"
+            />
             <template
               v-for="(income, index) in currentBudget?.incomes || []"
               :key="income.name"
@@ -52,38 +52,42 @@
 
       <!-- Bills Section -->
       <div>
-        <BaseSection
-          title="Bills"
-          :action="{
-            label: 'Add New Bill',
-            variant: 'primary',
-            onClick: () => (showAddBillModal = true),
-          }"
-        />
+        <BaseSection title="Bills" />
 
         <div class="bg-white shadow overflow-hidden sm:rounded-md">
           <ul class="divide-y divide-brand-surface">
-            <BaseListHeader title="Bills" />
-            <BaseList
+            <BaseListHeader
+              title="Bills"
+              :action="{
+                label: 'Add New Bill',
+                variant: 'primary',
+                onClick: () => (showAddBillModal = true),
+              }"
+            />
+            <template
               v-for="(bill, index) in currentBudget?.bills || []"
               :key="bill.name"
-              class="even:bg-gray-100"
-              :title="bill.name"
-              :subtitle="getNextDueDate(bill.dueDay)"
-              :amount="bill.amount"
-              :actions="[
-                {
-                  label: 'Delete',
-                  color: 'ghost',
-                  onClick: () => deleteBill(bill),
-                },
-                {
-                  label: 'Edit',
-                  color: 'outline',
-                  onClick: () => editBill(bill),
-                },
-              ]"
-            />
+            >
+              <li :class="index % 2 === 0 ? 'bg-white' : 'bg-gray-100'">
+                <BaseList
+                  :title="bill.name"
+                  :subtitle="getNextDueDate(bill.dueDay)"
+                  :amount="bill.amount"
+                  :actions="[
+                    {
+                      label: 'Delete',
+                      color: 'ghost',
+                      onClick: () => deleteBill(bill),
+                    },
+                    {
+                      label: 'Edit',
+                      color: 'outline',
+                      onClick: () => editBill(bill),
+                    },
+                  ]"
+                />
+              </li>
+            </template>
           </ul>
         </div>
       </div>

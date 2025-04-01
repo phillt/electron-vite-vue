@@ -1,8 +1,23 @@
 <!-- BaseListHeader.vue -->
 <script setup lang="ts">
+import BaseButton from "./BaseButton.vue";
+
 defineProps<{
   title?: string;
   subtitle?: string;
+  action?: {
+    label: string;
+    variant?:
+      | "primary"
+      | "outline"
+      | "popular"
+      | "cheapest"
+      | "recommended"
+      | "icon"
+      | "tag"
+      | "ghost";
+    onClick: () => void;
+  };
 }>();
 </script>
 
@@ -17,9 +32,14 @@ defineProps<{
           {{ subtitle }}
         </p>
       </div>
-      <div class="ml-4 flex-shrink-0 flex items-center space-x-4">
-        <div class="w-24"></div>
-        <!-- Space for actions -->
+      <div v-if="action" class="ml-4">
+        <BaseButton
+          :variant="action.variant || 'primary'"
+          size="sm"
+          @click="action.onClick"
+        >
+          {{ action.label }}
+        </BaseButton>
       </div>
     </div>
   </div>
