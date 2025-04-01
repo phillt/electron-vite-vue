@@ -3,7 +3,7 @@
 defineProps<{
   title?: string;
   subtitle?: string;
-  amount?: number;
+  amount?: number | string;
   amountColor?: "success" | "warning" | "default";
   actions?: {
     label: string;
@@ -34,7 +34,7 @@ defineProps<{
             'text-brand-text': amountColor === 'default',
           }"
         >
-          ${{ amount.toFixed(2) }}
+          ${{ Number(amount).toFixed(2) }}
         </span>
         <div v-if="actions" class="flex space-x-2">
           <button

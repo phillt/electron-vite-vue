@@ -15,7 +15,7 @@
           :action="{
             label: 'Add New Income',
             variant: 'primary',
-            onClick: () => $router.push('/add-income'),
+            onClick: () => (showAddIncomeModal = true),
           }"
         />
 
@@ -91,6 +91,11 @@
         @cancel="showAddBillModal = false"
       />
     </BaseModal>
+
+    <!-- Add Income Modal -->
+    <BaseModal v-model="showAddIncomeModal" title="Add New Income">
+      <AddIncome @close="showAddIncomeModal = false" />
+    </BaseModal>
   </BasePage>
 </template>
 
@@ -106,10 +111,12 @@ import BaseSection from "../components/atoms/BaseSection.vue";
 import BasePage from "../components/atoms/BasePage.vue";
 import BaseModal from "../components/atoms/BaseModal.vue";
 import BillForm from "../components/forms/BillForm.vue";
+import AddIncome from "./AddIncome.vue";
 
 const router = useRouter();
 const currentBudget = computed(() => budgetService.getCurrentBudget());
 const showAddBillModal = ref(false);
+const showAddIncomeModal = ref(false);
 
 const formatDate = (date: string) => {
   return new Date(date).toLocaleDateString();
@@ -157,5 +164,10 @@ const handleAddBill = async (bill: Bill) => {
   } catch (error) {
     console.error("Error adding bill:", error);
   }
+};
+
+const handleAddIncomeSuccess = () => {
+  showAddIncomeModal.value = false;
+  // Optionally refresh the income sources list here
 };
 </script>

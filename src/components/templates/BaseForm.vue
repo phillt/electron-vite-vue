@@ -7,11 +7,7 @@
     <!-- Action Buttons -->
     <div class="flex justify-end space-x-3 pt-4">
       <slot name="actions">
-        <BaseButton
-          v-if="showCancel"
-          variant="outline"
-          @click="$router.push(cancelRoute)"
-        >
+        <BaseButton v-if="showCancel" variant="outline" @click="handleCancel">
           Cancel
         </BaseButton>
         <BaseButton
@@ -35,7 +31,6 @@ interface Props {
   isFormValid?: boolean;
   error?: string | null;
   showCancel?: boolean;
-  cancelRoute?: string;
   submitButtonText?: string;
 }
 
@@ -44,17 +39,21 @@ const props = withDefaults(defineProps<Props>(), {
   isFormValid: true,
   error: null,
   showCancel: true,
-  cancelRoute: "/",
   submitButtonText: "Submit",
 });
 
 const emit = defineEmits<{
   (e: "submit"): void;
+  (e: "cancel"): void;
 }>();
 
 const handleSubmit = () => {
   if (props.isFormValid) {
     emit("submit");
   }
+};
+
+const handleCancel = () => {
+  emit("cancel");
 };
 </script>
