@@ -22,12 +22,10 @@ const handleOpenBudget = async () => {
     <BaseCard class="max-w-md w-full bg-white/95">
       <template #header>
         <div class="text-center">
-          <h1 class="text-4xl font-bold text-brand-text mb-2">
-            Budget Manager
-          </h1>
+          <h1 class="text-4xl font-bold text-brand-text mb-2">Astreos</h1>
           <p class="text-brand-muted">
-            Welcome! Get started by creating a new budget or opening an existing
-            one.
+            Welcome to Astreos! Get started by creating a new budget or opening
+            an existing one.
           </p>
         </div>
       </template>

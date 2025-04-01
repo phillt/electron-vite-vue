@@ -27,7 +27,7 @@ const handleClose = () => {
   <div
     class="h-8 bg-gray-800 flex items-center justify-between px-4 select-none"
   >
-    <div class="flex items-center text-white text-sm">Budget Manager</div>
+    <div class="flex items-center text-white text-sm">Astreos</div>
     <div class="flex items-center space-x-2">
       <BaseButton
         variant="ghost"

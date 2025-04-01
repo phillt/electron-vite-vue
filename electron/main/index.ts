@@ -96,7 +96,7 @@ ipcMain.handle("settings:set", async (_, settings: AppSettings) => {
 
 async function createWindow() {
   win = new BrowserWindow({
-    title: "Main window",
+    title: "Astreos",
     icon: path.join(process.env.VITE_PUBLIC, "favicon.ico"),
     frame: false,
     titleBarStyle: "hidden",

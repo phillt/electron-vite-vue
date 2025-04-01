@@ -1,8 +1,8 @@
 {
-  "name": "electron-vue-vite",
+  "name": "astreos",
   "version": "28.1.0",
   "main": "dist-electron/main/index.js",
-  "description": "Really simple Electron + Vue + Vite boilerplate.",
+  "description": "Astreos - A modern desktop application.",
   "author": "草鞋没号 <308487730@qq.com>",
   "license": "MIT",
   "private": true,
