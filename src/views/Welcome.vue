@@ -18,7 +18,7 @@ const handleOpenBudget = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-200">
+  <div class="min-h-full flex items-center justify-center bg-gray-200">
     <BaseCard class="max-w-md w-full bg-white/95">
       <template #header>
         <div class="text-center">
