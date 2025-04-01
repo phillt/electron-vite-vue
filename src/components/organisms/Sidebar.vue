@@ -46,11 +46,5 @@ const navigation = [
     >
       Open/Create
     </button>
-    <button
-      class="group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full transition-colors text-brand-muted hover:bg-brand-background hover:text-brand-text text-left"
-      @click="router.push('/')"
-    >
-      Quit
-    </button>
   </nav>
 </template>
