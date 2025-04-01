@@ -34,11 +34,11 @@ defineProps<{
       </div>
       <div v-if="action" class="ml-4">
         <BaseButton
-          :variant="action.variant || 'primary'"
+          :variant="(action as NonNullable<typeof action>).variant || 'primary'"
           size="sm"
-          @click="action.onClick"
+          @click="(action as NonNullable<typeof action>).onClick"
         >
-          {{ action.label }}
+          {{ (action as NonNullable<typeof action>).label }}
         </BaseButton>
       </div>
     </div>

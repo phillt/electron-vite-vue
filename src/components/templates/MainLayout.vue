@@ -5,7 +5,7 @@ import Sidebar from "../organisms/Sidebar.vue";
 
 <template>
   <div class="flex h-screen bg-gray-200">
-    <div class="p-4">
+    <div>
       <Sidebar />
     </div>
 

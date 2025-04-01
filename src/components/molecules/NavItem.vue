@@ -3,7 +3,7 @@
 defineProps<{
   name: string;
   path: string;
-  icon: string;
+  icon?: string;
   isActive: boolean;
 }>();
 
@@ -17,16 +17,17 @@ defineEmits<{
     @click="$emit('click')"
     :class="[
       isActive
-        ? 'bg-brand-dark/10 text-brand-dark'
+        ? 'bg-black text-white'
         : 'text-brand-muted hover:bg-brand-background hover:text-brand-text',
-      'group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full transition-colors',
+      'group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full transition-colors mb-2',
     ]"
   >
     <svg
+      v-if="icon"
       class="mr-3 h-6 w-6"
       :class="[
         isActive
-          ? 'text-brand-dark'
+          ? 'text-white'
           : 'text-brand-muted group-hover:text-brand-text',
       ]"
       xmlns="http://www.w3.org/2000/svg"
