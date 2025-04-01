@@ -4,11 +4,18 @@
     description="Configure your income details and payment schedule"
   >
     <div class="max-w-5xl mx-auto">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <!-- Left Column: Form -->
-        <div class="md:col-span-2">
+      <div class="grid grid-cols-1 gap-6">
+        <!-- Form -->
+        <div>
           <BaseCard>
-            <form @submit.prevent="handleSubmit" class="space-y-6">
+            <BaseForm
+              :is-submitting="isSubmitting"
+              :is-form-valid="isFormValid"
+              :error="error"
+              :cancel-route="'/income-expenses'"
+              submit-button-text="Add Income"
+              @submit="handleSubmit"
+            >
               <!-- Income Name -->
               <div class="space-y-1">
                 <label class="block text-sm font-medium text-gray-700"
@@ -67,91 +74,7 @@
                   Select your most recent payday
                 </p>
               </div>
-
-              <div v-if="error" class="text-red-600 text-sm">{{ error }}</div>
-
-              <!-- Action Buttons -->
-              <div class="flex justify-end space-x-3 pt-4">
-                <BaseButton
-                  variant="outline"
-                  @click="$router.push('/income-expenses')"
-                >
-                  Cancel
-                </BaseButton>
-                <BaseButton
-                  type="submit"
-                  variant="primary"
-                  :disabled="isSubmitting || !isFormValid"
-                >
-                  {{ isSubmitting ? "Saving..." : "Add Income" }}
-                </BaseButton>
-              </div>
-            </form>
-          </BaseCard>
-        </div>
-
-        <!-- Right Column: Info Cards -->
-        <div class="space-y-4">
-          <!-- Quick Tips -->
-          <BaseCard>
-            <h3 class="text-base font-medium text-gray-900 mb-4">Quick Tips</h3>
-            <ul class="space-y-3">
-              <li class="flex items-start">
-                <div
-                  class="flex-shrink-0 flex items-center justify-center h-6 w-6 rounded-full bg-blue-50 text-blue-600 text-sm font-medium mr-3"
-                >
-                  1
-                </div>
-                <p class="text-sm text-gray-600">
-                  Use clear, descriptive names for your income sources
-                </p>
-              </li>
-              <li class="flex items-start">
-                <div
-                  class="flex-shrink-0 flex items-center justify-center h-6 w-6 rounded-full bg-blue-50 text-blue-600 text-sm font-medium mr-3"
-                >
-                  2
-                </div>
-                <p class="text-sm text-gray-600">
-                  Enter your net income (after taxes and deductions)
-                </p>
-              </li>
-              <li class="flex items-start">
-                <div
-                  class="flex-shrink-0 flex items-center justify-center h-6 w-6 rounded-full bg-blue-50 text-blue-600 text-sm font-medium mr-3"
-                >
-                  3
-                </div>
-                <p class="text-sm text-gray-600">
-                  Make sure your last payday is accurate
-                </p>
-              </li>
-            </ul>
-          </BaseCard>
-
-          <!-- About Pay Periods -->
-          <BaseCard>
-            <h3 class="text-base font-medium text-gray-900 mb-4">
-              About Pay Periods
-            </h3>
-            <p class="text-sm text-gray-600 mb-3">
-              The system will automatically generate 5 pay periods based on your
-              last payday:
-            </p>
-            <ul class="space-y-2">
-              <li class="flex items-center text-sm text-gray-600">
-                <span class="text-blue-600 mr-2">•</span>
-                Starts the day after your last payday
-              </li>
-              <li class="flex items-center text-sm text-gray-600">
-                <span class="text-blue-600 mr-2">•</span>
-                Runs for 14 days (bi-weekly)
-              </li>
-              <li class="flex items-center text-sm text-gray-600">
-                <span class="text-blue-600 mr-2">•</span>
-                Helps track your income across the budget period
-              </li>
-            </ul>
+            </BaseForm>
           </BaseCard>
         </div>
       </div>
@@ -167,6 +90,7 @@ import BaseButton from "../components/atoms/BaseButton.vue";
 import BaseCard from "../components/atoms/BaseCard.vue";
 import BaseInput from "../components/atoms/BaseInput.vue";
 import BasePage from "../components/atoms/BasePage.vue";
+import BaseForm from "../components/templates/BaseForm.vue";
 
 const router = useRouter();
 const currentBudget = computed(() => budgetService.getCurrentBudget());
