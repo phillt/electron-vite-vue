@@ -572,9 +572,9 @@ class BudgetService {
       endDate: endDate.toISOString(),
       bills,
       expenses: [],
-      totalAmount,
+      totalAmount: 0,
       paidAmount: 0,
-      unpaidAmount: totalAmount,
+      unpaidAmount: 0,
       totalExpenses: 0,
       paycheckAmount: this.calculatePaycheckAmount(),
     };
@@ -615,12 +615,19 @@ class BudgetService {
     bill.isPaid = !bill.isPaid;
 
     // Recalculate paid and unpaid amounts
-    payPeriod.paidAmount = payPeriod.bills.reduce(
+    const totalBills = payPeriod.bills.reduce((sum, b) => sum + b.amount, 0);
+    const totalExpenses = payPeriod.expenses.reduce((sum, e) => sum + e.amount, 0);
+    const paidBills = payPeriod.bills.reduce(
       (sum, b) => sum + (b.isPaid ? b.amount : 0),
       0
     );
-    payPeriod.unpaidAmount = payPeriod.totalAmount - payPeriod.paidAmount;
+    const paidExpenses = payPeriod.expenses.reduce(
+      (sum, e) => sum + (e.isPaid ? e.amount : 0),
+      0
+    );
 
+    payPeriod.totalAmount = totalBills + totalExpenses;
+    payPeriod.paidAmount = paidBills + paidExpenses;
     this.currentBudget.value.updatedAt = new Date().toISOString();
 
     // Save the updated budget
@@ -761,6 +768,7 @@ class BudgetService {
     payPeriod.expenses.splice(expenseIndex, 1);
 
     // Recalculate totals
+    const totalBills = payPeriod.bills.reduce((sum, b) => sum + b.amount, 0);
     const totalExpenses = payPeriod.expenses.reduce(
       (sum, e) => sum + e.amount,
       0
@@ -775,9 +783,9 @@ class BudgetService {
     );
 
     payPeriod.totalExpenses = totalExpenses;
+    payPeriod.totalAmount = totalBills + totalExpenses;
     payPeriod.paidAmount = paidBills + paidExpenses;
-    payPeriod.unpaidAmount =
-      payPeriod.totalAmount + totalExpenses - payPeriod.paidAmount;
+    payPeriod.unpaidAmount = payPeriod.totalAmount - payPeriod.paidAmount;
 
     this.currentBudget.value.updatedAt = new Date().toISOString();
 
@@ -843,7 +851,11 @@ class BudgetService {
     bill.amount = newAmount;
 
     // Recalculate totals
-    const totalAmount = payPeriod.bills.reduce((sum, b) => sum + b.amount, 0);
+    const totalBills = payPeriod.bills.reduce((sum, b) => sum + b.amount, 0);
+    const totalExpenses = payPeriod.expenses.reduce(
+      (sum, e) => sum + e.amount,
+      0
+    );
     const paidBills = payPeriod.bills.reduce(
       (sum, b) => sum + (b.isPaid ? b.amount : 0),
       0
@@ -853,10 +865,9 @@ class BudgetService {
       0
     );
 
-    payPeriod.totalAmount = totalAmount;
+    payPeriod.totalAmount = totalBills + totalExpenses;
     payPeriod.paidAmount = paidBills + paidExpenses;
-    payPeriod.unpaidAmount =
-      totalAmount + payPeriod.totalExpenses - payPeriod.paidAmount;
+    payPeriod.unpaidAmount = payPeriod.totalAmount - payPeriod.paidAmount;
 
     this.currentBudget.value.updatedAt = new Date().toISOString();
 
@@ -891,6 +902,7 @@ class BudgetService {
     expense.amount = newAmount;
 
     // Recalculate totals
+    const totalBills = payPeriod.bills.reduce((sum, b) => sum + b.amount, 0);
     const totalExpenses = payPeriod.expenses.reduce(
       (sum, e) => sum + e.amount,
       0
@@ -905,9 +917,9 @@ class BudgetService {
     );
 
     payPeriod.totalExpenses = totalExpenses;
+    payPeriod.totalAmount = totalBills + totalExpenses;
     payPeriod.paidAmount = paidBills + paidExpenses;
-    payPeriod.unpaidAmount =
-      payPeriod.totalAmount + totalExpenses - payPeriod.paidAmount;
+    payPeriod.unpaidAmount = payPeriod.totalAmount - payPeriod.paidAmount;
 
     this.currentBudget.value.updatedAt = new Date().toISOString();
 

@@ -27,7 +27,7 @@ const remainingAmount = computed(() => {
     <div>
       <span class="text-brand-muted">Total Outgoing:</span>
       <span class="ml-2 font-normal text-brand-primary">
-        {{ formatCurrency(totalAmount + (totalExpenses || 0)) }}
+        {{ formatCurrency(totalAmount) }}
       </span>
     </div>
     <div class="flex items-center justify-end gap-2">
