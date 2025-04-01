@@ -21,6 +21,7 @@
 
         <div class="bg-white shadow overflow-hidden sm:rounded-md">
           <ul class="divide-y divide-brand-surface">
+            <BaseListHeader title="Income" />
             <BaseList
               v-for="income in currentBudget?.incomes || []"
               :key="income.name"
@@ -58,6 +59,7 @@
 
         <div class="bg-white shadow overflow-hidden sm:rounded-md">
           <ul class="divide-y divide-brand-surface">
+            <BaseListHeader title="Bills" />
             <BaseList
               v-for="bill in currentBudget?.bills || []"
               :key="bill.name"
@@ -112,6 +114,7 @@ import BasePage from "../components/atoms/BasePage.vue";
 import BaseModal from "../components/atoms/BaseModal.vue";
 import BillForm from "../components/forms/BillForm.vue";
 import AddIncome from "./AddIncome.vue";
+import BaseListHeader from "../components/atoms/BaseListHeader.vue";
 
 const router = useRouter();
 const currentBudget = computed(() => budgetService.getCurrentBudget());
