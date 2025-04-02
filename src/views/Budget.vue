@@ -183,6 +183,14 @@ const handleDeleteBill = async (payPeriodIndex: number, billName: string) => {
   }
 };
 
+const handleDeletePayPeriod = async (index: number) => {
+  try {
+    await budgetService.deletePayPeriod(index);
+  } catch (e: any) {
+    error.value = e.message;
+  }
+};
+
 const nextPayPeriodDates = computed(() => {
   if (!currentBudget.value || currentBudget.value.payPeriods.length === 0)
     return null;
@@ -228,13 +236,6 @@ const nextPayPeriodDates = computed(() => {
       >
         Delete Last Period
       </BaseButton>
-      <BaseButton
-        variant="primary"
-        :disabled="loading"
-        @click="handleCreatePayPeriod"
-      >
-        {{ loading ? "Creating..." : "Create Next Pay Period" }}
-      </BaseButton>
     </template>
 
     <div v-if="error" class="rounded-md bg-brand-danger/10 p-4">
@@ -270,6 +271,11 @@ const nextPayPeriodDates = computed(() => {
         :is-past-period="
           currentBudget.payPeriods.indexOf(payPeriod) < currentPayPeriodIndex
         "
+        :is-last-future-period="
+          currentBudget.payPeriods.indexOf(payPeriod) ===
+            currentBudget.payPeriods.length - 1 &&
+          currentBudget.payPeriods.indexOf(payPeriod) > currentPayPeriodIndex
+        "
         @create-pay-period="handleCreatePayPeriod"
         @delete-last-pay-period="handleDeleteLastPayPeriod"
         @toggle-bill-paid="(billName) => handleToggleBillPaid(index, billName)"
@@ -290,6 +296,7 @@ const nextPayPeriodDates = computed(() => {
         @add-expense="() => handleAddExpense(index)"
         @delete-expense="(expenseId) => handleDeleteExpense(index, expenseId)"
         @delete-bill="(billName) => handleDeleteBill(index, billName)"
+        @delete-pay-period="handleDeletePayPeriod"
       />
 
       <!-- Next Pay Period Cutout -->

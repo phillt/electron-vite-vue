@@ -7,6 +7,7 @@ module.exports = {
         brand: {
           dark: "hsl(226, 72%, 40%)", // Navy blue (Trust, Stability)
           dark50: "hsla(226, 72%, 40%, 0.5)", // Semi-transparent navy
+          dark20: "hsla(226, 72%, 40%, 0.2)", // Light navy
 
           accent: "hsl(156, 72%, 45%)", // Emerald green (Growth, Prosperity)
           accent20: "hsla(156, 72%, 45%, 0.2)",

@@ -1086,6 +1086,34 @@ class BudgetService {
       });
     }
   }
+
+  async deletePayPeriod(index: number): Promise<void> {
+    if (!this.currentBudget.value) {
+      throw new Error("No budget is currently open");
+    }
+
+    if (index < 0 || index >= this.currentBudget.value.payPeriods.length) {
+      throw new Error("Invalid pay period index");
+    }
+
+    // Don't allow deleting if it's the current or past pay period
+    const currentIndex = this.getCurrentPayPeriodIndex();
+    if (index <= currentIndex) {
+      throw new Error("Cannot delete the current or past pay period");
+    }
+
+    // Remove the pay period
+    this.currentBudget.value.payPeriods.splice(index, 1);
+    this.currentBudget.value.updatedAt = new Date().toISOString();
+
+    // Save the updated budget
+    if (this.currentBudget.value.filePath) {
+      await window.electron.ipcRenderer.invoke("file:save", {
+        filePath: this.currentBudget.value.filePath,
+        content: JSON.stringify(this.currentBudget.value, null, 2),
+      });
+    }
+  }
 }
 
 export const budgetService = BudgetService.getInstance();

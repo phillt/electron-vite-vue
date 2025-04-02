@@ -14,6 +14,7 @@ const props = defineProps<{
   index: number;
   isCurrentPeriod: boolean;
   isPastPeriod: boolean;
+  isLastFuturePeriod?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -28,11 +29,13 @@ const emit = defineEmits<{
   (e: "addExpense"): void;
   (e: "deleteExpense", expenseId: string): void;
   (e: "deleteBill", billName: string): void;
+  (e: "deletePayPeriod", index: number): void;
 }>();
 
 const showBills = ref(props.isCurrentPeriod);
 const showExpenses = ref(props.isCurrentPeriod);
 const showAddBillModal = ref(false);
+const showDeleteButton = ref(false);
 
 const status = computed(() => {
   if (props.isCurrentPeriod) {
@@ -50,8 +53,8 @@ const status = computed(() => {
   } else {
     return {
       label: "Future Period",
-      class: "bg-white border-brand-accent20",
-      badge: "bg-brand-accent20 text-brand-accent",
+      class: "bg-white border-brand-dark20",
+      badge: "bg-brand-dark20 text-brand-dark",
     };
   }
 });
@@ -75,12 +78,29 @@ const handleAddBill = (bill: Bill) => {
 </script>
 
 <template>
-  <div class="overflow-hidden rounded-lg border" :class="status.class">
+  <div
+    class="overflow-hidden rounded-lg border relative"
+    :class="status.class"
+    @mouseenter="showDeleteButton = true"
+    @mouseleave="showDeleteButton = false"
+  >
     <PayPeriodHeader
       :pay-period="payPeriod"
       :status="status"
       @update:paycheck-amount="(amount: number) => emit('updatePaycheckAmount', amount)"
-    />
+    >
+      <template #after-badge>
+        <BaseButton
+          v-show="showDeleteButton && (isPastPeriod || isLastFuturePeriod)"
+          variant="ghost"
+          size="xs"
+          class="ml-1 text-red-700 hover:bg-red-50"
+          @click.stop="emit('deletePayPeriod', index)"
+        >
+          Delete
+        </BaseButton>
+      </template>
+    </PayPeriodHeader>
 
     <div class="border-t" :class="status.class">
       <CollapsibleSection

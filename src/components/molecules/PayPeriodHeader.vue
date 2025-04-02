@@ -30,6 +30,7 @@ const emit = defineEmits<{
         :end-date="payPeriod.endDate"
         :status="status"
       />
+      <slot name="after-badge" />
       <ProgressBar
         :current-amount="payPeriod.paidAmount"
         :total-amount="payPeriod.totalAmount"
