@@ -93,13 +93,7 @@
     <BaseModal
       v-model="showAddBillModal"
       :title="editingBill ? 'Edit Bill' : 'Add New Bill'"
-      @update:model-value="
-        (value) => {
-          if (!value) {
-            editingBill.value = null;
-          }
-        }
-      "
+      @update:model-value="handleBillModalClose"
     >
       <BillForm
         :initial-data="editingBill"
@@ -114,13 +108,7 @@
     <BaseModal
       v-model="showAddIncomeModal"
       :title="editingIncome ? 'Edit Income' : 'Add New Income'"
-      @update:model-value="
-        (value) => {
-          if (!value) {
-            editingIncome.value = null;
-          }
-        }
-      "
+      @update:model-value="handleIncomeModalClose"
     >
       <AddIncome
         :editing-income="editingIncome"
@@ -247,5 +235,17 @@ const handleAddBill = async (bill: Bill) => {
 const handleAddIncomeSuccess = () => {
   showAddIncomeModal.value = false;
   editingIncome.value = null;
+};
+
+const handleBillModalClose = (value: boolean) => {
+  if (!value) {
+    editingBill.value = null;
+  }
+};
+
+const handleIncomeModalClose = (value: boolean) => {
+  if (!value) {
+    editingIncome.value = null;
+  }
 };
 </script>

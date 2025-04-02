@@ -1,17 +1,23 @@
 {
   "name": "astreos",
-  "version": "28.1.0",
+  "version": "1.0.0-beta.1",
   "main": "dist-electron/main/index.js",
-  "description": "Astreos - A modern desktop application.",
-  "author": "草鞋没号 <308487730@qq.com>",
-  "license": "MIT",
+  "description": "Astreos – Effortless budgeting for real people. Desktop-first. Simple. Private.",
+  "author": "Philip Tadeo <powerphillg5@gmail.com>",
+  "license": "UNLICENSED",
   "private": true,
   "keywords": [
+    "astreos",
+    "budget",
+    "budgeting",
+    "offline",
+    "desktop",
     "electron",
-    "rollup",
-    "vite",
     "vue3",
-    "vue"
+    "vite",
+    "tailwind",
+    "privacy-first",
+    "indie-software"
   ],
   "debug": {
     "env": {

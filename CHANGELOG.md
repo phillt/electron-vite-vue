@@ -1,3 +1,11 @@
+## 2024-03-21
+
+[v1.0.0-beta.1](https://github.com/electron-vite/electron-vite-vue/releases/tag/v1.0.0-beta.1)
+
+- 🎉 First beta release of Astreos
+- Initial implementation of the desktop application
+- Basic application structure and UI components
+
 ## 2022-10-03
 
 [v2.1.0](https://github.com/electron-vite/electron-vite-vue/pull/267)
@@ -20,10 +28,12 @@
 - ⚡️ Main、Renderer、preload, all built with vite
 
 ## 2022-01-27
+
 - Refactor the scripts part.
 - Remove `configs` directory.
 
 ## 2021-11-11
+
 - Refactor the project. Use vite.config.ts build `Main-process`, `Preload-script` and `Renderer-process` alternative rollup.
 - Scenic `Vue>=3.2.13`, `@vue/compiler-sfc` is no longer necessary.
 - If you prefer Rollup, Use rollup branch.

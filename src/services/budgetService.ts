@@ -15,6 +15,12 @@ declare global {
       shell: {
         showItemInFolder: (filePath: string) => Promise<boolean>;
       };
+      window: {
+        minimize: () => void;
+        maximize: () => void;
+        close: () => void;
+        isMaximized: () => Promise<boolean>;
+      };
     };
   }
 }

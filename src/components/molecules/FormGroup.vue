@@ -5,6 +5,7 @@ import BaseInput from "../atoms/BaseInput.vue";
 defineProps<{
   modelValue: string | number;
   label: string;
+  name: string;
   type?: string;
   placeholder?: string;
   disabled?: boolean;

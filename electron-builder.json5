@@ -8,9 +8,19 @@
     output: "release/${version}",
   },
   files: ["dist", "dist-electron"],
+  fileAssociations: [
+    {
+      ext: "bdgtmn",
+      name: "Budget Manager File",
+      description: "Astreos Budget Manager File",
+      icon: "icons/icon.ico",
+      role: "Editor",
+    },
+  ],
   mac: {
     target: ["dmg"],
     artifactName: "${productName}-Mac-${version}-Installer.${ext}",
+    icon: "icons/icon_1024x1024.png",
   },
   win: {
     target: [
@@ -20,6 +30,7 @@
       },
     ],
     artifactName: "${productName}-Windows-${version}-Setup.${ext}",
+    icon: "icons/icon.ico",
   },
   nsis: {
     oneClick: false,
@@ -28,7 +39,20 @@
     deleteAppDataOnUninstall: false,
   },
   linux: {
-    target: ["AppImage"],
+    target: ["deb"],
     artifactName: "${productName}-Linux-${version}.${ext}",
+    icon: "build/icons",
+    category: "Finance",
+    maintainer: "Philip Tadeo <powerphillg5@gmail.com>",
+    vendor: "Astreos",
+    synopsis: "Effortless budgeting for real people",
+    description: "Astreos – A modern desktop budgeting application that's simple, private, and works offline.",
+    desktop: {
+      Name: "Astreos",
+      Comment: "Effortless budgeting for real people",
+      Categories: "Finance;Office;Utility",
+      MimeType: "application/x-astreos-budget",
+      Icon: "astreos",
+    },
   },
 }

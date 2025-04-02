@@ -1,7 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { mount } from "@vue/test-utils";
 import Budget from "../Budget.vue";
-import { budgetService } from "../../services/budgetService";
+import {
+  budgetService,
+  type Income,
+  type Budget as BudgetType,
+} from "../../services/budgetService";
 import { createRouter, createWebHistory } from "vue-router";
 
 // Mock the budgetService
@@ -40,14 +44,25 @@ describe("Budget.vue", () => {
 
   it("displays the correct paycheck amount of $3,500 for a biweekly pay period", async () => {
     // Mock the current budget data
-    const mockBudget = {
+    const mockBudget: BudgetType = {
       name: "Test Budget",
+      description: "Test budget description",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      items: [],
+      bills: [],
       incomes: [
         {
           name: "Main Job",
           amount: 3500,
-          originalAmount: 3500,
-          nextPayday: "2025-03-29",
+          frequency: "bi-weekly" as const,
+          lastPayday: "2025-03-15",
+          payPeriods: [
+            {
+              start: "2025-03-29",
+              end: "2025-04-12",
+            },
+          ],
         },
       ],
       payPeriods: [
@@ -106,14 +121,25 @@ describe("Budget.vue", () => {
 
   it("calculates remaining money correctly when there are bills and expenses", async () => {
     // Mock the current budget data with bills and expenses
-    const mockBudget = {
+    const mockBudget: BudgetType = {
       name: "Test Budget",
+      description: "Test budget description",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      items: [],
+      bills: [],
       incomes: [
         {
           name: "Main Job",
           amount: 3500,
-          originalAmount: 3500,
-          nextPayday: "2025-03-29",
+          frequency: "bi-weekly" as const,
+          lastPayday: "2025-03-15",
+          payPeriods: [
+            {
+              start: "2025-03-29",
+              end: "2025-04-12",
+            },
+          ],
         },
       ],
       payPeriods: [
@@ -124,6 +150,7 @@ describe("Budget.vue", () => {
             {
               name: "Rent",
               amount: 1000,
+              dueDay: 1,
               dueDate: "2025-04-01",
               isPaid: false,
             },
@@ -134,6 +161,7 @@ describe("Budget.vue", () => {
               name: "Groceries",
               amount: 200,
               date: "2025-03-30",
+              isPaid: false,
             },
           ],
           totalAmount: 1000, // Total bills
