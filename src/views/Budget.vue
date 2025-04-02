@@ -9,6 +9,7 @@ import BasePage from "../components/atoms/BasePage.vue";
 import BaseCard from "../components/atoms/BaseCard.vue";
 import BaseToggle from "../components/atoms/BaseToggle.vue";
 import PayPeriodCard from "../components/molecules/PayPeriodCard.vue";
+import EmptyState from "../components/atoms/EmptyState.vue";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { faArrowDownWideShort } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
@@ -218,6 +219,22 @@ const nextPayPeriodDates = computed(() => {
     end: nextEndDate.toLocaleDateString(),
   };
 });
+
+const getEmptyStateDescription = computed(() => {
+  if (
+    currentBudget.value.bills.length === 0 &&
+    currentBudget.value.incomes.length === 0
+  ) {
+    return "To get started with budgeting, you'll need to add some bills and income first.";
+  }
+  if (currentBudget.value.bills.length === 0) {
+    return "You have income set up, but no bills to budget for. Add some bills to get started.";
+  }
+  if (currentBudget.value.incomes.length === 0) {
+    return "You have bills set up, but no income to budget with. Add some income to get started.";
+  }
+  return "A pay period is a two-week window where you'll track your income, bills, and expenses. Create your first pay period to start budgeting.";
+});
 </script>
 
 <template>
@@ -255,56 +272,43 @@ const nextPayPeriodDates = computed(() => {
       v-else-if="currentBudget.payPeriods.length === 0"
       class="text-center py-12"
     >
-      <h3 class="text-lg font-medium text-brand-text">No Pay Periods Yet</h3>
-      <p
-        v-if="
-          currentBudget.bills.length === 0 && currentBudget.incomes.length === 0
-        "
-        class="mt-2 text-sm text-brand-muted mb-4"
+      <EmptyState
+        title="No Pay Periods Yet"
+        :description="getEmptyStateDescription"
+        :show-logo="false"
       >
-        To get started with budgeting, you'll need to add some bills and income
-        first.
-      </p>
-      <p
-        v-else-if="currentBudget.bills.length === 0"
-        class="mt-2 text-sm text-brand-muted mb-4"
-      >
-        You have income set up, but no bills to budget for. Add some bills to
-        get started.
-      </p>
-      <p
-        v-else-if="currentBudget.incomes.length === 0"
-        class="mt-2 text-sm text-brand-muted mb-4"
-      >
-        You have bills set up, but no income to budget with. Add some income to
-        get started.
-      </p>
-      <p v-else class="mt-2 text-sm text-brand-muted mb-4">
-        A pay period is a two-week window where you'll track your income, bills,
-        and expenses. Create your first pay period to start budgeting.
-      </p>
-      <div class="flex justify-center space-x-4">
-        <BaseButton
-          v-if="
-            currentBudget.bills.length === 0 ||
-            currentBudget.incomes.length === 0
-          "
-          variant="outline"
-          @click="router.push('/income-expenses')"
-        >
-          Go to Income & Bills
-        </BaseButton>
-        <BaseButton
-          v-if="
-            currentBudget.bills.length > 0 && currentBudget.incomes.length > 0
-          "
-          variant="outline"
-          :disabled="loading"
-          @click="handleCreatePayPeriod"
-        >
-          {{ loading ? "Creating..." : "Create Your First Pay Period" }}
-        </BaseButton>
-      </div>
+        <template #icon>
+          <FontAwesomeIcon
+            icon="receipt"
+            class="w-10 h-10 mx-auto mb-4 text-white"
+          />
+        </template>
+        <template #actions>
+          <div class="flex justify-center space-x-4">
+            <BaseButton
+              v-if="
+                currentBudget.bills.length === 0 ||
+                currentBudget.incomes.length === 0
+              "
+              variant="outline"
+              @click="router.push('/income-expenses')"
+            >
+              Go to Income & Bills
+            </BaseButton>
+            <BaseButton
+              v-if="
+                currentBudget.bills.length > 0 &&
+                currentBudget.incomes.length > 0
+              "
+              variant="outline"
+              :disabled="loading"
+              @click="handleCreatePayPeriod"
+            >
+              {{ loading ? "Creating..." : "Create Your First Pay Period" }}
+            </BaseButton>
+          </div>
+        </template>
+      </EmptyState>
     </div>
 
     <div v-else class="space-y-6">

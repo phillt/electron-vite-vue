@@ -8,20 +8,18 @@
     </div>
 
     <template v-else>
-      <div
+      <EmptyState
         v-if="!currentBudget?.incomes.length && !currentBudget?.bills.length"
-        class="text-center py-12"
+        title="Welcome to Astreos"
+        description="To get started with budgeting, you'll need to add your income sources and bills. Let's begin by adding your income."
+        :show-logo="true"
       >
-        <AstreosLogo class="w-16 h-16 mx-auto mb-4" />
-        <h3 class="text-lg font-medium text-brand-text">Welcome to Astreos</h3>
-        <p class="mt-2 text-sm text-brand-muted mb-4">
-          To get started with budgeting, you'll need to add your income sources
-          and bills. Let's begin by adding your income.
-        </p>
-        <BaseButton variant="primary" @click="showAddIncomeModal = true">
-          Add Income
-        </BaseButton>
-      </div>
+        <template #actions>
+          <BaseButton variant="outline" @click="showAddIncomeModal = true">
+            Add Income
+          </BaseButton>
+        </template>
+      </EmptyState>
 
       <div v-else class="flex flex-col gap-4">
         <!-- Income Sources Section -->
@@ -148,6 +146,7 @@ import BillForm from "../components/forms/BillForm.vue";
 import AddIncome from "./AddIncome.vue";
 import BaseListHeader from "../components/atoms/BaseListHeader.vue";
 import AstreosLogo from "../icons/AstreosLogo.vue";
+import EmptyState from "../components/atoms/EmptyState.vue";
 
 const router = useRouter();
 const currentBudget = computed(() => budgetService.getCurrentBudget());
