@@ -67,6 +67,8 @@ const handleCreatePayPeriod = async () => {
   error.value = null;
   try {
     await budgetService.createPayPeriod();
+    // Enable future filter to show the newly created period
+    filters.value.add("future");
   } catch (e: any) {
     error.value = e.message;
   } finally {
@@ -168,11 +170,41 @@ const handleAddBill = (payPeriodIndex: number) => {
 const handleAddExpense = (payPeriodIndex: number) => {
   router.push(`/add-expense?payPeriodIndex=${payPeriodIndex}`);
 };
+
+const nextPayPeriodDates = computed(() => {
+  if (!currentBudget.value || currentBudget.value.payPeriods.length === 0)
+    return null;
+
+  const lastPayPeriod =
+    currentBudget.value.payPeriods[currentBudget.value.payPeriods.length - 1];
+  const lastEndDate = new Date(lastPayPeriod.endDate);
+
+  // Calculate next period dates (assuming 2-week periods)
+  const nextStartDate = new Date(lastEndDate);
+  nextStartDate.setDate(nextStartDate.getDate() + 1);
+
+  const nextEndDate = new Date(nextStartDate);
+  nextEndDate.setDate(nextEndDate.getDate() + 13); // 14 days total (including start date)
+
+  return {
+    start: nextStartDate.toLocaleDateString(),
+    end: nextEndDate.toLocaleDateString(),
+  };
+});
 </script>
 
 <template>
   <BasePage title="Budget Overview">
     <template #actions>
+      <div class="flex items-center space-x-4">
+        <label class="text-sm font-medium text-brand-text">Filter:</label>
+        <div class="flex space-x-4">
+          <BaseToggle v-model="pastFilter" label="Past" />
+          <BaseToggle v-model="currentFilter" label="Current" />
+          <BaseToggle v-model="futureFilter" label="Future" />
+        </div>
+      </div>
+
       <BaseButton
         variant="outline"
         v-if="
@@ -192,17 +224,6 @@ const handleAddExpense = (payPeriodIndex: number) => {
         {{ loading ? "Creating..." : "Create Next Pay Period" }}
       </BaseButton>
     </template>
-
-    <BaseCard class="mb-6">
-      <div class="flex items-center space-x-4">
-        <label class="text-sm font-medium text-brand-text">Filter:</label>
-        <div class="flex space-x-4">
-          <BaseToggle v-model="pastFilter" label="Past" />
-          <BaseToggle v-model="currentFilter" label="Current" />
-          <BaseToggle v-model="futureFilter" label="Future" />
-        </div>
-      </div>
-    </BaseCard>
 
     <div v-if="error" class="rounded-md bg-brand-danger/10 p-4">
       <div class="text-sm text-brand-danger">{{ error }}</div>
@@ -257,6 +278,30 @@ const handleAddExpense = (payPeriodIndex: number) => {
         @add-expense="() => handleAddExpense(index)"
         @delete-expense="(expenseId) => handleDeleteExpense(index, expenseId)"
       />
+
+      <!-- Next Pay Period Cutout -->
+      <div
+        class="relative bg-brand-surface rounded-lg border-2 border-dashed border-brand-primary/30 p-6"
+      >
+        <div class="text-center text-brand-muted mb-2">
+          Ready to start your next pay period?
+        </div>
+        <div
+          v-if="nextPayPeriodDates"
+          class="text-center text-sm text-brand-primary mb-4"
+        >
+          {{ nextPayPeriodDates.start }} - {{ nextPayPeriodDates.end }}
+        </div>
+        <div class="flex justify-center">
+          <BaseButton
+            variant="outline"
+            :disabled="loading"
+            @click="handleCreatePayPeriod"
+          >
+            {{ loading ? "Creating..." : "Start Next Pay Period" }}
+          </BaseButton>
+        </div>
+      </div>
     </div>
   </BasePage>
 </template>
