@@ -2,7 +2,7 @@
   "name": "Rolling Thunder",
   "description": "My first attempt at creating a real budget.",
   "createdAt": "2025-03-30T05:35:16.804Z",
-  "updatedAt": "2025-04-02T01:08:27.738Z",
+  "updatedAt": "2025-04-02T01:14:54.491Z",
   "filePath": "/home/philllt/Projects/apps/electron-vite-vue/Rolling Thunder.bdgtmn",
   "items": [],
   "incomes": [
@@ -253,7 +253,7 @@
           "date": "2025-04-01T00:56:21.385Z"
         }
       ],
-      "totalAmount": 1493.88,
+      "totalAmount": 2002.88,
       "paidAmount": 2002.88,
       "unpaidAmount": 0,
       "totalExpenses": 509,

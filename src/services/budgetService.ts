@@ -616,7 +616,10 @@ class BudgetService {
 
     // Recalculate paid and unpaid amounts
     const totalBills = payPeriod.bills.reduce((sum, b) => sum + b.amount, 0);
-    const totalExpenses = payPeriod.expenses.reduce((sum, e) => sum + e.amount, 0);
+    const totalExpenses = payPeriod.expenses.reduce(
+      (sum, e) => sum + e.amount,
+      0
+    );
     const paidBills = payPeriod.bills.reduce(
       (sum, b) => sum + (b.isPaid ? b.amount : 0),
       0
@@ -948,6 +951,134 @@ class BudgetService {
     payPeriod.paycheckAmount = newAmount;
     this.currentBudget.value.updatedAt = new Date().toISOString();
 
+    if (this.currentBudget.value.filePath) {
+      await window.electron.ipcRenderer.invoke("file:save", {
+        filePath: this.currentBudget.value.filePath,
+        content: JSON.stringify(this.currentBudget.value, null, 2),
+      });
+    }
+  }
+
+  async addBillToPayPeriod(payPeriodIndex: number, bill: Bill): Promise<void> {
+    if (!this.currentBudget.value) {
+      throw new Error("No budget is currently open");
+    }
+
+    const payPeriod = this.currentBudget.value.payPeriods[payPeriodIndex];
+    if (!payPeriod) {
+      throw new Error("Pay period not found");
+    }
+
+    // Convert the bill to a PayPeriodBill
+    const payPeriodBill: PayPeriodBill = {
+      ...bill,
+      isPaid: false,
+      dueDate: this.calculateDueDate(
+        bill.dueDay,
+        payPeriod.startDate,
+        payPeriod.endDate
+      ),
+    };
+
+    // Add the bill to the pay period
+    payPeriod.bills.push(payPeriodBill);
+
+    // Recalculate totals
+    const totalBills = payPeriod.bills.reduce((sum, b) => sum + b.amount, 0);
+    const totalExpenses = payPeriod.expenses.reduce(
+      (sum, e) => sum + e.amount,
+      0
+    );
+    const paidBills = payPeriod.bills.reduce(
+      (sum, b) => sum + (b.isPaid ? b.amount : 0),
+      0
+    );
+    const paidExpenses = payPeriod.expenses.reduce(
+      (sum, e) => sum + (e.isPaid ? e.amount : 0),
+      0
+    );
+
+    payPeriod.totalAmount = totalBills + totalExpenses;
+    payPeriod.paidAmount = paidBills + paidExpenses;
+    payPeriod.unpaidAmount = payPeriod.totalAmount - payPeriod.paidAmount;
+
+    this.currentBudget.value.updatedAt = new Date().toISOString();
+
+    // Save the updated budget
+    if (this.currentBudget.value.filePath) {
+      await window.electron.ipcRenderer.invoke("file:save", {
+        filePath: this.currentBudget.value.filePath,
+        content: JSON.stringify(this.currentBudget.value, null, 2),
+      });
+    }
+  }
+
+  private calculateDueDate(
+    dueDay: number,
+    startDate: string,
+    endDate: string
+  ): string {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const dueDate = new Date(start);
+    dueDate.setDate(dueDay);
+
+    // If the due date is before the start date, move it to the next month
+    if (dueDate < start) {
+      dueDate.setMonth(dueDate.getMonth() + 1);
+    }
+
+    // If the due date is after the end date, move it to the previous month
+    if (dueDate > end) {
+      dueDate.setMonth(dueDate.getMonth() - 1);
+    }
+
+    return dueDate.toISOString();
+  }
+
+  async deleteBillFromPayPeriod(
+    payPeriodIndex: number,
+    billName: string
+  ): Promise<void> {
+    if (!this.currentBudget.value) {
+      throw new Error("No budget is currently open");
+    }
+
+    const payPeriod = this.currentBudget.value.payPeriods[payPeriodIndex];
+    if (!payPeriod) {
+      throw new Error("Pay period not found");
+    }
+
+    const billIndex = payPeriod.bills.findIndex((b) => b.name === billName);
+    if (billIndex === -1) {
+      throw new Error("Bill not found in pay period");
+    }
+
+    // Remove the bill from the pay period
+    payPeriod.bills.splice(billIndex, 1);
+
+    // Recalculate totals
+    const totalBills = payPeriod.bills.reduce((sum, b) => sum + b.amount, 0);
+    const totalExpenses = payPeriod.expenses.reduce(
+      (sum, e) => sum + e.amount,
+      0
+    );
+    const paidBills = payPeriod.bills.reduce(
+      (sum, b) => sum + (b.isPaid ? b.amount : 0),
+      0
+    );
+    const paidExpenses = payPeriod.expenses.reduce(
+      (sum, e) => sum + (e.isPaid ? e.amount : 0),
+      0
+    );
+
+    payPeriod.totalAmount = totalBills + totalExpenses;
+    payPeriod.paidAmount = paidBills + paidExpenses;
+    payPeriod.unpaidAmount = payPeriod.totalAmount - payPeriod.paidAmount;
+
+    this.currentBudget.value.updatedAt = new Date().toISOString();
+
+    // Save the updated budget
     if (this.currentBudget.value.filePath) {
       await window.electron.ipcRenderer.invoke("file:save", {
         filePath: this.currentBudget.value.filePath,

@@ -18,6 +18,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: "togglePaid", billName: string): void;
   (e: "updateAmount", billName: string, amount: number): void;
+  (e: "deleteBill", billName: string): void;
 }>();
 
 const formatDate = (date: string) => {
@@ -48,7 +49,7 @@ const headers = [
   { label: "Amount", key: "amount", class: "w-1/5 text-center" },
   { label: "Due Date", key: "dueDate", class: "w-1/5 text-center" },
   { label: "Days Until Due", key: "daysUntilDue", class: "w-1/5 text-center" },
-  { label: "Paid", key: "paid", class: "w-1/5 text-right" },
+  { label: "Actions", key: "actions", class: "w-1/5 text-right" },
 ];
 
 const handleAmountChange = (billName: string, amount: string) => {
@@ -92,13 +93,23 @@ const handleAmountChange = (billName: string, amount: string) => {
             {{ calculateDaysUntilDue(bill.dueDate) }}
           </td>
           <td class="px-4 py-2 whitespace-nowrap w-1/5 text-right">
-            <BaseButton
-              :variant="bill.isPaid ? 'primary' : 'outline'"
-              size="sm"
-              @click="emit('togglePaid', bill.name)"
-            >
-              {{ bill.isPaid ? "Paid" : "Unpaid" }}
-            </BaseButton>
+            <div class="flex items-center justify-end gap-2">
+              <BaseButton
+                variant="ghost"
+                size="sm"
+                class="text-red-700 hover:bg-red-50"
+                @click="emit('deleteBill', bill.name)"
+              >
+                Delete
+              </BaseButton>
+              <BaseButton
+                :variant="bill.isPaid ? 'primary' : 'outline'"
+                size="sm"
+                @click="emit('togglePaid', bill.name)"
+              >
+                {{ bill.isPaid ? "Paid" : "Unpaid" }}
+              </BaseButton>
+            </div>
           </td>
         </tr>
       </template>

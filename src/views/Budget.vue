@@ -2,7 +2,7 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { budgetService } from "../services/budgetService";
-import type { PayPeriod } from "../services/budgetService";
+import type { PayPeriod, Bill } from "../services/budgetService";
 import { useRouter } from "vue-router";
 import BaseButton from "../components/atoms/BaseButton.vue";
 import BasePage from "../components/atoms/BasePage.vue";
@@ -163,12 +163,24 @@ const handleUpdatePaycheckAmount = async (
   }
 };
 
-const handleAddBill = (payPeriodIndex: number) => {
-  router.push(`/add-bill?payPeriodIndex=${payPeriodIndex}`);
+const handleAddBill = async (payPeriodIndex: number, bill: Bill) => {
+  try {
+    await budgetService.addBillToPayPeriod(payPeriodIndex, bill);
+  } catch (e: any) {
+    error.value = e.message;
+  }
 };
 
 const handleAddExpense = (payPeriodIndex: number) => {
   router.push(`/add-expense?payPeriodIndex=${payPeriodIndex}`);
+};
+
+const handleDeleteBill = async (payPeriodIndex: number, billName: string) => {
+  try {
+    await budgetService.deleteBillFromPayPeriod(payPeriodIndex, billName);
+  } catch (e: any) {
+    error.value = e.message;
+  }
 };
 
 const nextPayPeriodDates = computed(() => {
@@ -274,9 +286,10 @@ const nextPayPeriodDates = computed(() => {
         @update-paycheck-amount="
           (amount) => handleUpdatePaycheckAmount(index, amount)
         "
-        @add-bill="() => handleAddBill(index)"
+        @add-bill="(bill) => handleAddBill(index, bill)"
         @add-expense="() => handleAddExpense(index)"
         @delete-expense="(expenseId) => handleDeleteExpense(index, expenseId)"
+        @delete-bill="(billName) => handleDeleteBill(index, billName)"
       />
 
       <!-- Next Pay Period Cutout -->

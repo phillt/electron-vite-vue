@@ -1,12 +1,13 @@
 <!-- PayPeriodCard.vue -->
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import type { PayPeriod } from "../../services/budgetService";
+import type { PayPeriod, Bill } from "../../services/budgetService";
 import PayPeriodHeader from "./PayPeriodHeader.vue";
 import PayPeriodBills from "./PayPeriodBills.vue";
 import PayPeriodExpenses from "./PayPeriodExpenses.vue";
 import CollapsibleSection from "./CollapsibleSection.vue";
 import BaseButton from "../atoms/BaseButton.vue";
+import AddBillModal from "./pay-period/AddBillModal.vue";
 
 const props = defineProps<{
   payPeriod: PayPeriod;
@@ -23,13 +24,15 @@ const emit = defineEmits<{
   (e: "updateBillAmount", billName: string, amount: number): void;
   (e: "updateExpenseAmount", expenseId: string, amount: number): void;
   (e: "updatePaycheckAmount", amount: number): void;
-  (e: "addBill"): void;
+  (e: "addBill", bill: Bill): void;
   (e: "addExpense"): void;
   (e: "deleteExpense", expenseId: string): void;
+  (e: "deleteBill", billName: string): void;
 }>();
 
 const showBills = ref(props.isCurrentPeriod);
 const showExpenses = ref(props.isCurrentPeriod);
+const showAddBillModal = ref(false);
 
 const status = computed(() => {
   if (props.isCurrentPeriod) {
@@ -65,6 +68,10 @@ const expensesStats = computed(() => ({
   paid: props.payPeriod.expenses.filter((expense) => expense.isPaid).length,
   total: props.payPeriod.expenses.length,
 }));
+
+const handleAddBill = (bill: Bill) => {
+  emit("addBill", bill);
+};
 </script>
 
 <template>
@@ -90,9 +97,10 @@ const expensesStats = computed(() => ({
           @update-amount="
             (billName: string, amount: number) => emit('updateBillAmount', billName, amount)
           "
+          @delete-bill="(billName: string) => emit('deleteBill', billName)"
         />
         <div class="p-4 pt-0 flex justify-end">
-          <BaseButton variant="outline" @click="emit('addBill')"
+          <BaseButton variant="outline" @click="showAddBillModal = true"
             >Add Bill</BaseButton
           >
         </div>
@@ -123,5 +131,12 @@ const expensesStats = computed(() => ({
         </div>
       </div>
     </div>
+
+    <AddBillModal
+      v-model="showAddBillModal"
+      :pay-period-index="index"
+      :existing-bills="payPeriod.bills"
+      @submit="handleAddBill"
+    />
   </div>
 </template>
