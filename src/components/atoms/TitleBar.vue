@@ -32,7 +32,7 @@ const handleClose = () => {
 
 <template>
   <div
-    class="h-8 bg-white border-b border-gray-300 flex items-center justify-between px-4 select-none"
+    class="h-8 bg-gray-25 border-b border-gray-300 flex items-center justify-between px-4 select-none"
   >
     <div class="flex items-center text-gray-900 text-sm">Astreos</div>
     <div class="flex items-center space-x-1">

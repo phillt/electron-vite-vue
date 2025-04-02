@@ -26,6 +26,11 @@ defineEmits<{
         :class="modelValue ? 'translate-x-4' : 'translate-x-0'"
       />
     </div>
-    <span v-if="label" class="text-sm text-brand-text">{{ label }}</span>
+    <span
+      v-if="label"
+      class="text-sm"
+      :class="modelValue ? 'text-brand-text font-bold' : 'text-gray-500'"
+      >{{ label }}</span
+    >
   </label>
 </template>

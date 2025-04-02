@@ -9,6 +9,11 @@ import BasePage from "../components/atoms/BasePage.vue";
 import BaseCard from "../components/atoms/BaseCard.vue";
 import BaseToggle from "../components/atoms/BaseToggle.vue";
 import PayPeriodCard from "../components/molecules/PayPeriodCard.vue";
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { faArrowDownWideShort } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+
+library.add(faArrowDownWideShort);
 
 const router = useRouter();
 const currentBudget = computed(() => budgetService.getCurrentBudget());
@@ -17,7 +22,9 @@ const currentPayPeriodIndex = computed(() =>
 );
 const loading = ref(false);
 const error = ref<string | null>(null);
-const filters = ref<Set<"past" | "current" | "future">>(new Set());
+const filters = ref<Set<"past" | "current" | "future">>(
+  new Set(["current", "future"])
+);
 
 const pastFilter = computed({
   get: () => filters.value.has("past"),
@@ -216,26 +223,18 @@ const nextPayPeriodDates = computed(() => {
 <template>
   <BasePage title="Budget Overview">
     <template #actions>
-      <div class="flex items-center space-x-4">
-        <label class="text-sm font-medium text-brand-text">Filter:</label>
-        <div class="flex space-x-4">
-          <BaseToggle v-model="pastFilter" label="Past" />
-          <BaseToggle v-model="currentFilter" label="Current" />
-          <BaseToggle v-model="futureFilter" label="Future" />
-        </div>
-      </div>
-
-      <BaseButton
-        variant="outline"
-        v-if="
-          currentBudget &&
-          currentBudget.payPeriods.length > 0 &&
-          currentPayPeriodIndex !== currentBudget.payPeriods.length - 1
-        "
-        @click="handleDeleteLastPayPeriod"
-      >
-        Delete Last Period
-      </BaseButton>
+      <BaseCard :padding="4">
+        <div class="flex items-center space-x-4">
+          <FontAwesomeIcon
+            icon="arrow-down-wide-short"
+            class="text-brand-text"
+          />
+          <div class="flex space-x-4">
+            <BaseToggle v-model="pastFilter" label="Past" />
+            <BaseToggle v-model="currentFilter" label="Current" />
+            <BaseToggle v-model="futureFilter" label="Future" />
+          </div></div
+      ></BaseCard>
     </template>
 
     <div v-if="error" class="rounded-md bg-brand-danger/10 p-4">
