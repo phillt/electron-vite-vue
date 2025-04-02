@@ -2,6 +2,13 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import BaseButton from "./BaseButton.vue";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import {
+  faSquare,
+  faSquareFull,
+  faWindowMinimize,
+} from "@fortawesome/free-regular-svg-icons";
+import { faXmark } from "@fortawesome/free-solid-svg-icons";
 
 const isMaximized = ref(false);
 
@@ -25,80 +32,36 @@ const handleClose = () => {
 
 <template>
   <div
-    class="h-8 bg-gray-800 flex items-center justify-between px-4 select-none"
+    class="h-8 bg-white border-b border-gray-300 flex items-center justify-between px-4 select-none"
   >
-    <div class="flex items-center text-white text-sm">Astreos</div>
-    <div class="flex items-center space-x-2">
+    <div class="flex items-center text-gray-900 text-sm">Astreos</div>
+    <div class="flex items-center space-x-1">
       <BaseButton
         variant="ghost"
         size="sm"
-        class="text-white hover:bg-gray-700"
+        class="text-gray-900 hover:bg-gray-100"
         @click="handleMinimize"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="h-4 w-4"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z"
-            clip-rule="evenodd"
-          />
-        </svg>
+        <FontAwesomeIcon :icon="faWindowMinimize" class="h-4 w-4" />
       </BaseButton>
       <BaseButton
         variant="ghost"
         size="sm"
-        class="text-white hover:bg-gray-700"
+        class="text-gray-900 hover:bg-gray-100"
         @click="handleMaximize"
       >
-        <svg
-          v-if="!isMaximized"
-          xmlns="http://www.w3.org/2000/svg"
+        <FontAwesomeIcon
+          :icon="isMaximized ? faSquareFull : faSquare"
           class="h-4 w-4"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M3 4a1 1 0 011-1h4a1 1 0 010 2H6.414l2.293 2.293a1 1 0 11-1.414 1.414L5 6.414V8a1 1 0 01-2 0V4zm9 1a1 1 0 010-2h4a1 1 0 011 1v4a1 1 0 01-2 0V6.414l-2.293 2.293a1 1 0 11-1.414-1.414L13.586 5H12zm-9 7a1 1 0 012 0v1.586l2.293-2.293a1 1 0 111.414 1.414L6.414 15H8a1 1 0 010 2H4a1 1 0 01-1-1v-4zm13-1a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 010-2h1.586l-2.293-2.293a1 1 0 111.414-1.414L15 13.586V12a1 1 0 011-1z"
-            clip-rule="evenodd"
-          />
-        </svg>
-        <svg
-          v-else
-          xmlns="http://www.w3.org/2000/svg"
-          class="h-4 w-4"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M5 15V5h10v10H5zm-2-2h14V3H3v10z"
-            clip-rule="evenodd"
-          />
-        </svg>
+        />
       </BaseButton>
       <BaseButton
         variant="ghost"
         size="sm"
-        class="text-white hover:bg-red-600"
+        class="text-gray-900 hover:bg-red-100"
         @click="handleClose"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="h-4 w-4"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-            clip-rule="evenodd"
-          />
-        </svg>
+        <FontAwesomeIcon :icon="faXmark" class="h-4 w-4" />
       </BaseButton>
     </div>
   </div>

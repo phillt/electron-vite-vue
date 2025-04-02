@@ -23,13 +23,13 @@ defineEmits<{
       isActive
         ? 'bg-black text-white'
         : 'text-brand-muted hover:bg-brand-background hover:text-brand-text',
-      'group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full transition-colors mb-2',
+      'group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full transition-colors mb-1',
     ]"
   >
     <FontAwesomeIcon
       v-if="icon"
       :icon="icon"
-      class="mr-3 h-6 w-6"
+      class="mr-2 h-4 w-4"
       :class="[
         isActive
           ? 'text-white'
