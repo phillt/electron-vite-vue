@@ -1,6 +1,6 @@
 {
   "name": "astreos",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-beta.2",
   "main": "dist-electron/main/index.js",
   "description": "Astreos – Effortless budgeting for real people. Desktop-first. Simple. Private.",
   "author": "Philip Tadeo <powerphillg5@gmail.com>",
