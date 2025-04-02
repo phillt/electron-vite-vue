@@ -89,9 +89,21 @@
       </div>
     </template>
 
-    <!-- Add Bill Modal -->
-    <BaseModal v-model="showAddBillModal" title="Add New Bill">
+    <!-- Add/Edit Bill Modal -->
+    <BaseModal
+      v-model="showAddBillModal"
+      :title="editingBill ? 'Edit Bill' : 'Add New Bill'"
+      @update:model-value="
+        (value) => {
+          if (!value) {
+            editingBill.value = null;
+          }
+        }
+      "
+    >
       <BillForm
+        :initial-data="editingBill"
+        :is-editing="!!editingBill"
         :existing-bills="currentBudget?.bills"
         @submit="handleAddBill"
         @cancel="showAddBillModal = false"
@@ -138,6 +150,7 @@ const currentBudget = computed(() => budgetService.getCurrentBudget());
 const showAddBillModal = ref(false);
 const showAddIncomeModal = ref(false);
 const editingIncome = ref<Income | null>(null);
+const editingBill = ref<Bill | null>(null);
 
 const formatDate = (date: string) => {
   return new Date(date).toLocaleDateString();
@@ -203,7 +216,8 @@ const deleteIncome = async (income: Income) => {
 };
 
 const editBill = (bill: Bill) => {
-  router.push(`/add-bill?edit=${bill.name}`);
+  editingBill.value = bill;
+  showAddBillModal.value = true;
 };
 
 const deleteBill = async (bill: Bill) => {
@@ -218,10 +232,15 @@ const deleteBill = async (bill: Bill) => {
 
 const handleAddBill = async (bill: Bill) => {
   try {
-    await budgetService.addBill(bill);
+    if (editingBill.value) {
+      await budgetService.updateBill(editingBill.value.name, bill);
+    } else {
+      await budgetService.addBill(bill);
+    }
     showAddBillModal.value = false;
+    editingBill.value = null;
   } catch (error) {
-    console.error("Error adding bill:", error);
+    console.error("Error saving bill:", error);
   }
 };
 

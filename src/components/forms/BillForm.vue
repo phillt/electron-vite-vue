@@ -62,13 +62,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import type { Bill } from "../../services/budgetService";
 import BaseButton from "../atoms/BaseButton.vue";
 import BaseInput from "../atoms/BaseInput.vue";
 
 const props = defineProps<{
-  initialData?: Bill;
+  initialData?: Bill | null;
   isEditing?: boolean;
   existingBills?: Bill[];
 }>();
@@ -81,37 +81,62 @@ const emit = defineEmits<{
 const isSubmitting = ref(false);
 const error = ref<string | null>(null);
 
-const formData = ref({
-  name: props.initialData?.name || "",
-  dueDay: props.initialData?.dueDay || 1,
-  amount: props.initialData?.amount || 0,
-});
+const defaultBill = {
+  name: "",
+  dueDay: 1,
+  amount: 0,
+};
+
+const formData = ref<Bill>({ ...defaultBill });
+
+// Watch for changes to initialData prop
+watch(
+  () => props.initialData,
+  (newBill) => {
+    if (newBill) {
+      // Create a new object to avoid reference issues
+      formData.value = {
+        name: newBill.name,
+        dueDay: newBill.dueDay,
+        amount: newBill.amount,
+      };
+    } else {
+      // Reset form when not editing
+      formData.value = { ...defaultBill };
+    }
+  },
+  { immediate: true, deep: true }
+);
 
 const submitButtonText = computed(() =>
-  props.isEditing ? "Save Changes" : "Add Bill"
+  props.isEditing ? "Update Bill" : "Add Bill"
 );
 
 const handleSubmit = async () => {
+  if (
+    !formData.value.name ||
+    !formData.value.amount ||
+    !formData.value.dueDay
+  ) {
+    error.value = "Please fill in all required fields";
+    return;
+  }
+
+  // Check for duplicate names when creating a new bill
+  if (!props.isEditing && props.existingBills) {
+    const isDuplicate = props.existingBills.some(
+      (bill) => bill.name === formData.value.name
+    );
+    if (isDuplicate) {
+      error.value = "A bill with this name already exists";
+      return;
+    }
+  }
+
   isSubmitting.value = true;
   error.value = null;
 
   try {
-    // Check if name already exists (only for new bills)
-    if (!props.isEditing && props.existingBills) {
-      if (
-        props.existingBills.some((b: Bill) => b.name === formData.value.name)
-      ) {
-        error.value = "A bill with this name already exists.";
-        return;
-      }
-    }
-
-    // Validate due day
-    if (formData.value.dueDay < 1 || formData.value.dueDay > 31) {
-      error.value = "Due day must be between 1 and 31.";
-      return;
-    }
-
     emit("submit", { ...formData.value });
   } catch (err) {
     console.error("Error saving bill:", err);
