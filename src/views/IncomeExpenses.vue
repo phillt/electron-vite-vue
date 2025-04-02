@@ -1,5 +1,5 @@
 <template>
-  <BasePage title="Income & Expenses">
+  <BasePage title="Income & Bills">
     <div v-if="!currentBudget" class="text-center py-12">
       <p class="text-brand-muted">No budget is currently open.</p>
       <BaseButton variant="primary" class="mt-4" @click="$router.push('/')">
@@ -98,9 +98,22 @@
       />
     </BaseModal>
 
-    <!-- Add Income Modal -->
-    <BaseModal v-model="showAddIncomeModal" title="Add New Income">
-      <AddIncome @close="showAddIncomeModal = false" />
+    <!-- Add/Edit Income Modal -->
+    <BaseModal
+      v-model="showAddIncomeModal"
+      :title="editingIncome ? 'Edit Income' : 'Add New Income'"
+      @update:model-value="
+        (value) => {
+          if (!value) {
+            editingIncome.value = null;
+          }
+        }
+      "
+    >
+      <AddIncome
+        :editing-income="editingIncome"
+        @close="handleAddIncomeSuccess"
+      />
     </BaseModal>
   </BasePage>
 </template>
@@ -124,6 +137,7 @@ const router = useRouter();
 const currentBudget = computed(() => budgetService.getCurrentBudget());
 const showAddBillModal = ref(false);
 const showAddIncomeModal = ref(false);
+const editingIncome = ref<Income | null>(null);
 
 const formatDate = (date: string) => {
   return new Date(date).toLocaleDateString();
@@ -174,7 +188,8 @@ const getNextDueDate = (dueDay: number) => {
 };
 
 const editIncome = (income: Income) => {
-  router.push(`/add-income?edit=${income.name}`);
+  editingIncome.value = income;
+  showAddIncomeModal.value = true;
 };
 
 const deleteIncome = async (income: Income) => {
@@ -212,6 +227,6 @@ const handleAddBill = async (bill: Bill) => {
 
 const handleAddIncomeSuccess = () => {
   showAddIncomeModal.value = false;
-  // Optionally refresh the income sources list here
+  editingIncome.value = null;
 };
 </script>

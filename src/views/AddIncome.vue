@@ -3,7 +3,7 @@
     :is-submitting="isSubmitting"
     :is-form-valid="isFormValid"
     :error="error"
-    submit-button-text="Add Income"
+    :submit-button-text="editingIncome ? 'Update Income' : 'Add Income'"
     @submit="handleSubmit"
     @cancel="handleCancel"
   >
@@ -15,6 +15,7 @@
         type="text"
         name="income-name"
         placeholder="e.g., Main Job, Side Gig, etc."
+        :disabled="!!editingIncome"
       />
       <p class="text-sm text-gray-500">Give this income source a unique name</p>
     </div>
@@ -63,10 +64,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { budgetService, type Income } from "../services/budgetService";
 import BaseInput from "../components/atoms/BaseInput.vue";
 import BaseForm from "../components/templates/BaseForm.vue";
+
+const props = defineProps<{
+  editingIncome?: Income | null;
+}>();
 
 const isSubmitting = ref(false);
 const error = ref<string | null>(null);
@@ -77,13 +82,36 @@ const lastWeek = new Date();
 lastWeek.setDate(lastWeek.getDate() - 7);
 const lastWeekDate = lastWeek.toISOString().split("T")[0];
 
-const income = ref<Partial<Income>>({
+const defaultIncome = {
   name: "",
   amount: 0,
   frequency: "bi-weekly" as const,
   lastPayday: today,
   payPeriods: [],
-});
+};
+
+const income = ref<Partial<Income>>({ ...defaultIncome });
+
+// Watch for changes to editingIncome prop
+watch(
+  () => props.editingIncome,
+  (newIncome) => {
+    if (newIncome) {
+      // Create a new object to avoid reference issues
+      income.value = {
+        name: newIncome.name,
+        amount: newIncome.amount,
+        frequency: newIncome.frequency,
+        lastPayday: newIncome.lastPayday,
+        payPeriods: [...newIncome.payPeriods],
+      };
+    } else {
+      // Reset form when not editing
+      income.value = { ...defaultIncome };
+    }
+  },
+  { immediate: true, deep: true }
+);
 
 // Computed properties for v-model bindings
 const incomeName = computed({
@@ -145,11 +173,17 @@ const handleSubmit = async () => {
 
   try {
     const payPeriods = generatePayPeriods(income.value.lastPayday!, 5);
-    await budgetService.addIncome({
+    const incomeData = {
       ...income.value,
       payPeriods,
       frequency: "bi-weekly" as const,
-    } as Income);
+    } as Income;
+
+    if (props.editingIncome) {
+      await budgetService.updateIncome(props.editingIncome.name, incomeData);
+    } else {
+      await budgetService.addIncome(incomeData);
+    }
 
     emit("close");
   } catch (err) {
