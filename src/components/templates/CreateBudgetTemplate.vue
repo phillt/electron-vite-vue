@@ -19,7 +19,6 @@ const emit = defineEmits<{
 const budget = ref({
   name: "",
   description: "",
-  lastPayday: new Date().toISOString().split("T")[0],
 });
 
 const handleSubmit = () => {
@@ -77,28 +76,6 @@ const handleSubmit = () => {
               placeholder="A brief description of your budget"
             />
           </div>
-        </div>
-
-        <div>
-          <label
-            for="lastPayday"
-            class="block text-sm font-medium text-gray-700"
-          >
-            Last Payday
-          </label>
-          <div class="mt-1">
-            <BaseInput
-              id="lastPayday"
-              v-model="budget.lastPayday"
-              type="date"
-              name="budget-last-payday"
-              required
-            />
-          </div>
-          <p class="mt-1 text-sm text-gray-500">
-            Select the date of your most recent payday. This will be used to
-            calculate future pay periods.
-          </p>
         </div>
       </BaseForm>
     </BaseCard>

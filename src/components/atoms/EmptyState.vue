@@ -6,7 +6,7 @@
       <h3 class="text-3xl text-white font-medium text-brand-text mb-10">
         {{ title }}
       </h3>
-      <p class="mt-4 text-sm text-gray-300 mb-8">{{ description }}</p>
+      <p class="mt-4 text-sm text-left text-gray-300 mb-8">{{ description }}</p>
       <div v-if="$slots.actions" class="flex justify-end">
         <slot name="actions"></slot>
       </div>

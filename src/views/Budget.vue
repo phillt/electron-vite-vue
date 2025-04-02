@@ -221,6 +221,8 @@ const nextPayPeriodDates = computed(() => {
 });
 
 const getEmptyStateDescription = computed(() => {
+  if (!currentBudget.value) return "";
+
   if (
     currentBudget.value.bills.length === 0 &&
     currentBudget.value.incomes.length === 0
@@ -233,7 +235,7 @@ const getEmptyStateDescription = computed(() => {
   if (currentBudget.value.incomes.length === 0) {
     return "You have bills set up, but no income to budget with. Add some income to get started.";
   }
-  return "A pay period is a two-week window where you'll track your income, bills, and expenses. Create your first pay period to start budgeting.";
+  return "A pay period is a two-week window where you'll track your income, bills, and expenses. You'll be able to track your bills and expenses for each pay period, marking them as paid or unpaid.";
 });
 </script>
 
@@ -268,48 +270,43 @@ const getEmptyStateDescription = computed(() => {
       </p>
     </div>
 
-    <div
+    <EmptyState
       v-else-if="currentBudget.payPeriods.length === 0"
-      class="text-center py-12"
+      title="Create Your First Pay Period"
+      :description="getEmptyStateDescription"
+      :show-logo="false"
     >
-      <EmptyState
-        title="No Pay Periods Yet"
-        :description="getEmptyStateDescription"
-        :show-logo="false"
-      >
-        <template #icon>
-          <FontAwesomeIcon
-            icon="receipt"
-            class="w-10 h-10 mx-auto mb-4 text-white"
-          />
-        </template>
-        <template #actions>
-          <div class="flex justify-center space-x-4">
-            <BaseButton
-              v-if="
-                currentBudget.bills.length === 0 ||
-                currentBudget.incomes.length === 0
-              "
-              variant="outline"
-              @click="router.push('/income-expenses')"
-            >
-              Go to Income & Bills
-            </BaseButton>
-            <BaseButton
-              v-if="
-                currentBudget.bills.length > 0 &&
-                currentBudget.incomes.length > 0
-              "
-              variant="outline"
-              :disabled="loading"
-              @click="handleCreatePayPeriod"
-            >
-              {{ loading ? "Creating..." : "Create Your First Pay Period" }}
-            </BaseButton>
-          </div>
-        </template>
-      </EmptyState>
-    </div>
+      <template #icon>
+        <FontAwesomeIcon
+          icon="receipt"
+          class="w-10 h-10 mx-auto mb-4 text-white"
+        />
+      </template>
+      <template #actions>
+        <div class="flex justify-center space-x-4">
+          <BaseButton
+            v-if="
+              currentBudget.bills.length === 0 ||
+              currentBudget.incomes.length === 0
+            "
+            variant="outline"
+            @click="router.push('/income-expenses')"
+          >
+            Go to Income & Bills
+          </BaseButton>
+          <BaseButton
+            v-if="
+              currentBudget.bills.length > 0 && currentBudget.incomes.length > 0
+            "
+            variant="outline"
+            :disabled="loading"
+            @click="handleCreatePayPeriod"
+          >
+            {{ loading ? "Creating..." : "Create Your First Pay Period" }}
+          </BaseButton>
+        </div>
+      </template>
+    </EmptyState>
 
     <div v-else class="space-y-6">
       <PayPeriodCard

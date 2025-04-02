@@ -47,11 +47,6 @@ const handleOpenInFolder = async () => {
     title="Settings"
     description="Manage your budget settings and preferences"
   >
-    <template #actions>
-      <BaseButton variant="outline" @click="$router.push('/')">
-        Open or Create Budget
-      </BaseButton>
-    </template>
     <BaseCard :title="currentBudget?.name">
       <div class="px-4 py-5 sm:p-6">
         <div class="space-y-6">
