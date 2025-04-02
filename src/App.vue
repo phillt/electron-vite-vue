@@ -1,49 +1,49 @@
 <script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
+import { onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { budgetService } from "./services/budgetService";
+import TitleBar from "./components/atoms/TitleBar.vue";
+
+const router = useRouter();
+
+onMounted(async () => {
+  await budgetService.initialize();
+
+  // If a budget is loaded, redirect to the budget page
+  // otherwise, stay on the welcome page
+  if (budgetService.getCurrentBudget()) {
+    router.push("/budget");
+  }
+});
 </script>
 
 <template>
-  <div>
-    <a href="https://www.electronjs.org/" target="_blank">
-      <img src="./assets/electron.svg" class="logo electron" alt="Electron logo" />
-    </a>
-    <a href="https://vitejs.dev/" target="_blank">
-      <img src="./assets/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
-  </div>
-  <HelloWorld msg="Electron + Vite + Vue" />
-  <div class="flex-center">
-    Place static files into the <code>/public</code> folder
-    <img style="width: 2.4em; margin-left: .4em;" src="/logo.svg" alt="Logo">
+  <div class="h-full w-full flex flex-col rounded-lg overflow-hidden">
+    <TitleBar class="titlebar" />
+    <div class="flex-1 overflow-auto">
+      <router-view></router-view>
+    </div>
   </div>
 </template>
 
 <style>
-.flex-center {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  background: transparent !important;
+  margin: 0;
+  height: 100vh;
+  overflow: hidden;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-
-.logo.electron:hover {
-  filter: drop-shadow(0 0 2em #9FEAF9);
-}
-
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
+#app {
+  background: #f9fafb;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  height: 100vh;
 }
 </style>
